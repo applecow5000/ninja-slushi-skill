@@ -13,9 +13,9 @@ Check the drink's nutrition label. Sugar must meet these **minimums** (roughly
 
 | Serving size | Minimum total sugar |
 |---|---|
-| 8 oz (240 ml) | **8 g** |
-| 12 oz (355 ml) | **11 g** |
-| 20 oz (591 ml) | **18 g** |
+| 240 ml | **8 g** |
+| 355 ml | **11 g** |
+| 591 ml | **18 g** |
 
 - **Sugar-free substitutes and artificial sweeteners do NOT count** toward the
   minimum — they won't help a drink slush. (The community has found specific
@@ -41,10 +41,10 @@ below these **maximum spirit amounts** per total recipe size:
 
 | Total recipe size | Max hard alcohol/spirit |
 |---|---|
-| 3 cups (24 oz) | **½ cup (4 oz)** |
-| 4½ cups (36 oz) | **¾ cup (6 oz)** |
-| 6 cups (48 oz) | **1 cup (8 oz)** |
-| 8 cups (64 oz) | **1¼ cups (10 oz)** |
+| 720 ml | **120 ml** |
+| 1.08 L | **180 ml** |
+| 1.44 L | **240 ml** |
+| 1.9 L | **300 ml** |
 
 This chart is for spirits only. For wine/beer/seltzer/premade cocktails, use the
 2.8–16% rule above (and the No-Prep Slushes bar chart in
@@ -62,14 +62,14 @@ then **restart by pressing the preset again**.
 **Signal:** Temperature Control LEDs flash **one at a time in ascending order**
 (from the bottom LED up), preset LEDs flash, beeps every minute for 15 min.
 
-**Fix — dilute.** Per serving, add **¼ cup** of: water, soda, tonic water,
+**Fix — dilute.** Per serving, add **60 ml** of: water, soda, tonic water,
 seltzer, or plain chilled coffee/tea. Then reset + restart the preset.
 
 ### Low-Sugar Alert
 **Signal:** Temperature Control LEDs flash **one at a time in descending order**
 (from the top LED down), preset LEDs flash, beeps every minute for 15 min.
 
-**Fix — add sugar.** Per serving, add **1–2 tablespoons** of: flavored syrup,
+**Fix — add sugar.** Per serving, add **15–30 ml** of: flavored syrup,
 juice, sugar, date sugar, coconut sugar, maple syrup, agave, simple syrup, or
 honey. **Combine the sugar with the base *before* pouring in.** Then reset +
 restart the preset.
@@ -78,8 +78,8 @@ restart the preset.
 
 | | LED flash direction | Meaning | Fix |
 |---|---|---|---|
-| **High-Alcohol / High-Sugar** | bottom → up (ascending) | too concentrated to freeze | +¼ cup diluent per serving |
-| **Low-Sugar** | top → down (descending) | not enough sugar to slush | +1–2 Tbsp sugar per serving (mix in first) |
+| **High-Alcohol / High-Sugar** | bottom → up (ascending) | too concentrated to freeze | +60 ml diluent per serving |
+| **Low-Sugar** | top → down (descending) | not enough sugar to slush | +15–30 ml sugar per serving (mix in first) |
 
 ## Practical guidance
 

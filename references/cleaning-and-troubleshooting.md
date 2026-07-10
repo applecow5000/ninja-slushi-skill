@@ -4,7 +4,7 @@
 
 - **Motor base** with attached **evaporator** (the cold surface the drink freezes
   against)
-- **Vessel** (16-oz min / 64-oz max liquid capacity)
+- **Vessel** (475 ml min / 1.9 L max liquid capacity)
 - **Auger** (churns the slush)
 - **Bail handle**
 - **Easy-fill port & cover** (top) and **comfort handle**
@@ -29,7 +29,7 @@ The **Rinse cycle agitates without cooling** to rinse the unit. Steps:
 
 1. Dispense any remaining frozen drink.
 2. Stop the current preset. Press the **RINSE** button.
-3. Add hot water up to the vessel's max fill line (64 oz).
+3. Add hot water up to the vessel's max fill line (1.9 L).
 4. Slowly dispense the water from the unit **immediately after filling**.
 5. Stop the Rinse cycle by pressing the **RINSE** button again.
 6. Press the power button to turn off the unit.
@@ -78,7 +78,7 @@ Also check the fundamentals:
 - Chilling the liquid before adding speeds things up.
 
 ### Slush not dispensing?
-- **Fill to the max fill line** and make sure the **unit is running**.
+- **Fill to the max fill line (1.9 L)** and make sure the **unit is running**.
 - For a smoother dispense, **decrease the temperature level** (bottom arrow) —
   more sippable slush flows out more smoothly.
 
@@ -87,8 +87,8 @@ Also check the fundamentals:
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Won't thicken / stays liquid | not enough sugar, or too much alcohol | add sugar (mixed in before pouring) or dilute; raise temp level |
-| Beeping + LEDs flashing ascending | High-Alcohol/High-Sugar alert | add ¼ cup diluent per serving |
-| Beeping + LEDs flashing descending | Low-Sugar alert | add 1–2 Tbsp sugar per serving |
+| Beeping + LEDs flashing ascending | High-Alcohol/High-Sugar alert | add 60 ml diluent per serving |
+| Beeping + LEDs flashing descending | Low-Sugar alert | add 15–30 ml (or ~12–25 g) sugar per serving |
 | Hard/slow to dispense | too thick, or under-filled | lower temp level; fill to max; keep running |
 | Never slushes at all | diet/sugar-free base | switch to a full-sugar base |
 

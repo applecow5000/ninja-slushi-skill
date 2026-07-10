@@ -31,13 +31,13 @@ Two different jobs, and confusing them is the #1 mistake:
   keeps flavor bound to the ice.
 
 **How to use it (this matters):**
-- **Dose: ~¼ teaspoon per batch** of soda or juice is the common starting point.
-  Some go up to ~1 tsp for a full 64 oz — start low.
+- **Dose: ~1 g per batch** of soda or juice is the common starting point.
+  Some go up to ~3 g for a full 1.9 L — start low.
 - **Dissolve/mix it in BEFORE pouring.** Do not dump dry gum into the vessel.
 - Guar gum works similarly; some use it in frappés and to thicken hard cider.
 
-**Failure mode (learn from it):** adding a teaspoon of dry xanthan straight into a
-small (~20 oz) batch produced **white specks floating in the drink and stuck to
+**Failure mode (learn from it):** adding ~3 g of dry xanthan straight into a
+small (~600 ml) batch produced **white specks floating in the drink and stuck to
 the evaporator** — "a disaster." Xanthan is only lightly water-soluble, so
 whisk it into the liquid (or pre-blend with the dry sweetener) until fully
 hydrated first.
@@ -53,12 +53,12 @@ Ranked by how reliably the community reports success:
 
 - **Allulose — the clear favorite.** Behaves like real sugar, gives the smoothest
   sugar-free result, freezes properly. Reported dosing clusters around
-  **~1–1.5 Tbsp per 12 oz** (some use ~1 Tbsp per 8 oz). Dissolve first.
+  **~12–18 g per 355 ml** (some use ~12 g per 240 ml). Dissolve first.
 - **Splenda "Magic Baker" (an allulose-based blend)** — works well; some prefer
   its taste. Good for diet sodas.
 - **Erythritol / monk-fruit-erythritol** — hit or miss; needs **more than the
-  recipe-book amounts** and can be gritty. One working diet build: ~7 Tbsp
-  erythritol + ¼ tsp salt + lemon juice to taste for a full batch. Poor results
+  recipe-book amounts** and can be gritty. One working diet build: ~85 g
+  erythritol + 1.5 g salt + lemon juice to taste for a full batch. Poor results
   reported with Coke Zero specifically.
 - **Food-grade glycerine/glycerol (~1%)** — experimental antifreeze; a few report
   it working for diet raspberry-type drinks on the lowest setting.
@@ -69,9 +69,9 @@ Ranked by how reliably the community reports success:
 ## Putting it together — sugar-free Slurpee recipe pattern
 
 1. Start with the sugar-free base (diet soda or water + sugar-free syrup).
-2. Add a **real freezing agent**: allulose (~1 Tbsp/8–12 oz) or Splenda Magic
+2. Add a **real freezing agent**: allulose (~12 g/240–355 ml) or Splenda Magic
    Baker, fully dissolved.
-3. Add a **pinch of xanthan gum (~¼ tsp)**, whisked in until hydrated — no dry
+3. Add a **pinch of xanthan gum (~1 g)**, whisked in until hydrated — no dry
    specks.
 4. Run the preset **1 bar warmer** than default if it trends icy.
 5. If it still won't slush, it's under-sweetened, not under-thickened — add more

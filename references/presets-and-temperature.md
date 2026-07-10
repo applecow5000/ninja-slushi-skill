@@ -94,12 +94,12 @@ Total time: 15 min (2–3) / 25 min (4–6) / 35 min (6–8).
 For dairy/creamy bases and coffee drinks respectively. Full base ratios are in
 [official-recipes.md](official-recipes.md) (the "Create Your Own Milkshake &
 Frappé" chart). Quick reference:
-- **MILKSHAKE base (2–3 servings):** 2 cups whole milk + 1 cup heavy cream +
-  1 tsp vanilla + 2 tbsp sugar + ¼ cup flavored syrup/sauce. Or use flavored milk
+- **MILKSHAKE base (2–3 servings):** 480 ml whole milk + 240 ml heavy cream +
+  5 ml vanilla + 30 ml (or ~24 g) sugar + 60 ml flavored syrup/sauce. Or use flavored milk
   powders / flavored milk (+ heavy cream + sugar).
-- **FRAPPÉ base (2–3 servings):** a store-bought coffee drink (2¾ cups) + 2 tbsp
+- **FRAPPÉ base (2–3 servings):** a store-bought coffee drink (660 ml) + 30 ml
   heavy cream; or half & half + black coffee + sugar (+ vanilla/caramel).
-- **Both require ≥24 oz and dispensing within 30 min** of the preset ending to
+- **Both require ≥700 ml and dispensing within 30 min** of the preset ending to
   avoid a foamy output. Sugar/fat matter: too little fat is the #1 cause of
   milkshake/frappé texture problems (community confirms heavy cream over
   half-and-half).

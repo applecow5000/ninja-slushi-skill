@@ -28,7 +28,7 @@ people confuse:
   (https://reddit.com/r/ninjaslushi/comments/1jjyska/)
 
 **"How much sugar does a drink actually need?"** Community rules of thumb:
-~**12–15% sugar (Brix)** is the sweet spot; roughly **8 g sugar per 8 oz**
+~**12–15% sugar (Brix)** is the sweet spot; roughly **8 g sugar per 240 ml**
 liquid; **~4% is the practical minimum** to slush at all. Too little → freezes
 into hard ice / knocks. Too much → never thickens, just spins as cold liquid.
 A cheap **refractometer/Brix meter** or **slushcalculator.com** takes the
@@ -65,10 +65,10 @@ seeds, ice cubes, and frozen mixes jam the auger. If you want fresh fruit, **ble
 or juice it very smooth first** (thick "nectar" consistency is fine); strain pulp/
 seeds. Add whole fruit/toppings *after* dispensing.
 
-**"Which model — Ninja 88 oz vs Walmart 72 oz?"** The **Walmart ~$250 version is
+**"Which model — Ninja 2.6 L vs Walmart 2.2 L?"** The **Walmart ~$250 version is
 cheaper, has a smaller vessel and fewer presets (no dedicated Frappé — use
 Milkshake and drop the temp), but the same cooling tech.** Consensus: buy the
-**bigger** one — the 72 oz is "just enough" for two adults. The Costco version
+**bigger** one — the 2.2 L is "just enough" for two adults. The Costco version
 performs the same; people kept the Ninja mainly for larger capacity and a wider
 fill opening.
 
@@ -113,19 +113,19 @@ as-is), stevia, and liquid stevia alone do NOT work.** What the community uses:
 - **Allulose** — the favorite; ~70% as sweet as sugar with a sugar-like freezing
   profile. Powder or liquid (Wholesome brand named). **Not sold in Canada/most of
   the EU** (novel-food status) — people import via **iHerb** or Amazon.
-- **Splenda Magic Baker** — standout specific ratio: **1 tbsp per 12 oz can** of
-  sugar-free soda; blend into some of the soda first. Scales to 64 oz at that
+- **Splenda Magic Baker** — standout specific ratio: **~12 g per 355 ml can** of
+  sugar-free soda; blend into some of the soda first. Scales to 1.9 L at that
   ratio. (https://reddit.com/r/ninjaslushi/comments/1jic8iw/)
 - **Monk fruit / erythritol blends** (Costco monk fruit; Whole Earth "green pack,
-  blue stripe") — work about as well as allulose. Rough dose: **~1 tbsp per 500 mL**,
-  or **~3 level tbsp per 750 mL**. (Large amounts of erythritol can cause GI
+  blue stripe") — work about as well as allulose. Rough dose: **~12 g per 500 mL**,
+  or **~36 g per 750 mL**. (Large amounts of erythritol can cause GI
   upset.)
 - **Food-grade vegetable glycerine/glycerol** — what commercial low-sugar slush
-  machines actually use. **~1–2% (≈1 tbsp per 500 mL)** on the lowest setting.
+  machines actually use. **~1–2% (≈15 ml per 500 mL)** on the lowest setting.
   **Caution:** news reports warned kids shouldn't have much glycerol slush (limit
   ~one/day); several note to verify the product is food-grade.
-- **Xanthan/guar gum** is a **texture binder, not a freezer** — a pinch (~1/4 tsp,
-  shaken into a cup of the liquid first) helps flavor cling to the ice instead of
+- **Xanthan/guar gum** is a **texture binder, not a freezer** — a pinch (~1 g,
+  shaken into 240 ml of the liquid first) helps flavor cling to the ice instead of
   going watery/"snowball." Won't make a diet drink slush on its own.
 - Reality check from reviews: sugar-free results are **hit or miss**, allulose/
   monk fruit are **expensive**, and low-cal drinks lose flavor cold. Some owners
@@ -137,7 +137,7 @@ as-is), stevia, and liquid stevia alone do NOT work.** What the community uses:
 
 - **Keep total ABV modest — aim ~10–13%, and under ~16%** or it won't freeze
   (physics; no machine beats the freezing point). Baseline for spiked diet soda:
-  **~1 shot per 12 oz, around 4 bars.**
+  **~1 shot per 355 ml, around 4 bars.**
   (https://reddit.com/r/ninjaslushi/comments/1j14d0m/)
 - **Premixed drinks are formulated to work**, but some are borderline: a ~13.9%
   premixed margarita can come out **thin like an ICEE** — dilute less/run colder,
@@ -201,7 +201,7 @@ stir syrup into already-frozen slush.
   units** a hard-to-reach lip at the back traps residue and can grow mold/gunk.
   This is the #1 durable complaint and has driven returns.
   - **Newer/redesigned vessels lack that lip** (varies by batch and region; the
-    Walmart 72 oz and many EU units are reported without it). New units keep the
+    Walmart 2.2 L and many EU units are reported without it). New units keep the
     same model number, so check the vessel, not the box.
   - **Ninja has generally not covered old moldy vessels under warranty and won't
     sell a compatible replacement** for the oldest units — a real, unresolved pain
@@ -227,8 +227,8 @@ stir syrup into already-frozen slush.
 
 ## Buying, value & durability tips
 
-- **Walmart ~$250 / 72 oz** = cheaper, fewer presets, smaller, **same cooling
-  tech**; **88 oz Ninja** = more presets + capacity + wider fill port. If unsure,
+- **Walmart ~$250 / 2.2 L** = cheaper, fewer presets, smaller, **same cooling
+  tech**; **2.6 L Ninja** = more presets + capacity + wider fill port. If unsure,
   most say **get the bigger one.**
 - **Reconditioned units appear on Woot (~$259).** Watch for **scam sites** (fake
   "Macy's outlet" pulled real card fraud) — buy from Ninja, Walmart, Target, Best
@@ -244,8 +244,8 @@ stir syrup into already-frozen slush.
 - **Power draw:** ~**50–55 W** just churning, ~**144–200 W** when actively cooling
   (Ninja rates it **200 W**). Runs fine off inverters/power stations (EcoFlow ~5–6
   h; Ryobi/other battery banks) — **keep the car running** if powering from a car
-  inverter. Rated **indoor use**; may struggle to freeze in ~90°F+ heat outdoors.
+  inverter. Rated **indoor use**; may struggle to freeze in ~32°C+ heat outdoors.
 - Handy tools worth owning: **refractometer** (confirm a mix will freeze) and a
-  large **64 oz prep jug/pitcher** for easy pouring into the fill port.
+  large **1.9 L prep jug/pitcher** for easy pouring into the fill port.
 
 ---

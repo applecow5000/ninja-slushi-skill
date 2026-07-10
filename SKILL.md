@@ -21,16 +21,16 @@ troubleshooting.
 
 ## The machine in one paragraph
 
-Pour 16–64 oz (2–8 cups) of liquid into the vessel through the easy-fill port,
+Pour 475 ml–1.9 L of liquid into the vessel through the easy-fill port,
 pick a preset, and RapidChill Technology freezes and continuously churns it with
 an auger into slush. Each preset starts at an optimal default temperature; the
 user fine-tunes texture with a 1–10 bar Temperature Control. The unit beeps and
 holds LEDs solid when the drink is ready, then keeps running to hold it at
-temperature until dispensed. **Capacity: 16 oz minimum, 64 oz maximum.**
+temperature until dispensed. **Capacity: 475 ml minimum, 1.9 L maximum.**
 
 ## Core operating steps
 
-1. Add liquid(s) through the easy-fill port (16 oz min / 64 oz max).
+1. Add liquid(s) through the easy-fill port (475 ml min / 1.9 L max).
 2. Press the power button to turn on.
 3. Select a preset to start.
 4. If desired, adjust the temperature (see below).

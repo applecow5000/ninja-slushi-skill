@@ -1,8 +1,8 @@
 # Recipes & Recipe Adaptation
 
-Serving sizes across the Slushi map to fill amounts: **2–3 servings ≈ 3 cups**,
-**4–6 servings ≈ 6 cups**, **6–8 servings ≈ 7–8 cups** (64 oz max). Always stay
-between the **16 oz min and 64 oz max** fill lines.
+Serving sizes across the Slushi map to fill amounts: **2–3 servings ≈ 720 ml**,
+**4–6 servings ≈ 1.4 L**, **6–8 servings ≈ 1.7–1.9 L** (1.9 L max). Always stay
+between the **475 ml min and 1.9 L max** fill lines.
 
 ## One-Ingredient Soda Slush  (SLUSH preset) — Kid Friendly
 
@@ -13,7 +13,7 @@ grape, or any other full-sugar soda. **Diet/sugar-free soda will not work.**
 
 | | 2–3 servings | 4–6 servings | 6–8 servings |
 |---|---|---|---|
-| Soda | 2 (12-oz) cans / 3 cups | 4 (12-oz) cans / 6 cups | 5 (12-oz) cans / 7½ cups |
+| Soda | 2 × 355 ml cans / 720 ml | 4 × 355 ml cans / 1.4 L | 5 × 355 ml cans / 1.8 L |
 
 **Total time:** 15 min (2–3) / 40 min (4–6) / 45 min (6–8).
 
@@ -27,10 +27,10 @@ grape, or any other full-sugar soda. **Diet/sugar-free soda will not work.**
 
 | | 2–3 servings | 4–6 servings | 6–8 servings |
 |---|---|---|---|
-| Mango margarita mix | 2 cups | 4 cups | 5 cups |
-| Water | ⅓ cup | ⅔ cup | ¾ cup |
-| Lime juice | ⅓ cup | ⅔ cup | ¾ cup |
-| Tequila | ⅓ cup | ⅔ cup | ¾ cup |
+| Mango margarita mix | 480 ml | 960 ml | 1.2 L |
+| Water | 80 ml | 160 ml | 180 ml |
+| Lime juice | 80 ml | 160 ml | 180 ml |
+| Tequila | 80 ml | 160 ml | 180 ml |
 
 **Total time:** 30 min (2–3) / 45 min (4–6) / 50 min (6–8).
 
@@ -52,11 +52,11 @@ grape, or any other full-sugar soda. **Diet/sugar-free soda will not work.**
    - Dairy shake → **MILKSHAKE**
    - Coffee/frappé → **FRAPPÉ**
 2. **Hit the sugar requirement.** Full-sugar bases only; no diet/sugar-free. If
-   it's tart or lightly sweetened, plan to add 1–2 Tbsp sugar per serving mixed
+   it's tart or lightly sweetened, plan to add 12–24 g sugar per serving mixed
    in *before* pouring. (See `sugar-alcohol-and-alerts.md`.)
 3. **Keep alcohol in range.** Dilute spirit-forward mixes so they can freeze;
    higher proof → higher (colder) temperature bar. (See preset bar chart.)
-4. **Fill 16–64 oz.** For best/fastest results, chill the liquid first.
+4. **Fill 475 ml–1.9 L.** For best/fastest results, chill the liquid first.
 5. **Set the starting bar level** from
    [presets-and-temperature.md](presets-and-temperature.md), then fine-tune:
    lower = thinner/sippable, higher = thicker.

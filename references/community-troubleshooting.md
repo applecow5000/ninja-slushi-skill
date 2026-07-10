@@ -25,8 +25,8 @@ set too cold. Ice crystallizes hard instead of forming fine sippable slush.
   Start low (1–2 bars) and bump up if under-slushed.
 - **Add a splash of extra liquid at serving time** to loosen an over-icy batch.
 - For sugar-free: dissolve **allulose** in hot water first, then add. Common
-  confirmed ratio: **1 tbsp powdered allulose per 8 oz** (some use 1 tsp per
-  4 oz). Multiple users say allulose gives the smoothest sugar-free result.
+  confirmed ratio: **~12 g powdered allulose per 240 ml** (some use ~4 g per
+  120 ml). Multiple users say allulose gives the smoothest sugar-free result.
 - **Xanthan or guar gum (a pinch)** added to sugar-free mixes improves smoothness
   (reduces crystallization). Widely recommended; several confirmed.
 - **Glycerin/glycerol at ~1.5%** works as a non-sweetening freeze modifier where
@@ -47,7 +47,7 @@ sweeter/cooling.
 
 **Community consensus:** Allulose is preferred over erythritol for taste and
 texture. Erythritol also causes **digestive issues in quantity** (multiple
-first-hand reports — one user had problems from a 1/3-cup batch). Cutting sweetness
+first-hand reports — one user had problems from a ~67 g batch). Cutting sweetness
 with **lemon/lime juice** is the common trick. Note allulose is hard to get in
 Germany/Canada; Swerve and monk-fruit/allulose blends are named substitutes.
 
@@ -133,7 +133,7 @@ guidance owners noticed. Community verdict: more fat is better; heavy cream wins
 (meant to be served over ice). Alcohol depresses freezing point.
 
 **Community fixes (confirmed):**
-- **Add water** to dilute concentrated ready-mixes (e.g., +1/4 cup; several
+- **Add water** to dilute concentrated ready-mixes (e.g., +60 ml; several
   confirmed a margarita slushed after adding water).
 - **More sugar, less alcohol, temp to max.** "If I made frozen margs as strong as
   I like regular ones, they'd never freeze."
@@ -156,8 +156,8 @@ Gatorade/Powerade, and even booklet recipes.
 **Likely causes / fixes:**
 - **Genuinely borderline sugar:** community rule of thumb is **~10–15% sugar**
   (higher than the manual's ~4–5%). Full sodas near the low end (Dr Pepper is
-  ~half the sugar of Coke; UK sugar-tax sodas) trip it. Fix: add 1–3 Tbsp sugar
-  (one user needed 3 Tbsp for Coke to stop alerting).
+  ~half the sugar of Coke; UK sugar-tax sodas) trip it. Fix: add 15–45 ml (or ~12–36 g) sugar
+  (one user needed 45 ml / ~36 g for Coke to stop alerting).
 - **Onset over time on a machine that used to work fine** (Coke/Dr Pepper
   suddenly alerting after months) points to a **failing unit** — several such
   users ended up getting warranty replacements. If a base that always worked
