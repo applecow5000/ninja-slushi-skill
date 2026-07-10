@@ -1,9 +1,13 @@
 # Ninja Slushi Guide
 
 A [Claude skill](https://docs.claude.com/en/docs/agents-and-tools/agent-skills)
-for operating and getting the most out of the **Ninja Slushi** (Professional
-Frozen Drink Maker, FS300/FS301 Series) — presets, texture control, recipes,
-the sugar & alcohol rules the machine enforces, cleaning, and troubleshooting.
+for operating and getting the most out of the **Ninja Slushi** — a countertop
+consumer frozen drink maker (FS300/FS301 Series). Covers presets, texture control,
+recipes, the sugar & alcohol rules the machine enforces, cleaning, and
+troubleshooting.
+
+> Ninja markets it as the "Slushi Professional Frozen Drink Maker," but it's a
+> home consumer appliance, not commercial equipment.
 
 It combines three layers of knowledge:
 

@@ -1,15 +1,18 @@
 ---
 name: ninja-slushi
 description: >-
-  Operate and get the most out of the Ninja Slushi (Professional Frozen Drink
-  Maker, FS300/FS301 Series). Use when the user wants help making a frozen
+  Operate and get the most out of the Ninja Slushi, a countertop consumer frozen
+  drink maker (FS300/FS301 Series). Use when the user wants help making a frozen
   drink/slushie, choosing a preset, dialing in the temperature/texture, following
   or adapting a recipe, understanding the sugar & alcohol requirements, handling a
   high/low-sugar or high-alcohol alert, running the rinse/cleaning cycle, or
   troubleshooting a drink that won't slush or won't dispense.
 ---
 
-# Ninja Slushi — Professional Frozen Drink Maker
+# Ninja Slushi — Countertop Frozen Drink Maker
+
+A home countertop appliance (Ninja markets it as the "Slushi Professional Frozen
+Drink Maker," but it's a consumer device, not commercial equipment).
 
 Helps a user operate the Ninja Slushi (FS300/FS301 Series) and get great frozen
 drinks every time. Covers the 5 presets, the 1–10 temperature/texture control,
