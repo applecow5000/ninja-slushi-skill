@@ -1,0 +1,1040 @@
+# r/ninjaslushi digest — bucket: troubleshooting-slushi (100 threads)
+
+======================================================================
+TITLE: Slushi Consistency
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 5  URL: https://reddit.com/r/ninjaslushi/comments/1ienr91/slushi_consistency/
+POST:
+I got my machine this week and I've been pretty disappointed with the consistency of everything I've made.  I'm looking to have something I can drink through a straw, and the best I've accomplished is more of an frozen ice consistency that requires a spoon.  Today I tried Pepsi Max (soda stream) with allulose added, and it came out terribly.  Just basically ice.  What am I doing wrong?  Or were my expectations just unrealistic?
+
+======================================================================
+TITLE: Sugar free recipe adjustment tips UK
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 4  URL: https://reddit.com/r/ninjaslushi/comments/1kincz6/sugar_free_recipe_adjustment_tips_uk/
+POST:
+Hello. 
+Does anyone have any tips on adjusting the recipe in the UK Slushi manual for sugar free soda slush? I’m struggling with getting a consistency that I like. It comes out more like a snow cone than a slush. I have some liquid allulose on the way that is supposed to make the slush less crystallised but wondered if anyone here had nailed it using the erythritol that’s mentioned in the guide?  I’m using Pepsi Max Cherry as the soda ingredient. Thanks in advance.
+COMMENTS (top by score):
+  - [2] Yes they do! Thank you so much! I just ordered the allulose syrup for testing :)
+  - [2] Using the guide, no. You need more erythrit than mentioned in the recipe book. I'm right now sipping on some mango fanta Zero which tastes pretty good. 7 tablespoons of erythrit, 1/4 tablespoon salt and as much lemon juice to make it not overly sweet. 
+
+I had bad results using erythrit with coke zero though and I will try to get my hands on allulose. Sadly it's not easily available through Amazon because it's not officially allowed as a sweetener in Germany.
+
+You could also try adding some xanthan gum with the erythrit as it seems to make the slush more smooth. At least that's what I read online.
+  - [2] Unfortunately not.  Got some from Amazon, just makes already sweet “sugar free” drinks taste sickly sweet.  Biggest purchase regret of 2025 for me.
+  - [1] Do those additives alter the nutrients or the taste?
+  - [1] Thank You! I’ll give that a try. I’ve ordered my allulose from I-herb. They ship to the UK at least, maybe Germany too?
+
+======================================================================
+TITLE: My machine is not slushing after 2 hours and temperature goes back to 1 bar
+FLAIR: Troubleshooting (Slushi)  SCORE: 4  URL: https://reddit.com/r/ninjaslushi/comments/1fmxn5e/my_machine_is_not_slushing_after_2_hours_and/
+POST:
+Hi there! I’ve been trying to slush Fanta for the 1st time and my machine is not doing a job for slushing (my compressor is not getting icy either). I’m constantly getting beeped and the bar goes back to 1 whenever I set it to 3. Is my unit defective? 
+
+P.S: yes, I let it uplift for more than 2 hours before I turn it on, and I’m smelling a weird smell coming from the unit.
+COMMENTS (top by score):
+  - [1] also just sent a PM
+  - [1] Pm sent
+  - [1] Hi there I’m facing the same issue , what did u end up doing ?? Did where did you order the one from UK ?
+
+======================================================================
+TITLE: Grape Juice Error
+POST:
+Has anyone tried just plain Welch's Grape Juice? We did the other night and it was just straight froth. Like an airy snow texture. It also left the tongue very "dry". I set the machine to frozen juice and it was horrible.
+
+======================================================================
+TITLE: It’s here! Processing &amp; Shipping were crazy fast
+POST:
+I know some ppl have inquired about processing &amp; shipping times &amp; wanted to give my experience. I ordered this Thursday the 8th at 3:43pm (by a literal miracle. I kept refreshing the page &amp; clicking the add to cart button for like 10 minutes even though I was getting the out of stock error message. On my last try it went in the cart!)
+
+I got an email Friday morning stating it had been shipped. It was scheduled to be delivered this Thursday the 15th but it got here today at 12:09pm. 
+
+Ninja is definitely processing quickly but FedEx is really the star here lol. I hope everyone gets theirs soon!!!
+
+======================================================================
+TITLE: Just got my machine. Its not dispensing
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 3  URL: https://reddit.com/r/ninjaslushi/comments/1j9lgbw/just_got_my_machine_its_not_dispensing/
+COMMENTS (top by score):
+  - [1] I just lower the temperature completely down when it does that
+  - [1] Next time add some guar gum or xantham gum
+  - [1] It's all liquid.
+  - [1] There is not enough liquid
+  - [1] When ours gets too thick/over frozen, I put it on Rinse and within about a minute or two it starts to dispense :)
+  - [1] It's frozen. Dial the temp back by one and give it a few minutes.
+  - [1] In addition to what others said about "rinse" for a few minutes, I've found that also a small ice cube can form right at the outlet there that doesn't get scraped away by the auger. So I have had a lot of luck with putting the cup under and pulling the handle, then gently poking hole with a toothpick or something and more often than not, it'll start flowing.
+  - [1] It’s on the lowest setting, so adding more liquid should help.
+  - [1] Yeah, it's a little too frozen. Use a little bit of a plastic straw or something to stick in the out spot to break up the fozen bit and it should work (be careful not to stick it in so far that it hits the spinning part)
+  - [1] That stuff looks frozen solid!
+  - [1] This machine has a really hard time dispensing thick slushies, you need to reduce the cold setting or add more liquid.
+  - [1] It looks like it’s too frozen. Put it on rinse for a lil bit or you can add more liquid.
+  - [1] I may be wrong but it looks like you don’t have enough in there
+
+======================================================================
+TITLE: Tips for coffee slush?
+POST:
+Here in canada were trying to duplicate timmies icecap 
+
+So use coffee, add cream and sugar (syrup) and then throw in slushi 
+
+Problem we have is that often, the coffee mixture seems to freeze around the metal bar and blocks.
+
+Any tips to avoid this issue?
+
+======================================================================
+TITLE: Not freezing with ready made margarita mix
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 2  URL: https://reddit.com/r/ninjaslushi/comments/1kmr79t/not_freezing_with_ready_made_margarita_mix/
+POST:
+Need some help from the experts please… recently got my ninja slushi and have made two successful batches of spiked slushy drinks based upon recipes posted on this subreddit. But tonight I poured commercial ready mix margarita into the machine and got…nothing. It was freezing and then started beeping with the ascending light error code. So, per the instructions, I added 1/4 cup water. Then it never froze again. Complete liquid. Thoughts? Thanks!
+COMMENTS (top by score):
+  - [3] More sugar and less alcohol
+  - [2] More water. That shit is meant to be served over ice or blended with ice, so you need to dilute it some.
+  - [1] This happened to me- I added water and it became a slushie!
+  - [1] Temp to the max, more sugar, more water.
+  - [1] Agreed. If I made frozen margs the strength I like regular ones they would never freeze!
+
+======================================================================
+TITLE: Unit not working
+FLAIR: Troubleshooting (Slushi)  SCORE: 2  URL: https://reddit.com/r/ninjaslushi/comments/1hrwbjs/unit_not_working/
+POST:
+I’ve used my slushi a handful of times now with no issue. I went to make a slushed drink recently and now when I power on, the buttons on the left (different drink types) just blinks and nothing happens when you push one of the buttons. I’ve looked in my troubleshooting guide and Google, nothing!
+
+Anyone else have this happen?
+
+======================================================================
+TITLE: Wait list
+POST:
+I been on the wait list for two weeks, does it not work?
+
+======================================================================
+TITLE: How to clean liquid stuck on the edge?
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1j71w0m/how_to_clean_liquid_stuck_on_the_edge/
+POST:
+Anyone else experiencing this? Any ideas how do we clean it ?
+COMMENTS (top by score):
+  - [3] 100 percent. Bad design. I'm considering starting a petition for them to acknowledge it, and replace them.
+  - [1] Ya, no doubt. I haven’t had this issue yet. I just wash it right away and use the sprayer hot to rinse. 😂
+  - [1] I don't know what y'all's sink looks like, but mine has a sprayer so just rinsing it with that works pretty well for me.
+  - [1] I used food grade silicone
+  - [1] I’ve yet to attempt that, lol - not really a huge fan of cinnnamininnnon
+  - [1] I’ve never used milk and still have this issue.
+  - [1] I never had a problem until I used cinnamon 🫠
+  - [1] https://www.change.org/p/demand-ninja-to-address-flaws-in-the-design-of-their-slushi-vessel?recruiter=36784912&amp;recruited_by_id=58564750-2ac1-0130-9395-3c764e049c4f&amp;utm_source=share_petition&amp;utm_campaign=petition_dashboard&amp;utm_medium=copylink
+  - [1] What do you think of this:
+
+"For many of us, the Ninja Slushi is not just a gadget, but expensive investments. Often sold out, the popularity of these machines speaks for itself. However, an increasing number of users have voiced their dissatisfactions about the quality of these products. The current design harbors defects that are not in line with the standards that Ninja should uphold for its products. 
+
+Among the reports from people like us, key issues include the vessels catching liquids in the rim at the back, that are hard to clean, leading to mould formation. This is a matter of serious health concern, as mould exposure can result in respiratory problems, allergic reactions, and even more serious health issues (Center for Disease Control and Prevention). Adding insult to injury, the Ninja Slushi Vessels are also prone to staining, diminishing their aesthetic appeal over a relatively short period of usage.
+
+While suggestions given to manage these issues include putting the vessels in the dishwasher or using a water flosser, these only serve as temporary, ineffective remedies that demand unnecessary additional effort from the users. It is unreasonable to spend on an additional product like a water flosser to maintain a basic food processing equipment. The unsatifactory condition of these vessels, disputes the high cost and the premium brand's promise of uncompromised quality.
+
+This is a call to Ninja to rise up to these widespread complaints, many of whom might not have the voice or the platform to fight for their rights. It is crucial for Ninja to readdress the design flaws of the Slushi Vessels to ensure that a product that enters countless households, schools, and workplaces upholds the health safety and quality standards that its customers deserve.
+
+Please sign this petition to demand Ninja to provide a comprehensive solution to these issues, rather than expect its consumers to find short-term, laborious and individual solutions. This is not just for us, but for every consumer who trusts in the Ninja name."
+
+For the petition.
+  - [1] Tempted to fill that bit with epoxy tbh
+  - [1] Damn that too. Make it a combined petition.
+  - [1] Please also start a petition for the damn orange staining!
+  - [1] I bought the water flosser from Walmart for $12. Just be careful, it shot myself in the face, my kitchen ceiling, and everywhere else 🤣
+  - [1] Put it in some soapy water and let it soak, after a little while squeeze the edge whilst under water, it will force the gunk out
+  - [1] A good place to start is that little magnifying glass at the top of the sub
+
+======================================================================
+TITLE: Lower my learning curve, please
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1ju4pf2/lower_my_learning_curve_please/
+POST:
+Friends, I just got a Ninja Slushi, and I'd like some suggestions, if you please. I am trying to make slushies with sugar-free powdered drink mix singles. I get that you need sugar, so I've been adding allulose. (Allulose in water and whisking it till it dissolves) It works, but I'm getting more of a snow cone consistency. It tastes good, but it's hard to drink through a straw, which is what I'm wanting.
+
+If anyone has any suggestions, like the ideal allulose ratio, turning down the temperature setting, or anything else that has worked for you, I would love some advice. Please and thank you!
+COMMENTS (top by score):
+  - [1] Yeah, that's what I did before I started exploring around. I tried alcohol first then graduated myself up to totally sugar free with him. 🤣 I also learned to bump it a touch with soda but by a tiny bit. I'm worried about BG levels here but you can try that.
+  - [1] That was my thought too, regarding both parts. I did put it on the lowest level but no luck. Im going to try to master the juices first and gain some confidence and then try to go back to no sugar.
+  - [1] Your setting was probably too cold for it to freeze up. My husband is diabetic and we use ours several times a week and sometimes a few times a day. Sounds like after you added the extra drink mixture you didn't have enough allulose to help keep it slushed.
+  - [1] I am not the OP but I dod try this. I used a 17 oz bottle of sugar free sparkling ice and a half tsp of allulose with lemon juice. The drink froze so fast and clogged the machine. I dumped it all out, melted the allulose and sparkling ice mixture and added another 8 oz if sparkling ice to the melted mixture and tried again. It gave a signal for not enough sugar. I then added more allulose and then it was too thick. I gave up.
+  - [1] I don't measure. But if I had to guess it would be a ½ Tbs of allulose to each 8 ounce. Lemon or lime juice I'll add a little at a time, I taste test it to my liking. I use powder allulose but I believe they are interchangeable on measurements. 
+
+The lemon or lime juice takes out some of the sweetness after adding the allulose.
+  - [1] If you want a pop slush. 1/4 real Coke, 3/4 Coke Zero seems to work. 
+
+Same with other combinations of 1/4 full sugar pop and 3/4 diet.
+  - [1] Thanks for your response. Could you tell me how much you add of each to how much liquid?
+  - [1] We had this problem with our sugar free drinks (which we add alcohol or allulose to). I’ve found we have to turn the temp down a little from the default setting, and this fixes it.
+  - [1] I use allulose with a little lemon or lime juice. No issues here.
+  - [1] Even Ninja Slushi itself tells how to make sugar-free with the most recent machines. I just got one and they mention allulose. Other options are Splenda Magic Baker or Swerve.
+  - [1] How so? Genuinely asking because it says you can’t do sugar free (unless you use that substitute but I don’t like it)
+  - [1] The problem im having with Eryhthritol, or really anything you add is that it completely overpowers the taste of the drink. 
+
+I've been adding 1 Tbsp, and it already feels like a lot. But my slushies are turning out so thick that thyre more like a snowcone, as the OP here is experiencing too. Will adding more thin it out?
+  - [1] Try erythritol, it works great. And play with some different ingredients. I add 3 tbs erythritol dissolved in half a cup of boiling water (Topped with a but of cold water) and 1.25L bottle of sugar-free soft drink.
+  - [1] Not correct... coz I've made over 100 sugar-free slushies in my machine now. How do thing 7/11 and the likes, manage to do sugar-free slushies.
+  - [1] Sugar free isn’t going to work. If there isn’t either enough fat, sugar or alcohol, water will freeze on the freezing rod and jam the machine.
+
+======================================================================
+TITLE: Guys please sign my petition for the vessel.
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1j8atuj/guys_please_sign_my_petition_for_the_vessel/
+POST:
+https://www.change.org/p/demand-ninja-to-address-flaws-in-the-design-of-their-slushi-vessel?recruiter=36784912&amp;recruited_by_id=58564750-2ac1-0130-9395-3c764e049c4f&amp;utm_source=share_petition&amp;utm_campaign=petition_dashboard&amp;utm_medium=copylink
+COMMENTS (top by score):
+  - [1] You're welcome.
+  - [1] Thanks
+  - [1] I signed it. 🫶
+  - [1] Learned something new today, silly language on both sides of the pond IMO.
+  - [1] Actually. I'm in the UK. That's how we spell it. But thanks.
+  - [1] Yes thanks AI for you.
+  - [1] *mold.
+A mould is a hollow container for making a specific shape.
+Mold is the gross stuff that grows. 
+
+P.S. I signed
+  - [1] Thanks. I tried to post to Facebook Slushi groups but no luck, some reason FB is flagging my account as spam so won't let me post to the big groups. That's where we need the link sent. 
+
+If you or anyone could share it, that might help out.
+  - [1] Signed, it is a glaring flaw in an otherwise great machine.
+  - [1] I will be messaging you in 3 days on [**2025-03-13 22:28:59 UTC**](http://www.wolframalpha.com/input/?i=2025-03-13%2022:28:59%20UTC%20To%20Local%20Time) to remind you of [**this link**](https://www.reddit.com/r/ninjaslushi/comments/1j8atuj/guys_please_sign_my_petition_for_the_vessel/mh3qlap/?context=3)
+
+[**CLICK THIS LINK**](https://www.reddit.com/message/compose/?to=RemindMeBot&amp;subject=Reminder&amp;message=%5Bhttps%3A%2F%2Fwww.reddit.com%2Fr%2Fninjaslushi%2Fcomments%2F1j8atuj%2Fguys_please_sign_my_petition_for_the_vessel%2Fmh3qlap%2F%5D%0A%0ARemindMe%21%202025-03-13%2022%3A28%3A59%20UTC) to send a PM to also be reminded and to reduce spam.
+
+^(Parent commenter can ) [^(delete this message to hide from others.)](https://www.reddit.com/message/compose/?to=RemindMeBot&amp;subject=Delete%20Comment&amp;message=Delete%21%201j8atuj)
+
+*****
+
+|[^(Info)](https://www.reddit.com/r/RemindMeBot/comments/e1bko7/remindmebot_info_v21/)|[^(Custom)](https://www.reddit.com/message/compose/?to=RemindMeBot&amp;subject=Reminder&amp;message=%5BLink%20or%20message%20inside%20square%20brackets%5D%0A%0ARemindMe%21%20Time%20period%20here)|[^(Your Reminders)](https://www.reddit.com/message/compose/?to=RemindMeBot&amp;subject=List%20Of%20Reminders&amp;message=MyReminders%21)|[^(Feedback)](https://www.reddit.com/message/compose/?to=Watchful1&amp;subject=RemindMeBot%20Feedback)|
+|-|-|-|-|
+  - [1] RemindMe! 3 days
+
+======================================================================
+TITLE: Ninja Slushi not letting me choose freeze level
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1j578zr/ninja_slushi_not_letting_me_choose_freeze_level/
+POST:
+Hi, I've received my slushie machine 2 days ago and i tried few recipes, there was an issue with first one (coca cola) taking over 70 minutes to finish - I've read somewhere that some people had similar experience on first use. 
+
+The milkshakes were about correct time, though there is an issue with freeze level, first I've set the milkshake to level 3, i didn't like the consistency as it was too runny, raised it to level 5, waited 10 minutes, it never went above level 3 and it beeped indicating being finished and went back to solid level 3.
+
+Did anyone experience something similar?
+COMMENTS (top by score):
+  - [2] I have the same issue. It slushes great with coke but milkshakes are too thin and it won't ever increase.
+  - [1] Milkshakes are kinda hard to make in the slushy in my experience. The milkshake button is just a preset temperature with the lights on the right being the temperature setting of the machine and are the same no matter what preset is chosen. 
+
+I have also run into the machine beeping and not wanting to go any colder, it seems like the motor is working at its max so it doesn’t want to cool further. I’ve noticed when the machine is fuller it happens more often so doing a little smaller batch might help. But also adding some sugar in my experience also helped it.
+  - [1] Just run the cycle with something to show it does not freeze.
+  - [1] Thanks for that feedback!
+
+Was there anything special they had you do or try to prove that it didn’t work right?
+  - [1] I had issues as well. I called Ninja warranty, and they videoed with me to see what it was doing, and are sending me a new one. It was so frustrating!
+  - [1] Second time I made a milkshake I was cocky and didn’t use a recipe. Thought I could wing it.
+
+And that’s how I made a strawberry butter milkshake.
+  - [1] Mine did the exact same thing when I tried to do a milkshake. Following hopefully someone has a solution.
+  - [1] Hmm that’s really weird. The only issues I had were because I didn’t use enough sugar, alcohol or fat in my mixed
+  - [1] 6 hours before running for the first time, no, they flash indicating levels steadily, going up but when i choose higher level its going to drop after some time
+  - [1] Did you leave the machine upright for 2 hours before plugging it in for the first time?
+
+Did you notice the lights flashing in a specific / odd way? Like flashing up to down or down to up?
+
+======================================================================
+TITLE: Struggling with Zero Sugar Recipes
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1irvaig/struggling_with_zero_sugar_recipes/
+POST:
+Basically the title.  I'm using Soda stream zero sugar syrups and every time I try it comes out way too icy, completely the wrong texture and consistency and I often get ice buildup in the machine while it's working.
+
+Now I know zero sugar syrups don't work on their own.  But I was told allulose was the solution for this, well that in combination with guar gum.  
+
+Now did I get bad advice or am I getting my ratios wrong?
+
+How much allulose should I be using per oz of liquid?  How much guar gum per oz?
+
+Any advice would be appreciated.
+COMMENTS (top by score):
+  - [1] I use 1 tbsp of powdered allulose for every 8 oz of zero sugar pops .. I use hot water in the kettle to dissolve it and pour in after the pop and so far so good ... Good luck 🍀
+  - [1] Rum
+  - [1] I also knock the temperature / slushiness control down by 1 when using this method.
+  - [1] What alcohol do you use?
+  - [1] Or do what I do and just pour a shout of alcohol in... It's not even enough to taste it, it's so dilute
+  - [1] Swerve sugar replacement. While it doesn't contain allulose in the Canadian version but it works great. 2 tbsp generally does 16oz if it's too icy add another tbsp
+  - [1] I've found that 1 tsp allulose per 4 oz of liquid has worked well. With that ratio I haven't had any digestive issues too.
+  - [1] Yes, exactly.  Note though, glycerin / glycerol is not suitable for small children.  I should have said that before.
+  - [1] Glycerin at 1.5% works without sweetening the drinks further. 
+
+We can't get allulose where I live.
+
+======================================================================
+TITLE: ‘Absolute garbage’: Customer tests $299 Ninja SLUSHi and $199 Costco Iceman slushie machine with Crush soda. Which is better?
+POST:
+Just a copy paste job.
+
+\-J
+
+=====
+
+[Which Is Better? The Ninja Slushi or Costco Iceman?](https://www.dailydot.com/news/ninja-slushi-costco-iceman-slushy-comparison/)
+
+[](https://www.dailydot.com/author/stacy-fernandez/)Posted on December 7 2024 4:00 pm CST
+
+We’re not sure who consumes so many slushies that they need an at-home machine. But if you’re that person (or family), this one’s for you.
+
+We’re not sure who consumes so many slushies that they need an at-home machine. But if you’re that person (or family), this one’s for you.
+
+Slushies form when you get a beverage super cold to where it’ll form ice crystals, but not quite to its full freezing form where it’ll become pure ice.
+
+You can transform many beverages, from juices to sodas to cocktails, into slushy form; just be careful not to slurp it down too quickly or risk getting a brain freeze.
+
+While most people love slushies, it’s usually a treat reserved for going out. But it seems some people love the textured beverage so much that they’re committing part of their counter space to buy an at-home slushy machine.
+
+# Ninja Slushi vs Costco Iceman
+
+In a viral video, [TikTok](https://www.dailydot.com/tags/tiktok/) user Devyn (@devandnat.adventures) gave his side-by-side test and review of the [Ninja](https://www.dailydot.com/news/ninja-creami-catches-fire-2/) Slushi machine versus the Iceman Slush-Ease.
+
+For testing purposes Devyn used orange Crush soda in both machines.
+
+They had very similar structures, allowing him to pour the beverage in from the top of the machine with no hassle, but Devyn did note that the Iceman has a capacity for 1.5 liters versus the Ninja’s 1.8.
+
+“You can fit a little bit more in the Ninja, but it is a bigger machine,” he pointed out.
+
+He starts the machines and lets them each run for about 20 minutes. The Ninja clearly has worked its way to a slushy consistency while the Iceman machine claims to be 10 minutes past done but the liquid is still, well, liquid.
+
+# Devyn reviews the two slushie machines
+
+“Texture is not there. I don’t know why the machine thinks it’s done; it’s nowhere near done,” Devyn said.
+
+When he poured out the drink from the Ninja, it came out with a nice texture, while the Iceman was fully liquid.
+
+“Absolute garbage, he said, referring to the Iceman.
+
+However, there are several [other TikToks](https://www.tiktok.com/discover/iceman-slush-ease-slushy-maker-review) showing off the Iceman where the drink does actually get to a slushy consistency.
+
+“I’m going to try and exchange at Costco for another one. Has to be faulty right???” Devyn said in a comment reply.
+
+# How do they compare?
+
+While Devyn doesn’t mention price, we noted that there’s a jump between the two.
+
+The Ninja, which appears to be sold out, has a $300 price tag on the Ninja site. But because its sold out, Walmart, which does have it for sale has it marked to almost double the price at nearly $568. The Iceman, meanwhile, cost $200 on Costco’s site.
+
+And in terms of reviews, Ninja has the Iceman beat. Iceman has a 3.7 star rating based on 23 reviews on Costco’s site. Meanwhile, the Ninja has 4.7 stars on Walmart’s site based on more than 1,000 reviews.
+
+# Commenters react
+
+Devyn posted the video on Dec. 3, and it has since amassed more than 590,000 views. In the comments, users took sides in the argument.
+
+“I have both. They work almost identical to each other. Ninja modeled there’s after Iceman. I’m suggesting user error here,” the top comment read. (Though there’s no evidence to support whether the Ninja is modeled after the Iceman.)
+
+“You must be using it wrong, or have gotten a faulty one. I have the Iceman and it’s worked incredibly well for me. Well worth the savings compared to the Ninja,” a person said.
+
+
+
+“I don’t care how good the other one is. I have had so many Ninja appliances and zero issues out of any, I’ll just stick with them,” another added.
+
+“My sister brought over her Ninja to Thanksgiving over my other sisters’ and we went through eight bottles of wine, frozen wine. It was terrific,” a commenter shared.
+
+&gt;
+
+The Daily Dot reached out to Devyn for comment via TikTok direct message and comment. We also reached out to Ninja and Costco via email.
+COMMENTS (top by score):
+  - [1] It’s great machine
+  - [1] Thanks! I did a bottle of pop last night and I was really impressed! It I think kinda of exceeded my expectations because it didn't melt really fast like I thought it was going to.
+  - [1] Nice and have fun experimenting!
+  - [1] Nice! 
+
+I got one today,  so excited to use it later 🥰
+  - [1] I even bought another one as a Xmas gift for my nieces and nephews and they use theirs all the time also
+  - [1] Thanks for replying 🙂 I'm more exited now to get one knowing you use it still, months later.
+  - [1] Here for the same thing.
+  - [1] We use it 5-6 times a week we love it
+  - [1] I was just thinking about purchasing one and doing my research.. do you still like it several months later?
+
+======================================================================
+TITLE: Doctor Pepper (UK) first time
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1ke2io6/doctor_pepper_uk_first_time/
+POST:
+Hi guys,
+
+New user here and first time using the machine - we used Dr Pepper (not diet) and used the present slushie function (2 bars on the temp) - the drink was incredibly icy and barely would dispense - is there anyway to remedy this? Is it just reducing it to one bar of temperature?
+
+Many thanks in advance
+COMMENTS (top by score):
+  - [1] Thank you 😊 I'll definitely do the lowest setting next time!
+  - [1] The manual says you need at least 4% sugar, and Dr Pepper is (just) over this but I would think that would put it at the lowest (highest?) temperature setting in order for it to work.
+
+The UK sugar tax means that even non-diet drinks are often borderline in having enough sugar to slush...
+
+However, you can add a little more sugar or use an additive to make it slush better.
+  - [1] Thank you, I kind of assumed all the none diet 'colas' would be fine from a sugar perspective
+  - [1] Thank you, I would never have thought of that
+  - [1] Put it on the rinse cycle for easier dispensing when it gets too frozen too
+  - [1] I posted about this previously. Dr Pepper seems to have about half the sugar of other drinks. I'd left my Slushi running, waiting to hear the beep. But heard grinding instead before the warning tones. And it had created a large piece of ice.
+  - [1] Thank you so much will try that
+  - [1] Try it on one bar. I tend to use either Dr Pepper or Fanta Lemon and they’re slightly below the recommended 5g sugar per 100ml, so dropping the bar helps. You can always bump it up if it’s not slushed enough. 
+
+Other option is keep it on 2 bars, but add a splash of extra liquid when you’re ready to serve it, helps loosen it up a bit.
+
+======================================================================
+TITLE: Issues with Gatorade slush
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1jlnw3g/issues_with_gatorade_slush/
+POST:
+For some reason when I try to make a Gatorade slush using the powder mix following the Slushi recipe guidelines in the book for powdered drinks the machine ices up and overheats. 
+
+I've dropped from the standard 3 bar default setting to 1 bar and it still ices up and shuts down after a couple of minutes running. This is doing any amount, min line, half the tank, or to the max line. This is on the normal slush mode.
+
+Does anyone have any suggestions? I mix the powder first in a pitcher of water to dissolve it. I've tried it room temp and fridge cold water. Machine did a milkshake run just fine last night and I've used the machine probably 10 to 12 times since I got it last year. It just seems to hate Gatorade.
+COMMENTS (top by score):
+  - [2] Yes that's what we've been doing.
+  - [1] If it ices up and James there is only one of three answers: More sugar, more fat or more alcohol.
+  - [1] Use a pinch of xanthum gum
+  - [1] So an extra scoop of the powder?
+  - [1] Yeah, can confirm that mine hates powdered Gatorade, too. I've tried both the g2 powder and the full sugar powder. We have to add an extra scoop of the mix and it seems to do fine after that.
+  - [1] Yes
+  - [1] Is there enough sugar?
+
+======================================================================
+TITLE: My Slushi isn’t slushing
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1ffq7wh/my_slushi_isnt_slushing/
+POST:
+Just unboxed my Slushi today. It’s not getting cold at all and the lights on the right flash together. 
+
+Any ideas?
+COMMENTS (top by score):
+  - [1] source please?
+  - [1] Did you try this? I have the same issue
+  - [1] DID YOU TRY THIS? i HAVE THE SAME ISSUE
+  - [1] my ninja slushy comes on and when I set it it works for 10 secs and then all the lights starts blinking....
+  - [1] Are you 100% sure? because I'm going to do that, and I have no clue where the hell you got this solution from or why I'm doing this.
+
+My slushie suffers the same issue and I bought it from USA, I'm from Europe so sending it back for repair isn't an option
+  - [1] What happened with This? Mine is doing the same thing now.
+  - [1] What happened with this? Mine is doing the same thing.
+
+======================================================================
+TITLE: Milkshake and frappé problems
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1k0ttr8/milkshake_and_frappé_problems/
+POST:
+Made one successful frappe and can't replicate anymore.  
+
+Juices and cocktails freeze great, but anything milkshake like never freezes down.  It gets coldish, no ice forms and it runs for up to an hour with not real progress. I get a low sugar warning sometimes despite having lots and lots of sugar in it.
+
+ I'm using the exact recipes from the book, is this an RMA thing?
+COMMENTS (top by score):
+  - [1] Yeah I found that out the hard way. Tried one with 2% and it did nothing. Used coffee cream (18%) and was amazing (though unhealthy as hell)
+  - [1] You need more fat! Heavy / double cream will do it
+  - [1] I am going to try this! Thanks-
+  - [1] The recipe I use for frappes (I usually make about 4 servings) is;
+
+3 cups of coffee (I make it ahead and chill it overnight)
+3 cups of cold milk
+4 tbsp cold heavy whipping cream
+1/2 to 3/4 cups of super fine sugar (used to use a whole cup, but it would hide the taste of the coffee)
+Combine all of this in a bowl and whip until sugar dissolves.
+
+Do you use the same or a similar recipe??
+  - [1] Yeah I up it, even to max and it's kind of a foamy unfrozen mess.   Sodas and juices are fine and I nailed one frappe
+  - [1] Have you tried upping the temp? This happened to me the second time I made a frappe. I used the frappe setting (just like the first time when it worked), but it wouldn't freeze. So I upped the temperature and eureka! If you're getting low sugar warning, then I'm at a loss if your following the recipe.
+
+======================================================================
+TITLE: Slush getting stuck in a very specific spot
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1j7ekzx/slush_getting_stuck_in_a_very_specific_spot/
+POST:
+Every time I use this machine it always builds up right there. Is there any way to fix this?
+COMMENTS (top by score):
+  - [1] Mine does it too. I just gently tap it. Will try turning it down as well then.
+  - [1] Way too cold.
+  - [1] Yup mine does every time too.
+  - [1] This happens when I think it's a little too cold. I usually drop it one level and it works itself out.
+  - [1] Mine does the same but I’ve honestly never had an issue. Like once I pour, or take it off and scoop, it ends up mixing in with everything else.
+
+======================================================================
+TITLE: Any tips on a beer slushy?
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1ke6ye7/any_tips_on_a_beer_slushy/
+POST:
+It's foam. All foam. So much foam. I used a 16oz can of Weihenstephaner Hefe and it's just turning to foam. 
+
+I have been letting it settle over an over thinking eventually the Co2 will leave solution and I can just make a normal slushy. If I keep it running the foam just gets more and more and smaller and smaller and eventually starts to freeze. I even tried running it on rinse mode for a while to work the Co2 out, it doesn't seem to help. 
+
+Is there any normal household additive that can help kill the foam? A bit of sugar water? Spritz of oil? Anything?
+COMMENTS (top by score):
+  - [1] I let it sit about 2 hours total. The foam never really went away and it was still foaming like crazy if I ran it. I decided just to send it and let it foam. Unlike milk drinks where the foam gets worse as it runs, the auger or cold beat the foam out so it just kinda went away once it started freezing. I think I should have just let it run at first and it probably would have been fine. 
+
+The problem is it was nasty. I wouldn't recommend it! It was like stale beer ice, just terrible.
+  - [1] How long did you let it sit?  I'd probably open them up and let it settle overnight
+  - [1] Maybe try a little bit if neutral cooking oil. Something that won't affect the flavor. Remember in college when you'd wipe you face with a finger and swirl it in your solo cup to kill the foam? Same concept. Oil kills foam.
+  - [1] Normally to get it out I use sugar... I would try that. Don't know if it works for beer, I know it works for coca cola.
+
+======================================================================
+TITLE: Cylinder is not scraping correctly
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1j0no71/cylinder_is_not_scraping_correctly/
+POST:
+Hi all, unsure why, help would be appreciated. The end of the cylinder , say after 10mins gets over loaded, resulting in stoppages. Wait a few mins start up again the blockage gets scrapped off, then  starts to get over loaded again, rinse wash repeat. Any thoughts? Using milk, cream and macca chai powder (was made to liquid with little hot water)
+COMMENTS (top by score):
+  - [1] May be too cold. I did this once and set the temp a little warmer and it corrected itself.
+  - [1] Ok, so add more sugar and or fat, thanks for that :)
+  - [1] I would say the agitator isn't really intended to 'scrape' the cylinder as much as brush it. If it's scaping enough to stick or jam, the fluid is freezing too hard and you'll want to adjust your mixture for sugar/alcohol content.
+  - [1] It should not be scraping at all, that means your mixture is too cold, or it's missing sugar/fat/alcohol
+
+======================================================================
+TITLE: I may have solved the milk foaming problem
+POST:
+**Problem**: Milky drinks (or anything high in protein) rapidly turn into an undrinkable foam when agitated for an extended period of time, e.g. through the churning action of the Ninja Slushi. The manual suggests solving this by adding a load of cream, which does work initially, but the foam will return after a while and it requires adding a load of saturated fat to the drink, which isn't ideal.
+
+**Solution**: Chemistry provides us with a variety of anti-foaming agents, notably including [polydimethylsiloxane](https://en.wikipedia.org/wiki/Polydimethylsiloxane) (PDMS), which is a silicone oil widely used in food manufacturing. McDonald's uses it in their frying oil to prevent it from foaming up and splashing dangerously during cooking, and in their milkshakes to reduce foam generation; it's also used in various protein powder supplements to prevent them becoming super foamy when shaken.
+
+PDMS is available from various sources, but the two easiest ones I could find are home-brewing suppliers (where it's used to prevent beer over-foaming during brewing) and from pharmacists in the form of a medication used for IBS relief (albeit at much higher doses than I'm using here). I purchased the medication here in the UK - an oral gel composed of 70% PDMS and 30% called *Enterosgel*, which appears to also be available in the US - and tried it out today with some good results.
+
+I added 1.5g of the gel (just over 1g of PDMS) to 250g of cold brew coffee (with 10g each of allulose, erythritol, and glycerine; plus 1.5g of xanthan gum) and blended it thoroughly to incorporate the ingredients, then mixed it with 250g of whole milk and briefly blended the whole mixture together. I then poured the whole mixture into my Slushi machine and set it to the frappe mode, then waited. Instead of foaming up as it normally would, the bubbles remained very small and after \~20 minutes of churning they hadn't climbed much higher than where they started. Begin impatient and wanting my coffee, I poured out the frappe slush into my mug.
+
+So far I've only run the one test, so more experimentation is obviously needed, but my frappe is deliciously thick and smooth, so I'm feeling cautiously optimistic. I'd be very interested to hear if anyone else has tried PDMS or alternative anti-foaming techniques that don't rely on adding loads of extra fat to the mix (not that there's anything wrong with a nice cream-heavy drink, but it's not something I want too often!).
+COMMENTS (top by score):
+  - [1] Yep!  Used the same ratio of same ingredients with one drop, and it came out perfect!  THANK YOU!
+  - [1] Yeah looks PDMS is the main active ingredient in that, hope it works well!
+  - [1] Free ship required $49 purchase, so found it on Amazon and will be here tomorrow https://a.co/d/hX5zdVu
+  - [1] I’m having the same issues, and typically have added cream that does seem to help, but makes my Saturday morning frozen coffee more like a Saturday morning milkshake.  Found a US mail order source, and have ordered from these guys for brewing supplies a few years ago.
+
+https://www.northernbrewer.com/products/fermcap-s-1-oz?variant=8158373281836&amp;gad_source=1&amp;gbraid=0AAAAAD7PUIQNRiJR9uROXuyLrmfengjCC&amp;gclid=Cj0KCQjwytS-BhCKARIsAMGJyzrkgQxNX_atgnrquEdNLBmrTmQAgqteDF4Gk0U3JpGHLNDwX8wH6v4aAjNDEALw_wcB
+
+How’s this look?  Found another source saying it was based on PMDS, but can’t verify if it had other additives.  For $5 shipped, I’ll give it a try and report back - unless OP scientist tells me I’m off track.
+
+======================================================================
+TITLE: Design flaw - nightmare cleaning
+POST:
+We have used our machine a total of 3 times. Pina colada, strawberry daiquiri, and a Dutch bros type coffee freeze. We rinse and clean the machine thoroughly every time immediately after dispensing the last of the item we made. We have noticed that there is a lip on the backside of the vessel that liquid can get in, that you cannot clean out, the lip opening is so small that a brush bristle cannot fit to get the gunk out. It’s only going to get worse and eventually will mold/mildew. @KnowYourProduce posted a video on YouTube about this issue as well on August 13, 2034. Ninja had replaced their vessel but the issue occurred again on the new vessel as well. 
+YouTube video linked below. 
+
+We called ninja support about it this morning. He suggested putting warm water, 2 drops of dish soap or some vinegar in the vessel and running the rinse cycle, so far that has not helped. We may end up returning the machine until they can fix this design flaw. 
+
+https://youtu.be/QVMtAFkxxLw?si=yG598_i7SO8a-r0U
+COMMENTS (top by score):
+  - [1] https://www.bestbuy.com/site/waterpik-ultra-water-flosser-green/6444458.p?skuId=6444458&amp;ref=212&amp;loc=19822905250&amp;gclsrc=aw.ds&amp;gad_source=1&amp;gad_campaignid=19822209803&amp;gclid=Cj0KCQjwoZbBBhDCARIsAOqMEZUN2Cf6kghTWTQd4XMJmJMY5VGgTxAoeaIcWf7wGeOe6iqNIEtUr2saAupaEALw_wcB
+This is the one we used that worked great but I'm sure that any waterpik with the pin pointed bit at a high pressure will do the trick
+  - [1] We just ran into this issue yesterday and we used our waterpik to clean it, which worked better than expected. Scrubbing didn't get into the teenie gap and soaking didn't work but that waterpik did wonders
+  - [1] Responding to top comment so others don't have to hunt for the solution. 
+A water pic and Dawn power wash did the trick for me thanks to this thread. I let it soak in power wash for a little bit then blast it with the pic 
+I'll also say that I clean my machine fully after every use and this build up still happens.
+  - [1] They did update it for UK models. The lip isn’t there in mine for anything to get trapped under. See my post
+
+======================================================================
+TITLE: Frappé and milkshakes are foamy
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1iqauqa/frappé_and_milkshakes_are_foamy/
+POST:
+Hi there,
+
+we just got our Ninja Slushi a few days ago and tried a few recipes. Vanilla coke slushi worked perfect. Now we also tried a coffee frappé and a strawberry milkshake. Frappé and milshake were both just super foamy because there was too much air in.
+
+How to fix that? We used 700ml milk and some bar strawberry sirup (by taste because the sirup has like 82,5g sugar per 100ml). Are we doing something wrong?
+COMMENTS (top by score):
+  - [1] Have to use Oat Milk for the perfect milkshake consistency. I have 4 machines and a slush mix business 
+We have the ninja Slushi machine mastered
+  - [1] Use Oat milk and no foamy froth. I have 4 machines and a slush mix business 
+We have this machine mastered.
+  - [1] I own 4 of these machines and have a slush mix business. We found you have to use Oat milk not regular milk to stop the frothy consistency. Oat milk gives it a perfect milkshake without the froth.
+
+======================================================================
+TITLE: Ninja SLUSHIE Recipe Guide – 100+ Frozen Drink Recipes, Hacks &amp; Secret Tricks!
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1izc99v/ninja_slushie_recipe_guide_100_frozen_drink/
+COMMENTS (top by score):
+  - [1] You couldn’t even be bothered throwing a few dollars towards a proper domain name before trying to sell your rubbish?
+  - [1] Fuck off with selling shit on here.
+
+======================================================================
+TITLE: Ninja SLUSHi™ Recipe Guide – 100+ Frozen Drink Recipes, Hacks &amp; Secret Tricks!
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1igp2vk/ninja_slushi_recipe_guide_100_frozen_drink/
+COMMENTS (top by score):
+  - [1] "Sorry, this store is currently unavailable."
+  - [1] Done!!!!! - [https://3s2iw1-r7.myshopify.com/products/ninja-slushi%E2%84%A2-recipe-guide-100-frozen-drink-recipes-hacks-secret-tricks](https://3s2iw1-r7.myshopify.com/products/ninja-slushi%E2%84%A2-recipe-guide-100-frozen-drink-recipes-hacks-secret-tricks)
+
+======================================================================
+TITLE: Freezing component keeps building up ice
+POST:
+Hey everyone,
+
+I’m having an issue with my Ninja slushie machine. Every time I use it, it seems to build up a lot of ice on the freezing component. This ice build-up is causing the machine to make loud sounds, and it’s making it difficult for the agitator to spin properly. I’ve been using Hawaiian Punch as the base and I just set it to the normal slush setting without adjusting the temperature. I also made sure that I filled it above the min fill line
+
+Has anyone else experienced this?
+COMMENTS (top by score):
+  - [1] Did the new one work?
+  - [1] I'm having the same issue.
+
+======================================================================
+TITLE: Frappe problems...
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1etziub/frappe_problems/
+POST:
+Howdy.  I'm having a good time making slushes and milkshakes, but I can't get the frappes to come out right.  I've tried both the caramel frappe and the coffee frappe from the recipe book, and both have turned out so foamy that they're undrinkable.  They're so foamy that the drink doesn't taste cold, if that makes sense.  the mixture turns foamy within 2-3 minutes of being dumped into the machine.
+
+One thing I noticed is that the recipes in the booklet call for half-and-half, yet when you try the troubleshooting guide on [www.ninjakitchen.com](http://www.ninjakitchen.com), the question you are asked is whether or not you put an appropriate amount of heavy cream into the mixture.   Before I go wasting any more precious dairy consumables, I wondered if anyone else has had good luck with a particular frappe or frozen coffee drink recipe.   
+
+I got interested in the Slushi machine because a little convenience store in the middle of nowhere eastern Washington has these great frozen mocha drinks in a Slurpee-type machine, and I want to see if I can make them myself.
+COMMENTS (top by score):
+  - [1] THANK YOU!!!! Been stressing trying to get the right recipe because every single time it creates too many bubbles. This is the only thing that has worked!!! 😁
+  - [1] We use slushi setting, mocha coffee with creamer and then add Starbucks coffee (espresso) - takes 27-30 minutes and add whip after dispensing the mix.
+
+======================================================================
+TITLE: Coke Zero and Allulose
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1et5b7y/coke_zero_and_allulose/
+POST:
+Used: 2 (12-oz) cans (or 3 cups) diet soda
+
+3 tablespoons liquid allulose
+
+2 tablespoons lemon juice
+
+on the Slushi program, it's too firm, slow, and close to impossible to pour. On the Sulsi program, on low temp. 
+
+Any ideas?
+COMMENTS (top by score):
+  - [1] i think diet has extra additives over zero sugar.
+  - [1] Try using zero sugar coke. i saw someone use 2 12 oz cans of zero sugar coke and 4 tbsp of allulose and it turned out perfectly. no clue what setting they were on. also the lemon juice could be mixing in a weird way and changing the consistency but thats pretty unlikely.
+
+======================================================================
+TITLE: Unexpected error
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1j6wtr3/unexpected_error/
+POST:
+I made a vodka/cranberry/lime slushi a couple of times.   20 oz 50/50 Cranberry (1/2  sugarfree 1/2 sugar), 4 oz vodka and around 2 oz of lime juice.  It slushed up fine.  In fact, the 2nd time I added 1 bar (all bars on) and it was actually too thick. 
+
+What is confusing me is after 30-40 minutes it shuts off and beeps and gives the too much alcohol/sugar error.  Well....if there was too much I think it wouldn't freeze as much as it did.  What am I missing?   I would think this is error is it isn't freezing enough.
+
+I did dispense one drink (this was maybe a 3 drink batch) probably 10-15 min before the error/shutdown.
+COMMENTS (top by score):
+  - [1] Try adding a bit of water and it should go away. Just a little bit
+
+======================================================================
+TITLE: is it normal for ice to form on the silver condenser, shaking the whole unit?
+POST:
+I'm still pretty new to the Ninja Slushi and have a basic question.  When I try store bought, sugar filled juice, ice ends up forming on the center cooling condenser unit and the blue auger and the whole clear container to start rocking which doesn't seem right.  When this happens, I always turn off cooling for a few seconds to clear the ice and then re-do the frozen juice setting.  But that only lasts a few minutes before ice forms again. Should I just let the ice form and have it keep running in hopes that it magically clears itself?  I made frappes also and had the ice issue with that as well.  Regular Coke slushie's seem fine.
+COMMENTS (top by score):
+  - [1] Works perfectly! The banging when down and we I tired the rinse the ice stuck on the chiller goes down and normal slushy making resumed
+
+======================================================================
+TITLE: Is my Slushi broken?
+POST:
+My Ninja Slushi (it’s only been a month of use btw) has started stopping shortly after I touch the on and slush button. It shutters and then turns off (stops slushying, it beeps but lights remain on and flashing) I press the slush button again and it starts again and it seems fine. The second time it happened we kept having to restart the slush button. Is my slushi broken? My BF mentioned he felt the sides releasing cold air from the vents when it would shut down. But when it was working he felt warm air. Has this happened to anyone else? Should I try to get a replacement? Or is there a fix to this?
+COMMENTS (top by score):
+  - [1] Bonjour, cela vient de m'arriver et une pal de l'agitateur est cassé donc une pal sur les deux qui racle le cylindre et la machine se bloque car trop de glace sur celui ci
+
+======================================================================
+TITLE: Is Ninja fluffing their ABV specs?
+POST:
+Ive tried numerous different ways to get a 10% abv slushy but it always turns out too watery and doesn't get thick enough. I've checked the brix levels and doing 13-15 brix like a lot of people suggest but it actually makes it worse. I've tried xanthan gum. I've tried maxing out the freeze levels. The highest I've been able to go with a proper slushy texture is 7% abv. I'm not getting any warnings either. Do you think my machine is defective  or is Ninja fluffing their abv specs? Because they say it can go up to 16% abv.
+COMMENTS (top by score):
+  - [1] Can confirm. Have to add water. Ninja is fluffing it a bit. At the end of the day it is physics
+
+======================================================================
+TITLE: Vimto too thick to slush
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1jq49jv/vimto_too_thick_to_slush/
+POST:
+Hi,
+
+Im really struggling to make vimto in the ninja slushi since it's my favourite soft drink. I buy the no added sugar version, which apparently wont slush because it needs more sugar.
+
+I have tried adding a bunch of sugar, ive tried using erythritol since Ninja suggest it for sugar-free soda slushies in the uk. 
+
+What ends up happening is the slushi gets so thick it wont dispense. If i take it out of the machine, the texture is kind like eating dry ice and then it starts to separate from the drink ice.
+
+Any advice? I cant figure out how to slush vimto.
+
+======================================================================
+TITLE: Chocolate milk / milk drinks in general don't go past level 1 freezing
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1iqtvvd/chocolate_milk_milk_drinks_in_general_dont_go/
+POST:
+Hi, I tried different kinds of milk (3,5% fat, chocolate drinks from the supermarket) and choose the "Milkshake" preset. I reaches level 1 of cooling, the other 3 just glow normally (as the machine hasn't reached them yet). After a while, the machine beeps and only the first temperature light is on, like it doesn't even try anymore to cool any further. Why is that?
+
+======================================================================
+TITLE: Trying to make a frozen adult drink
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1il2prf/trying_to_make_a_frozen_adult_drink/
+POST:
+I've had mine for about two weeks.  I can make normal slurpies, coke for example, fine.  But when I try a premade margarita mix.  Ugh.  No joy.
+
+I believe I need to add ice, but how do I do that when it does not open wide enough.  I tried to blend it and the ice still would not fit.  
+
+Someone must have narrowed this down to a science to help me out.
+
+======================================================================
+TITLE: Anyone used Kool-Aid powder?
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1ievgp3/anyone_used_koolaid_powder/
+POST:
+When I tried making slushies with kool-aid powder (the big cherry container) today, it stopped working on 3 different attempts. It’d start making an awful noise and shaking a bit and then it would stop spinning, beep, and flash all of the lights at once. When I tried unplugging and starting it again, it would spin just the tiniest bit and beep and stop again. I took it all out and tried again 3 times and it’d start again normally but then end up like that again.
+
+I noticed there was larger chunks of ice and I’m assuming it’d freeze too much and then something would get stuck and stop the machine. Any ideas on how to avoid this? I’m planning to troubleshoot tomorrow but could it be solved with more powder/less powder?
+
+======================================================================
+TITLE: First time troubleshooting FS301
+FLAIR: 🛠️Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1ibs36r/first_time_troubleshooting_fs301/
+POST:
+Followed the instructions for setup. Trying to make a simple soda slushi. the soda has 39 grams of cane sugar. I did 2 12 oz cans. Let it sit came and checked on it every 15 minutes maybe and it never got cold. I noticed the temperature LED’s preset to 3 for slushi they never stopped pulsing. So I take it it’s never got to temp. Im also not hearing a single beep from it so idk whats going on. Any troubleshoot help. I already unplugged disconnected pulled everything out cleaned it hooked it back up and tried again and its not getting cold. Keep wasting soda testing this shit out
+
+======================================================================
+TITLE: Customer support is kinda of a joke. I was told by multiple reps that the faulty mold vessel seal are considered wear and tear and not covered under warranty . I've tried everything to keep this thing clean .
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1i9023q/customer_support_is_kinda_of_a_joke_i_was_told_by/
+
+======================================================================
+TITLE: Tried the costco monkfruit - lessons learned
+POST:
+I made a coffee frappe today using the slushi book recipe and replacing sugar with the monkfruit erythritol blend. 
+
+1)Need a couple extra bars than normal sugar to slush up
+
+2)Taste was great, real close to normal sugar 
+
+3)Had too much, and paid the price. Seems this is the erythritol getting revenge. Definitely having some digestive issues from it. I am in Canada so allulose isn't readily available. I do have a monkfruit/allulose blend on order to experiment with as well. I'm going to try it again in less quantity, this batch was a full 1/3 cup of the sweetener. Will do a half batch next time to see if it still happens.
+
+4)If small quantities aren't going to be a problem, I will be using this stuff in lots of recipes to keep calories down and reduce my sugar intake.
+
+======================================================================
+TITLE: Millshakes
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1i8po1n/millshakes/
+POST:
+I'm trying to make milkshakes but so far they seem to come out grainy with bits .
+
+I used whole fat milk , double cream and nesquik powder.
+
+I then tried using whole fat milk , melted ice cream and nesquik powder. Same result .
+
+
+Anyone experienced this know what the problem is 
+
+I'm thinking of trying semi skimmed milk next but also trying something else instead of nesquik powder . Though I got the recipe from a tiktok and also followed the booklet guide.
+
+======================================================================
+TITLE: Is this safe to use?
+POST:
+Context:
+
+Anxiously waited for it to arrive only for it come damaged like this. Ninja replaced it without requiring me to send the broken one back. 
+
+Buuuut it’s another 7 days of waiting for it and we were really excited to use this. 
+
+Just worried about the inner parts being exposed or it exploding if I try to use it lmao
+
+Plus what am I gonna do with a broken but maybe still works machine?
+
+======================================================================
+TITLE: Failure codes on day 1
+POST:
+I'll preface this with I'm probably just an idiot but maybe there's a chance I'm not?  
+Just set up the new Slushi.  First mix the kids wanted to try was the Wendy's slushi (made just under 64oz of a mix.  It was damn good however after about 30min the machine beeped, the motor stopped and all the lights were lit.  I read it's a motor failure but I have no idea what would cause it.  I unplugged it and let it sit for a few minutes and it fired back up.  Then after another 10min or so it beeped again, the motor stopped, but this time the temp lights were scrolling up.  I read that error means it's too concentrated.  Is that a result of the mixture getting less and less?  Is this common for anyone (should I expect this to happen often)?
+
+======================================================================
+TITLE: Beyond frustrated
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1i8hz5l/beyond_frustrated/
+POST:
+Does anyone else have a constant low sugar warning? It doesn't matter what i use. I add tons of sugar and it still gives me the warning. Last thing I tried was coke. I needed to add 3 tablespoons before it worked.
+
+======================================================================
+TITLE: Low sugar alert
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1i7178b/low_sugar_alert/
+POST:
+I got a ninja slushie and I can only make slushies with soda. Every time I try to make something else it gives me the low sugar alert then turns off. This is even with the recipes that ninja has in their little booklet that came with the machine. Has anyone else had this same issue?
+
+======================================================================
+TITLE: Can’t seem to get consistency right
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1i3zsrm/cant_seem_to_get_consistency_right/
+POST:
+I tried Coke and Juice. But it all becomes too thick that I can’t get it to pour through the spout. Always end up having to just turn off the machine mid way when it’s half slush and half liquid. 
+
+I tried lowering the temperature too but always same result. Am I supposed to increase the temperature?
+
+======================================================================
+TITLE: Gatorade zero
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1i3wdhc/gatorade_zero/
+POST:
+Has anyone gotten Gatorade zero to work? We tried adding xanthum gum as well as the Splenda magic bake. No matter what we do, the center metal condenser tube freezes over. 
+
+I’d appreciate any tips! I have allulose in the mail and will try that once it gets here, but we’d love to get the xanthum gum to work. I tried warming a small portion of the Gatorade so the xanthum gum would dissolve and then mixing that into the batch. This wasn’t successful.
+
+======================================================================
+TITLE: Warranty starts before possession
+POST:
+My Slushi in California. I’m in Virginia 🙄
+
+======================================================================
+TITLE: Squeaking? How to fix?
+POST:
+Our ninja slushi has been squeaking as the augers turning. Anyone have any ideas how to solve this noise??
+
+======================================================================
+TITLE: Broken?
+POST:
+I just purchased a Ninja slushi maker. When I took it out of the box, I noticed that there is a line where you pour the liquid. Does anyone else have this or not?
+
+======================================================================
+TITLE: Back in stock on Ninja website
+POST:
+The main link won't allow you to purchase, but if you search for the ninja slushi, you will be able to purchase!
+
+  
+[https://www.ninjakitchen.com/search/Slushi](https://www.ninjakitchen.com/search/Slushi)
+
+======================================================================
+TITLE: Issues with unit? Mine exploded when plugged in for the first time
+POST:
+Hey yall - just wondering if anyone has had a similar issue with the back around the top of the vent area exploding and sparking when first using it? We went out and spend the entire day gathering ingredients for it. We opened it upon returning home late and saw it needed to be upright for the 2 hour time so then waited overnight. Woke up and immediately went downstairs only for it to explode and not turn on. Womp womp.  My fiance got it through Amazon so all we can do is return apparently and not get a replacement so back to finding it before it sells out it less than a minute
+
+======================================================================
+TITLE: Jack frost won't slush
+POST:
+Made quite a few things with our machine
+  But this recipe will not slush.  Tried multiple temp settings in spiked slush setting but nothing works.  Looking for input
+
+======================================================================
+TITLE: Best dairy alternatives
+POST:
+So my MIL gifted us the gift we didn’t know we needed but it’s a game changer for us. We’ve used it everyday so far but there’s one problem for me. I am lactose intolerant.. Rashes, breakouts, and tons of stomach issues. 
+
+I’ve made a coffee frappe today which worked well and may be a regular staple. But it’s like a cup of half and half instead of the tablespoon I use in my daily coffee. 
+
+Which dairy alternatives worked best for your recipes? Also what’s a good alternative for sweetened condensed milk and whipped cream? 
+
+I know there are also juice and fruit purées and sugar substitutes and we’ll be using more of those for sure. I’m so glad I found this subreddit!
+
+======================================================================
+TITLE: Error/Faulty? Flashing alternating temperature lights
+POST:
+It started spinning as usual then stopped, only used it a couple of times! Left it off overnight and tried again, no luck, going to call support tomorrow but just wondering if anyone else has had this issue?
+
+======================================================================
+TITLE: Noise
+POST:
+Anyone know what might be causing this?
+
+======================================================================
+TITLE: Help with single serving slushie consistancy
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1hr0je3/help_with_single_serving_slushie_consistancy/
+
+======================================================================
+TITLE: Difference between Gatorade flavors/Barrel freezing
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1hqt4hp/difference_between_gatorade_flavorsbarrel_freezing/
+POST:
+Last week I used just red Gatorade and made a pretty great slushi.
+Just now I tried orange, but it kept freezing around the barrel.
+I babysat it for a while and would turn it to rinse each time the ice would freeze on the barrel, then once it broke loose I would turn it back to slush.
+It eventually got a bit slushi, but it wasn’t worth the time or attention.
+
+Has anyone seen differences between sports drink flavors? 
+I’ve seen the behavior of the barrel freezing and then got the low sugar alert but it never happened with the orange Gatorade.
+
+======================================================================
+TITLE: Freezing Over
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1hq2ivn/freezing_over/
+POST:
+We got a Slushi fir christmas and ever since we've been trying to get it to work. The flimsy plastic auger is getting bent out if the way by ice buildup even on the lowest setting. Have tried multiple liquids, currently lemonade at 30g of Sugar per cup so it's not a low sugar thing.
+
+No matter what I try it will always freeze up. On lowest setting with store bought lemonade sweetened with sugar it froze around the chiller in about 19 minutes bending the auger out.
+
+Any help with figuring this out other than "probably low sugar or try adding alcohol" would be great
+
+======================================================================
+TITLE: Sport drinks issues
+POST:
+I'm having problems turning powerade into a slush. The lights turn on indicating low sugar and then all lights blink at once after. I tried using default level 3 and 1 for the slush but both are having the same issue. I was using 3 20oz powerade bottles and each has 34g of sugar. Would anyone have any solutions for this problem?
+
+======================================================================
+TITLE: Milkshake Won't Freeze Enough?
+POST:
+I just got one of these machines so I went out and got the ingredients to make the chocolate recipe from the book for the test run. I pressed the milkshake button and sat down to watch a movie until it was ready. It eventually beeped a seemingly happy beep pattern, so I went over to check it and it was still pretty liquid and only 2 of the original 5 lights were on. I tried using the up arrows to put it back at 5 and let it run, but it stopped at 3 and beeped the happy pattern with a still much too thin milkshake. Is this thing actually capable of making a thick milkshake? I eventually gave up on that and just dumped some straight orange juice from a bottle into it which seemed to make some slush but it was still pretty liquid. I'm going to try it more, but I'm confused why it seemed to think it was done when it didn't get cold enough or thick enough.
+
+======================================================================
+TITLE: Slush Puppy
+POST:
+I have the ninja sushi, and blue raspberry syrup from slush puppy. I diluted 1/2 cup syrup, and 2 cups water like the directions stated, but it’s not working. The middle chamber keeps getting a buildup of ice that causes a clunking noise, followed by an error beep saying there’s not enough sugar. Does anyone have any insight/ a better recipe to do a blue raspberry slushy with the slush puppy syrup?
+
+======================================================================
+TITLE: Is my slushi broken or am I just missing something? Can’t make slush and frappe presets work smoothly - frozen juice works just fine. It starts making noise after around 10-25 mins, stops, beeps and all lights blinking.
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1hidkrk/is_my_slushi_broken_or_am_i_just_missing/
+
+======================================================================
+TITLE: Making weird noise
+POST:
+Making a weird noise and you can see it rocking it stopped and made a peep noise about 15 min into the cycle its only 2 months old what's wrong !?
+
+======================================================================
+TITLE: stopped freezing
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1h0ilh5/stopped_freezing/
+POST:
+hi everyone 
+i bought a ninja slushi and have been using it for the past 12 days, it was freezing my drinks fine and then randomly it wont get cold enough the silver cylinder doesn’t seem to freeze? i have taken it apart washed it all, unplugged it, select rinse several times. It seems to just spin and not freeze my drinks have enough sugar and everything like that. Also contacted ninja who have said that i would have to go on the waiting list to even get a new one. yet my one is malfunctioning? anyone able to help. please xoxo
+
+======================================================================
+TITLE: Whats the weirdest thing you've tried?
+POST:
+I wont lie, since getting my Slushi, I've wanted to try a few, weird things.
+
+I've also started looking closely at the sugar contents of drinks, to see what could be thrown into the slushi and would theorically work.
+
+So yesterday I checked my clam juice (Clamato) bottle and it looks like it would work. It would be unholy, but would probably work.
+
+So, whats the weirdest thing you've tried in your slushi?
+
+======================================================================
+TITLE: Which one???
+POST:
+I bought a Ninja slushi from Target and then ended up receiving one as a gift. I didn't realize that the one was bigger than the other.
+We're a family of 5. I'm trying to decide if the smaller one from Walmart with 4yrs warranty(gift) is better than the larger from Target that I bought no extended warranty. Help lol.
+
+======================================================================
+TITLE: Low-sugar alert constantly
+POST:
+Hello, I want to make sugar free slushes but every time I use it I get the low sugar alert (lights flashing downwards on the right hand side). I do not want to add sugar. Anybody else having this issue?
+
+======================================================================
+TITLE: New machine, not working.
+POST:
+I've had my new slushie and it fails to get cold after a solid day sitting on the counter. I'm trying to do the simple soda slush with no luck. Has anyone had that issue?
+
+======================================================================
+TITLE: Getting the "high alcohol content" warning with straight pepsi?
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1gj3hmi/getting_the_high_alcohol_content_warning_with/
+POST:
+Anyone else get this?
+
+======================================================================
+TITLE: how do you clean your condenser?
+POST:
+i know in the video it just tells you to rinse cycle it with hot water a few times and then wipe it down.. but i recently made milkshake and even after trying to rinse it down with hot water the condenser feels greasy and there's still some milkshake leftever stuck to the back of it.. i mean i eventually wiped it all down.. but who knows if i wiped it completely clean.. it is milk product after all i dont wanna get sick from it being not completely "cleaned"
+
+======================================================================
+TITLE: Troubleshooting: Foam/Bubbles
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1g58uq3/troubleshooting_foambubbles/
+POST:
+I have been trying to create fruit juice slush and almost all of them end up creating a bunch of foam or bubbles before anything begins to freeze. Any ideas or tips for fixing this?
+
+======================================================================
+TITLE: Quick Question
+POST:
+I'm trying to get one for a present for my mum and dad for Christmas. One problem they are not available in the UK. How will I go about getting one without paying £800? Thank you!
+
+======================================================================
+TITLE: Adding to Slush
+POST:
+Just got our Ninja Slushi today in prep for a party we are hosting tomorrow. The instructions say you can add to the Slushi throughout the day to keep it constantly full, however when we add to ours, it no longer makes it into a Slushi. Started with the basic coke slush and no luck. Anyone have a similar issue and know how to solve?
+
+======================================================================
+TITLE: Where can I pick up in person?
+POST:
+Do any stores have "Ship to Store" options? I just don't want this sitting on my porch all day.
+
+I tried Kohl's, Best Buy, Target, Amazon, and Walmart. Either it's not in stock or they won't ship to store.
+
+Thanks if you can help.
+
+======================================================================
+TITLE: Slushie woes
+POST:
+Any idea whay's going on?  Not gettong a low sugar error as far as i know but it keeps freezing up and auger wont pull the ice off. Used soda stream syrup.
+
+======================================================================
+TITLE: Machine goes for 15-20 minutes, makes a weird chime, and resets to level 1 temp?
+POST:
+Trying to make a milkshake. It's high in sugar and 0 alcohol. However, those don't really matter, as those have their own error codes and that's not what is happening.
+
+What would cause it to sing a little tune and then reset to level 1 temp?
+
+======================================================================
+TITLE: My Freezing component keeps building up ice and making sounds.
+POST:
+I just got my Ninja Slushi and I have tried using Simply Watermelon and Simply Lemonade. 
+
+I have tried different things like filling only half, filling up to the max, I have added more sugar, lowering the temperature, and raising the temperature, but I keep having the same issue... Usually, I turn it off for like 1 minute and then turn it on again and the ice gets unstuck, but this keeps happening like every 5 minutes, which sucks because then I have to be babysitting the machine... Is anyone else having the same issue?
+
+======================================================================
+TITLE: Won't dispense
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1fg091a/wont_dispense/
+POST:
+Hello, I just received the slushi yesterday and have tried several times to make a proper slushi without much success. It's close, but refuses to dispense. I tried adding more sugar and adding more water across three tests, min and max fill. They all seem to freeze so much it won't dispense. Even on cooling setting one. What am I doing wrong?
+
+======================================================================
+TITLE: Sent a used one?
+POST:
+I just received mine today and I believe it's been used. I was disassembling it to wash all the parts before 1st use and noticed the evaporator has been scratched due to the auger. Do you guys think this is a big deal? Just wanted to get some opinions before I use it
+
+======================================================================
+TITLE: Noise
+
+======================================================================
+TITLE: Knocking noise
+
+======================================================================
+TITLE: Warning on Second Hand Purchases
+POST:
+I found one locally for a decent price but looked at Ninja’s Website and found the warranty is NOT TRANSFERRABLE.  It is for the original purchaser ONLY.  So beware.  I had/have an Opal Ice Makers and know first hand what can go wrong with these types of appliances (with built in compressors).
+
+Needless to say, I’ll by when it’s my turn to get “Lucky”
+
+======================================================================
+TITLE: Frappe issue?
+POST:
+My wife was trying to make a Carmel frappe. She followed the instructions, and it didn’t turn out at all. The mixture was sticking to the frozen component and causing it to rock. We followed the stock recipe that came with it. Anyone had these issues? Or have frappe recommendations? Love the machine otherwise.
+
+======================================================================
+TITLE: Why the awful noise
+POST:
+First try out of the box frappe. It’s like the machine is trying to separate itself. It comes and goes. 
+
+https://imgur.com/a/KyYwyMe
+
+Am I doing it wrong? It was off and on with the frappe setting. It was somewhat better on slushi setting.
+
+======================================================================
+TITLE: Can you use soft serve mix?
+POST:
+Wondering if you can use the slushi to make soft serve by adding soft serve mix. Just bought the slushi from khols. I really wanted to use it to replace my ice cream cravings from McDonalds and not worry about a broken machine.
+
+======================================================================
+TITLE: Support problems
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1ex8n80/support_problems/
+POST:
+Beware of Ninja support if you have a problem with your slushie machine. Got mine from Walmart and the second day it started to make noises. Made the mistake of chatting with ninja support. They asked me to send the machine to them and they would send me a new unit as soon as they received mine. Warning….they are not totally honest. They got my machine and nothing so went to support chat again and found out they had no record of a new machine to be sent to me. 
+Beware if you send it back to ninja demand an order number for the replacement. I was told they had no record of a new machine to be sent to me and it could be up to 5 weeks to get a new one!
+I should have just returned it to Walmart….gotten a refund….and ordered even from Ninja and I would have already had a new machine. Don’t buy the slushie machine from Ninja. Buy from other sources and avoid returning your machine to Ninja.
+
+======================================================================
+TITLE: Slushi “knocking” noise
+POST:
+I received the Slushi back on the 16th. I let it sit upright for over 24 hours to be safe since it was “shipping” for about a week. The first batch was great. After reading some of the instructions, I noticed it suggested basic products like lemonade, sports drinks, sweet ice tea, etc is best on “slushy” setting but reduced to 1 bar instead of 3. We have made 5 different types of slushies now (all basic drinks) and the noise coming from the machine is getting worse and worse. I can only describe it as “knocking” as my dogs freak out as if someone is knocking at the door. I have a call into Support but no resolution yet. Anyone else have this issue? It happens with the machine half full (32 oz) or completely full (64 oz)
+
+======================================================================
+TITLE: Ninja slushi squeaking
+POST:
+I unfortunately just bought a ninja slushi today and it's squeaking.  Has this been reported? Is there a way to fix?
+
+======================================================================
+TITLE: Making noise
+POST:
+Anyone else dealing with this sound? Seems like auger is rubbing ? I have the minimum liquid and seems to only make it when compressor is off. The other noise in background is my kitchenaid going. I was on hold with ninja for 40 min before I hung up. Thanks.
+
+======================================================================
+TITLE: Rubbing sound from auger?
+
+======================================================================
+TITLE: Diet Slush
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1etdlz8/diet_slush/
+POST:
+Tried diet soda (Coke Zero) powdered stevia and xanthan gum. I used a little of each and a ton of each. Every time doesn’t work. Anyone have any ideas other than Allulose?
+
+======================================================================
+TITLE: slushi squeak?
+FLAIR: Troubleshooting (Slushi)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1ej55of/slushi_squeak/
+POST:
+is anybody else having this issue?? I literally just got this machine and made my first batch and it’s sounding like this already. I lowered the settings and that didn’t do much either. With my second batch, the squeak would be consistent and then would be on and off and then more consistent.😭 I’ve reached out to ninja, but they gave me a guide that did not include any troubleshooting for a squeaking sound just a rattling sound which is not occurring.
+
+======================================================================
+TITLE: Long delivery time?
+POST:
+I ordered my slushi when it was available and got one and got email saying it was shipped and it's been nearly 2 weeks since and FedEx hasn't even recieved the package from Ninja. I've even submitted a ticket asking where it's at cause all it says is "Your package is on the way to a FedEx facility on a truck loaded by your shipper." Anyone else experiencing this issue?
+
+======================================================================
+TITLE: Ninja slushi squeaking?
+POST:
+Anyone else machine sometimes make a loud squeaking/screeching sound
+
+======================================================================
+TITLE: Any luck with Spiked Slush
+POST:
+Has anyone had any luck yet making a spiked slush with this?  I got the unit about a week ago.  So far, I’ve done several juice slushes, frozen lemonade, and chocolate milkshakes. They turned out great.  
+
+But three attempts so far for spiked slush and it never actually gets slush.  Just liquid.  First time I assumed I had too high alcohol content, so I dropped it considerably on the next one.  But still did not slush.  Ended up dispensing the liquid and threw it in a blender with ice.
+
+For context, my attempts so far were with the pre-mixed mixers (excluding alcohol) like Margarita mix, Pina colada mix, etc.  Last attempt was 2.5 cups of the pina colada mixer and 0.5 cups tequila.
+
+======================================================================
+TITLE: Juice stuck in crevices of vessel
+POST:
+This is the second slushi I did and I  did the recommended rinse cycle twice and hand washed but I can’t get to this area. It’s near the back of vessel. I’m guessing this is a defect and I will have to get a replacement. Sort of disappointing but I love this machine.
+
+======================================================================
+TITLE: Annoyed and wanna share
+POST:
+Ninja Canada site said in stock , order by Dec 17th for Xmas delivery. We ordered the 17th , now says on backorder. This is pretty lame, would have preferred the site to just say it was out of stock before placing an order and giving my CC info. Now it won't be here for Christmas because they were bullshitting on their website.
+

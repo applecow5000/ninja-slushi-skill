@@ -1,0 +1,403 @@
+# r/ninjaslushi digest — bucket: troubleshooting-machine (31 threads)
+
+======================================================================
+TITLE: Possible solution for stained vessel.
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 6  URL: https://reddit.com/r/ninjaslushi/comments/1kq8pef/possible_solution_for_stained_vessel/
+POST:
+As has happened to a lot of people, the vessel on my Slushi has been badly stained since the first use.  I think it was either mango or pineapple soda / pop that did it and I discovered afterwards that you have to take special care with anything that's orange...
+
+I was gutted about the stain.  I tried all sorts to take it off.  Soaking in oxy clean solution, bleach, a dishwasher tablet, even denture cleaner... but it didn't even fade, so I decided to simply live with it.
+
+Fast forward a few months and I haven't used my Slushi for a few weeks due to work going on in the house.  I've stored it in our conservatory where there is a lot of sun.
+
+I went to use it yesterday and lo and behold, everywhere the sun has been on it regularly the stain has disappeared.  There's now only a tiny bit on the underside (which wasn't getting sun) so I've stood the vessel up for a bit more sun to see if that disappears as well.
+
+Happy days.
+COMMENTS (top by score):
+  - [1] Are you seriously telling me that the sun is the solution?
+I'm going to try it tomorrow.
+I bought my ninja slushi 2 weeks ago and the second time I used it, I put a famous tropical fruit juice in it which is orange in color. My surprise was that when I removed it to clean it, I saw that the plastic had become orange in some areas. It's not over the top and is still transparent but with an orange tone.
+I tried cleaning it in a thousand ways without using a scouring pad so as not to scratch it but nothing helped.
+That discouraged me quite a bit since I've been waiting for a year for this ninja to be sold in Spain and just after the machine was released this thing happened to me... I even thought about returning it.
+I will write again if I can solve it with the sun.
+Thanks in advance!!
+
+======================================================================
+TITLE: No slush after 2 hours root beer
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 4  URL: https://reddit.com/r/ninjaslushi/comments/1k6gaxj/no_slush_after_2_hours_root_beer/
+POST:
+Hey guys,
+
+I have tried putting the regular full sugar Barq's root beer in my slushi on the SLUSH setting with 3 bars and nothing has formed after 2 hours. I tried upping the chill factor and nothing! Does anyone have suggestions? Do I have a broken machine? Yesterday I tried mango juice on the frozen juice setting and that also failed and it was still fully liquid after 8 hours of running. YES I did let the machine wait 2 hours upright on the counter before using it. I am at a loss right now! It is blinking normally so I do not have any warning lights. Any thoughts?
+COMMENTS (top by score):
+  - [9] No, if cold should be 20 min or so
+  - [3] I tried it on spiked and it still didn’t work BUT I reached out to ninja and they are sending me a new machine 🤗
+  - [3] Do you have a kitchen/probe thermometer? What's the temperature of the liquid? Full sugar root beer should slush up at about 27f.    
+I normally pour room temperature regular soda in mine and it's making small floating ice crystals in 10 minutes and full-on slush in 20 minutes.
+  - [2] They make you cut the power cord so it cant be used by anyone anymore but you can keep the accessories like the auger and extra tank and drip tray as a spare for the new one
+  - [2] No they didn’t ask for proof of purchase hut the slushi was released less than a year ago so all the units of the serial number is valid will be under warranty
+  - [2] That's disappointing, but the wait will be worth it. We use our alot.
+  - [2] New machine? If nothing freezes it's probably a bad unit. The condenser is most likely bad
+  - [2] Yep! The paddle spins and I hear the compressor sound on and off! Warm air does exude from both sides of the unit! I do not hear any unusual sounds like grinding or any of the other issues with weird clicking I have seen people mention................
+  - [2] Try another setting like spiked.
+  - [1] They must of had a batch of machines because I bought one a few weeks ago and mine also didn’t work and Ninja told me to return it to Best Buy.
+  - [1] 5 preset settings: **Slush, Spiked Slush, Frappé, Milkshake, Frozen Juice**. Temperature control lets you customize whether you want the output to be thicker or thinner than the preset.
+  - [1] How to do custom settings??
+  - [1] Custom setting - minus 3.3 celcius.
+  - [1] It's the machine, unfortunately. I did AW root beer as the second thing I made in it. The minimum fill line was frozen in about 20 minutes.
+  - [1] I dont have it anymore its on the website look it up!
+
+======================================================================
+TITLE: Help
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 3  URL: https://reddit.com/r/ninjaslushi/comments/1inx2ed/help/
+POST:
+Beeped and all light are blinking. Why?
+COMMENTS (top by score):
+  - [1] Correct. Start out on slush mode w 2 bars and work your way up every 15 mins or so. Watch how much better it works out
+  - [1] Correct...the Slush setting with the arrow down to 2 bars is a good place to start.
+
+======================================================================
+TITLE: Low Sugar Alert for Regular Coke
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 3  URL: https://reddit.com/r/ninjaslushi/comments/1ik2eci/low_sugar_alert_for_regular_coke/
+POST:
+I've had the Ninja Slushi since December and have been using it without an issue somewhat frequently ever since.
+
+Recently, the "low sugar" indicator started going off even when I know for a fact there is enough sugar for a Slushi. For example, it recently happened repeatedly with Dr. Pepper, and today it kept happening with regular coke out of a 2 liter. 
+
+Anybody else ever have this issue? Is it a setting issue or could the Slushi be broken?
+
+======================================================================
+TITLE: Failure making frosty
+FLAIR: Troubleshooting (Machine)  SCORE: 3  URL: https://reddit.com/r/ninjaslushi/comments/1hs4i2t/failure_making_frosty/
+POST:
+So I’m trying one of the simpler frosty recipes here:
+
+2 cups chocolate milk
+7 Oz sweetened condensed milk
+2 Oz cool whip
+1tbsp chocolate syrup.
+
+(I cut a similar recipe in half for this). 
+
+I’m above the minimum line and the slushie is coming out pretty thin/melty. I’ve tried reducing the temperature via increasing the level but any point I set after the midpoint (5) seems to not get reached. The unit will run for a bit, beep, and drop it back down.
+
+How do I get it to let me freeze it colder?(to make it thicker)
+
+======================================================================
+TITLE: My machine got electric shock as soon as I plugged in
+FLAIR: Troubleshooting (Machine)  SCORE: 2  URL: https://reddit.com/r/ninjaslushi/comments/1fkn0es/my_machine_got_electric_shock_as_soon_as_i/
+POST:
+Hi there! I've recently unboxed my slushi machine and since my country is based on the EU/UK Power Cord, I used a travel adapter... annnnd it got a shock straight from my slushi power supply.. Is my machine pretty much gone now?
+
+P.S: I'd love to give me a suggestion for Converter to EU power cord.
+
+======================================================================
+TITLE: Please Help
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1k0qi2i/please_help/
+POST:
+So after waiting months and months for a Ninja Slushie Machine, it finally has came to my hands. Somebody please help, the instructions dont say shit about this problem. I am trying to make a Frappuccino from pre-brought Starbucks glass bottles, I poured 3 of them, press frappe, and this is what the machine keeps doing. After 5 minutes it stops the flashing, and when I press the button for frappe again, it does it all over again.
+
+  
+The lights do not flash down or up, so its not the problem of sugar content
+
+  
+I am so angry, I waited so long for this machine and this happens now.
+COMMENTS (top by score):
+  - [1] It's faulty to need a replacement
+  - [1] Then it's fuck'd mate, you should be able to spin it by hand.
+  - [1] I bought a dual airfrier from them last year and it's the greatest airfrier I ever had, I even bought my parents one last Christmas, they were against airfriers but fell in love with the one from Ninja. I know their stuff is good but I was just unlucky with the slushi machine, but I'll get a new one, so it's all good.
+  - [1] On second hand I tried it out of curiosity. But still nothing, same problem
+  - [1] Their support is great. I have a bunch of ninja appliances. Good luck
+  - [1] Auger will not move no matter what, not even manually, not even by rinse
+  - [1] Unfortunately tried everything the internet suggested , my guess it's something with the part that moves the Auger, I cannot even spin the Auger manually by hand. I was waiting for this machine for so long, because it was my dream machine. Good thing Ninja support was nice, they immediately said that they will replace my machine as soon as I send them this one back
+  - [1] Nope. Tried it again today, but at the end Ninja will send me a replacement
+  - [1] Seriously why the down votes, I am just stating what their guide book says
+  - [1] Can't complain about customer support. They replied pretty quickly to my email and will send me a new one
+  - [1] I thought of that, but I already packed it and I am sending it back. Ninja will send me a new one
+  - [1] That's one of the things I thought that might cause the issue, I positioned so many times. Did not do anything
+  - [1] The thing is that the Auger will not spin by hand, i tried it.
+  - [1] Make sure the blue spinner thing inside is slotted in correctly, from the video it looks a bit too close to the front, mine did the same and when I corrected it, it worked again.
+  - [1] Try unplugging for 24 hours. That worked for me
+
+======================================================================
+TITLE: 2nd use, Orange Fanta, impossible to get clean?
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1irgecn/2nd_use_orange_fanta_impossible_to_get_clean/
+COMMENTS (top by score):
+  - [1] Ok.
+
+I tried all of the solutions people suggested &amp; the only one that did anything (and it's not perfect, just made it better) was buying some of the sterilising tablets that clean dentures, putting it in a bucket of warm water, adding the whole packet &amp; soaking it.
+
+Ultimately Ninja sent us a new one... we will never use 'orange anything' again :)
+  - [1] Any fix??? We used tropical V8 and it’s still stained orange 😩 I cleaned IMMEDIATELY after use!!! Only our 2nd time
+
+https://preview.redd.it/73423dtfwdye1.jpeg?width=4284&amp;format=pjpg&amp;auto=webp&amp;s=5e208d0b500fdb046907d5bb5a84e18ec4f4f90b
+  - [1] I just got a machine yesterday, my great idea to do Fanta for the first slush! Same issue! We made it, dispensed and cleaned straight away.. kinda pissed
+  - [1] Nothing worked. If you actually find anything please let me know!
+  - [1] Did this work?? Mine is stained from mango pineapple juice!
+  - [1] Happened to us. Second day in Australia we just fresh orange juice from Aldi.. nothing else on slushie and it’s all stained
+  - [1] Zero luck. It looks horrible. Maybe Orange Fanta in Australia has particularly terrible food colors.
+  - [1] This happened to me today after using orange Fanta, any luck getting the stain out ? , I’m also in Australia
+  - [1] Fanta must use extreme food colouring!
+  - [1] I did the exact same thing with Fanta fruit twist. I just  cleaned best as and kept using. its mostly faded now
+  - [1] I used v8 and it stained bad. I sent it back.
+  - [1] Nope, the first was cola
+  - [1] I used v8 tropical blend. Here’s the ingredients: 
+
+Ingredients: Water, Carrot Juice Concentrate, High Fructose Corn Syrup, Malic Acid, Natural Flavoring, Vitamin C (Ascorbic Acid), Sucralose, Niacinamide (Vitamin B3), Licorice Root Extract (For Flavor), Pyridoxine Hydrochloride (Vitamin B6), Cyanocobalamin (Vitamin B12).
+  - [1] Use hot water and dish soap let it soak
+  - [1] Let it soak with some dish soap
+
+======================================================================
+TITLE: Ninja Slushy
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1iuhskm/ninja_slushy/
+POST:
+Just got a ninja slushy today, got it home and waited a few hours to try it out but the barrel isn't turning? Is that normal? Every review Ive watched the barrel turns as soon as you select which drink you want to make.  I can hear the machine going but thats it, the barrel gets cold but just doesn't spin? Do I have to wait after turning it on or something?
+COMMENTS (top by score):
+  - [1] It's good that they didn't try to give you the run around and are sending a new unit, thanks for the update! I am always curious as to why people go through the trouble (or what i assume must be a more time comsuming process) of waiting for warranties and replacements to be honored and sent instead of just returning the item or simply swapping it out from where they purchased it? ....after typing all that I realized I have forgotten that online shopping is a thing lol.
+  - [1] Just thought Id update you since you were so helpful. We took it back to the shop and they tested it and also couldn't get it to work so they reached out to Ninja and they are sending us a replacement.
+  - [1] Nah, shop took it book and replaced it because it was faulty
+  - [1] You didn't put it on correctly.
+  - [1] Remove the blue plastic thing, and turn on the machine, check if the "tip" of the metal barrel spins. If it doesn't your machine is broken and needs to be replaced
+  - [1] No need, I was just making sure cause I made that mistake but if you heard the motor running then totally sounds like something isn't working right internally. Best to just save the headache and time  of trying to diy and just return while you have the chance. Sorry that was your initial experience with it, but hopefully it goes better if you try again
+  - [1] Yep, the container was locked in place and we set it to slush and we could hear the motor going.  Ill take a video when I get home
+  - [1] You sure you started a cycle and everything though? The whole machine has to be put together minus the auger for it to start turning. I'm only saying this cause I tried to run it without the liquid container and it wouldn't start up. Well i guess either way you'd have to return it cause something Is simply not working lol. And yeah, no problem! Hopefully you arent deterred and get another unit that actually works, mine has been my favorite purchase of like the past 5 years
+  - [1] That part doesn't spin so guess its a return to store job.  Thanks
+  - [1] https://preview.redd.it/y3w0saoiyfke1.png?width=1080&amp;format=png&amp;auto=webp&amp;s=f772793b66f792c555814fc4b9b32c601c1dce07
+
+This is where the metal rod should fully be seated into in the auger.  it should be shaped the same as the metal rod so that when the rod turns it catches onto something. If it's worn down the rod simply may not be catching thus making the auger not spin.
+  - [1] https://preview.redd.it/f4o80by7yfke1.png?width=1080&amp;format=png&amp;auto=webp&amp;s=5538cf6905466ac240e379121232b475971e17df
+  - [1] Try running the machine without the blue auger to see if the metal rod sticking out of the evaporator (big metal part attached to the machine that gets cold) spins. If it doesn't then yes return it, if it does that means either the auger isn't installed all the way, (sometimes you have to turn it so that it fully seats) or the place where the auger and metal rod attach isn't shaped properly. I'll send you pics on message so you can get a better idea
+  - [1] No it’s not normal
+  - [1] Yea that’s an issue. You might be sending that back.
+  - [1] Yes ive edited it, the blue blades don't spin
+
+======================================================================
+TITLE: I have had my slushies freeze the the middle part
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1kbnkod/i_have_had_my_slushies_freeze_the_the_middle_part/
+POST:
+I have been using the machine and the consistency of the slushies are messed up on one day I will put it on 4 and it will be super watery and the next day on 3 is will be super thick, I keep hearing noises that sound like 2 pieces rubbing against each other and I checked it and saw frozen slush on the middle part. I know this isn’t due to sugar level because I was using coke (not diet just plain regular coke) any help is appreciated
+COMMENTS (top by score):
+  - [1] Good bot
+  - [1] Ok thank you
+  - [1] If you’re using a flavored syrup I would use that before sugar.
+  - [1] I heard another suggestion so I’m gonna try that and if that doesn’t work I think I might return it (bought off Amazon) and buy a new one
+  - [1] &gt;Thank you!
+
+You're welcome!
+  - [1] Thank you!
+  - [1] Thank you I will try this later, I had kind of the same problem with water and syrup mixed together, if it happens with that should I add more syrup or just more sugar?
+  - [1] That happened to a few people in the Facebook group. They ended up calling ninja tech support. They had to do a video call with the issue and got replacements.
+
+I don't know if there is a practical solution tho.
+  - [1] The condenser has to battle the ambient temperature around the device. If it’s warmer one day, a higher setting may be needed to slush your mixture and a colder temp would speed up the process. 
+
+As for the Coke icing underneath the auger, that is just the water from the Coke being separated from the syrup. More sugar will prevent this and too much sugar will stop the mix from freezing at all. If Coke always freezes to the center I would start dissolving sugar in the cola prior to adding it to the Slushi. Start with small amounts and gradually add more to see where the sweet spot is with your machine.
+  - [1] Yes it’s only the front part you connect to the blue piece that mixes it when I inspected it there was a dozen ring of coke on it and the coke was well above the minimum fill but it was also less than the max
+  - [1] My mistake, indeed you did. Are you saying that just the metal cylinder is freezing over?
+  - [1] I already said I put coke
+  - [1] We need to know what you put in the machine in order to give you any opinions.
+
+======================================================================
+TITLE: Unit won't power on
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1jh3cty/unit_wont_power_on/
+POST:
+The machine has no sign of power or life no matter what outlet I use or how securely the parts are put in.
+COMMENTS (top by score):
+  - [1] Yeah I'm gonna leave it unplugged over night to see if it fixes itself if bot I'll send it back to Amazon and get a new one.
+  - [1] Might’ve just been thermal shutdown. If it happens again I would be warranty it in case.
+  - [1] Was just dead for a bit but got the top light on the temp to turn on after spinning the mixer before pressing the power button
+  - [1] Does it light up at all or just dead?
+  - [1] Yup. It was working just fine earlier yesterday but tonight it wouldn't power on.
+  - [1] What about the power switch on the back? Is that switched on?
+
+======================================================================
+TITLE: Not freezing above 3.
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1k2eg10/not_freezing_above_3/
+POST:
+So I've had the machine for a few months and never really used it until now. The Facebook group is trash and never get any help so I'll ask here, so I decided to do a milkshake today and added all liquids right below the 64 oz line (max) and hit milkshake and hit the freeze up 1 more for a total of 6 lines. The machine beeped at lights stopped blinking at 3... not sure why, so went to the machine again and hit milkshake again and the 2 extra lines were blinking since it was already frozen at 3, after about 10 min the machine beeped again and stopped at the 3 solid lines again, im unsure what's happening here and can't find a resolution in the handbook. I also smell a burnt like smell when I get close to the machine and a small squeaky noise.... probably have a faulty machine? It's too late to return now.
+COMMENTS (top by score):
+  - [1] what does the manual say for blinking lights and beeps?
+  - [1] So, based on your recipe you are at about 5% sugar, in order to get a slushie consistency, you typically need to ensure you mix contains between 10% and 15% sugar.  My guess is that your error message is a low sugar warning and it is shutting down to avoid freezing the machine.
+
+If you don’t like the idea of 10-15% sugar, consider some of the low sugar recipe tricks that require additional ingredients
+  - [1] I don’t think you have enough sugar
+  - [1] Just blinking and beeps, and solid 3. 
+
+4 cups of whole milk 
+4 tsp vanilla 
+2 cups of heavy cream
+4 tbsp of granulated sugar
+1/4 cups of vanilla flavored syrup (total of 2 1/4 cups in mix) 
+
+Whisked in large mixing bowl and poured in machine
+  - [1] What’s in the mix.  Also, describe what the lights were doing.
+
+======================================================================
+TITLE: All buttons turn slushie machine on and off
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1j92i36/all_buttons_turn_slushie_machine_on_and_off/
+POST:
+None of the buttons on the ninja slushie matching either select the pre sets of turn the temp up or down they only start or stop the machine any ideas?
+COMMENTS (top by score):
+  - [1] Yes, Lol!
+  - [1] Just wait for them to tell you to cut the cord
+  - [1] Make sure it’s closed properly
+  - [1] Call ninja. Video with them. Cut the power cord. Get a replacement. If you aren't under warranty, no idea. I just had to do this.
+
+======================================================================
+TITLE: Seal not seating. Please help
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1j24bqz/seal_not_seating_please_help/
+POST:
+Rubber has mold growing between the seam so removed it to clean. Can i cannot get it to go back on in a way which proper.  Any advice ?
+COMMENTS (top by score):
+  - [1] Without disassembling it, you could try to put some disk soap on the pieces and slowly push it in. I don't know if it will work for certain but could be worth a go.
+  - [1] Sorry, I don’t have any better advice but your options are somewhat limited since it’s so close to the gasket. If you manage to remove the housing, take it slow. I have PC fans that use a similar setup to hold the fan to the PC case, and I tore the rubber on one of them while trying to pull it through the casing. So, definitely proceed with caution.
+  - [1] Yeah, definitely don’t try to poke it through. Best bet is to pull the rubber fitting from the opposite side carefully. Maybe try removing the plastic housing first if you can.
+  - [0] Yeah wish it wasent so easy to remove if its near impossible to get back in.   Its got safety screws on the back so gonna have to find somehing that cant remove it unfortunately.
+
+======================================================================
+TITLE: Broken Auger scratching Vessel
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1kl9j0o/broken_auger_scratching_vessel/
+POST:
+Hey guys,
+
+Pretty bummed... I guess i didn't see but there was a hairline crack in my brand new unit I got for my wife for mothers day.  It worked like a charm but after our first client up after we made lemonade slushi.  I noticed the auger was scratching the bottom of the Vessel is that normal or is this due to the broken auger?
+COMMENTS (top by score):
+  - [1] Can you post a photo? I know other people have asked about what appeared to be a crack but was actually a seal.
+  - [1] Email them and ask to send you a replacement auger under the warranty, be sure to register first (literally can do this right before emailing)
+
+======================================================================
+TITLE: Unit powers on, but can’t start
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1ivxq1q/unit_powers_on_but_cant_start/
+POST:
+I’ve had my slushi unit since August and haven’t had any problems aside from tweaking alcohol/sugar content. Went to go make a slushi this evening and the unit powers on and all of the preset lights blink. The user manual tells me this means it’s not sensing the vessel. I’ve taken it off and put it back on several times to no avail. Has anyone else had this happen? Just want to try and troubleshoot until their customer support opens on Monday. Thanks!
+COMMENTS (top by score):
+  - [1] I called customer service and did a video trouble shoot call, they basically confirmed what I told them and sent me a new one (I had to send my broken unit it and call them once they received it to basically remind them to send a new one but all in all super easy and relatively hassle free). Bonus, the vessel seems to be made better and the lip at the back doesn’t seem to get gunked up the way the original did. Yay!
+  - [1] Did you resolve this? Mine was doing the same and it turned out the little nipple and the back of the container was not fully engaging the little button at the back of the unit.
+
+Once I pushed the container with some force there was a click and the presets worked.
+
+But as soon as I pull the handle to dispense slushie it disengages the button and turns off the unit. Really frustrating and hoping others have a fix.
+
+======================================================================
+TITLE: Voyants de sélection  menus clignotants
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1kgwiex/voyants_de_sélection_menus_clignotants/
+POST:
+Bonjour,je vous écris  car je rencontre un problème avec mon ninja slushi : j'ai  la barre de sélection des menus de gauche qui ne cesse de clignoter  de haut en bas j'ignore à  quoi ca correspond  et cela empêche  toute utilisation : auriez  vous  s'il  vous plaît une solution ??,merci  d'avance..
+COMMENTS (top by score):
+  - [1] Pour nous, cela disparaît lorsque nous appuyons sur le bouton « Power » au-dessus de la barre de gauche. Ou lorsque vous allumez et éteignez complètement la machine à l'aide de l'interrupteur situé à l'arrière.
+
+======================================================================
+TITLE: Temp lights always flash-- but it's working otherwise?
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1jqo4xj/temp_lights_always_flash_but_its_working_otherwise/
+POST:
+The tempature lights for my Ninja are flashing as if the unit is coming up to temp, but they don't stop flashing. But it does get up to temp....So, eventually, I just stop the unit and pour out the slushy. I can tell when it is at the consistency I want by looking at the product. The Ninja never indicated the correct temp was reached. In the few weeks I had it, it did previously indicate the correct temp, though. Is it me?
+COMMENTS (top by score):
+  - [1] You should be able to audibly hear/feel if the compressor is working. If you’re not sure, set it to rinse mode then set it to another mode, it will make a different noise
+
+======================================================================
+TITLE: Where's the beep?
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1jmn2gn/wheres_the_beep/
+POST:
+Just got the machine and made two slushies yesterday. Machine worked great and the slushies were delicious but after 30 minutes I still didnt get the three beeps. Is that common? I mean, other than that everything has ben great! I just poured them out when the consistency was obviously right (about 17 min).
+COMMENTS (top by score):
+  - [1] I've gotten the "completion beep" each time I've used mine (and I use it A LOT). I usually let it do its thing until it beeps. Even if it looks like the consistency is perfect, I usually let it go until it beeps. The longest I've waited was 45-50 minutes, but it was worth it for milkshake perfection.
+
+======================================================================
+TITLE: Machine turns off after 5 minutes
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1iq3r7p/machine_turns_off_after_5_minutes/
+POST:
+After like 5 minutes the machine turns off and the lights are going from top to bottom. What could be the problem?
+
+======================================================================
+TITLE: Deep clean
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1imfy0v/deep_clean/
+POST:
+Has anyone figured a good way of cleaning this spot. It’s seems to be two pieces of plastic sandwiched together.
+
+======================================================================
+TITLE: Only had this 3 days really confused probably user error entirely
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1ikv1jy/only_had_this_3_days_really_confused_probably/
+POST:
+Did a frozen Smirnoff Ice which actually went really well. 
+Today Dr Pepper.. has stopped completely and is just beeping.
+Nothing comes out. Is it too frozen? I don't know
+
+Pretty confused.
+All lights flashing. 
+Pull handle down and tiny amount of unfrozen liquid comes out just keeps beeping.
+Put it on 7 and all 10 are flashing
+
+======================================================================
+TITLE: Tank Lip Buildup
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1ig4dt0/tank_lip_buildup/
+POST:
+I managed to get all the build up out of the lip of my machine by filling a container with hot water and a few denture tabs and standing the tank in it.  Let it soak all day and would swish it around whenever I’d pass it or think about it and the tank came perfectly clean last night. Thought I’d share this tip for anyone else having this issue!
+
+======================================================================
+TITLE: Ninja Slushi squeaking , even without water or parts inside
+FLAIR: Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1hxghpb/ninja_slushi_squeaking_even_without_water_or/
+POST:
+Are you meant to open and lube the motor?
+
+======================================================================
+TITLE: Immediately stops, beeps and cant power off
+FLAIR: Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1hmztbs/immediately_stops_beeps_and_cant_power_off/
+POST:
+Just got one and trying to use it but when I press slush it spins for a few seconds and then stops.
+
+The temperature lights blink (all of them) and it beeps every 30 seconds or so.
+
+What is really odd os it also wont turn off unless I unplug it.
+
+I cant find any information on this issue so I am hoping somone knows what is going on
+
+======================================================================
+TITLE: Slowly Dispensing Issue
+FLAIR: Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1h1ngzh/slowly_dispensing_issue/
+POST:
+What steps should I take for creations that dispense slowly?
+
+======================================================================
+TITLE: Preset Lights Flashing
+FLAIR: Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1gcalcl/preset_lights_flashing/
+POST:
+Borrowed a machine for our party tomorrow and when you turn on the power all the preset lights flash (temperature light are not illuminated).  From reading up on it, it sounds like one of the parts is not locked in place.
+
+We’ve taken the chamber on and off along with the blue blending piece.  No luck.
+
+Any ideas Reddit?  I google searches and all I am getting is TikTok videos of people making drinks-nothing related to this issue
+
+======================================================================
+TITLE: Machine had a lot of condensation + Slushi got really weird texture after 3 hours (more in comments)
+FLAIR: Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1g0p9ah/machine_had_a_lot_of_condensation_slushi_got/
+
+======================================================================
+TITLE: Frozen at exit point
+FLAIR: Troubleshooting (Machine)  SCORE: 1  URL: https://reddit.com/r/ninjaslushi/comments/1eupagq/frozen_at_exit_point/
+POST:
+Is anyone else having issues with the liquid coming out VERy slowly or clogged at the exit point? I have turned down the cold level, but it almost seems to get frozen and stick there. A few drinks (spiked slushi) have been fine. But gatoraid, Sunny d and a few other drinks for my kids seems to do this. Any tricks? (Making about 20oz to not waste more than my kids will drink)
+
+======================================================================
+TITLE: Scratches on evaporator after first use?
+FLAIR: 🛠️Troubleshooting (Machine)  SCORE: 0  URL: https://reddit.com/r/ninjaslushi/comments/1kngt8e/scratches_on_evaporator_after_first_use/
+POST:
+Is this normal and expected, or is it a problem (or.. both, like a known defect)?
+
+Hard to get a good photo of this, the surface being so reflective, but hopefully you can see what I'm talking about..
+COMMENTS (top by score):
+  - [7] I got it too. Assume it's just the auger grinding occasionally. I dunno. Still works perfectly fine, so I put it out of my mind.
+  - [2] I mean, good luck avoiding those anymore. Microplastics and state surveillance, baby; they're everywhere.
+  - [2] Mmmmm Microplastics
+  - [1] Like ice building up underneath the impeller
+  - [1] Yes me too, I got two slushi (one has broken under warranty) and both got the scratches, I assume it's normal, probably not intended but it's like that for now!
+  - [1] Tengo exactamente el mismo problema con mi ninja.
+En el primer uso se arañó el cilindro.
+Y lo peor de todo es que la segunda o tercera vez que la usé, hice un granizado de un zumo de frutas de color naranja.
+Pues una parte del plástico transparente se le a quedado un tono anaranjado. Por mucho que lo lavé no se va, ya se a quedado transparente con un tono anaranjado.
+
+======================================================================
+TITLE: Lights are solid but no beep.
+FLAIR: Troubleshooting (Machine)  SCORE: 0  URL: https://reddit.com/r/ninjaslushi/comments/1fop7tx/lights_are_solid_but_no_beep/
+POST:
+Making a spiked slush and it’s been going for about 25 minutes or so. Lights are solid after flashing for a bit but I have not heard the beep like is referenced in the manual. Any ideas? Also I apologize if this is the wrong tag I wasn’t entirely sure the difference.
+
