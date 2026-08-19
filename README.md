@@ -19,46 +19,67 @@ It combines three layers of knowledge:
    and techniques (sugar-free workarounds, xanthan gum, Brix/ABV targets) — often
    where community experience *corrects or extends* the manual.
 
+## Installing it
+
+The skill lives at [`.claude/skills/ninja-slushi/`](.claude/skills/ninja-slushi/),
+the standard location Claude Code auto-discovers skills from.
+
+- **Use it in another project (recommended):** copy or merge the
+  `.claude/skills/ninja-slushi/` directory into the repo you actually work in, at
+  the same path (`your-repo/.claude/skills/ninja-slushi/`), then commit and push.
+  Any Claude Code session (desktop, CLI, or mobile/web) opened against that repo
+  will auto-load the skill.
+- **Personal (desktop/CLI only):** `git clone` this repo, then copy
+  `.claude/skills/ninja-slushi/` to `~/.claude/skills/ninja-slushi/` so it's
+  available across all your projects.
+- **Working directly in this repo:** any session sourced from this repo already
+  has the skill in the right place — no extra setup needed.
+
 ## Using it
 
-Point Claude Code (or any Agent-Skills-compatible client) at this directory. The
-skill activates when you ask about making a frozen drink, choosing a preset,
-dialing in texture, following/adapting a recipe, decoding a beeping alert,
-cleaning, or troubleshooting. Start from [`SKILL.md`](SKILL.md).
+Once installed, the skill activates on its own — no explicit invocation needed.
+Just ask about making a frozen drink, choosing a preset, dialing in texture,
+following/adapting a recipe, decoding a beeping alert, cleaning, or
+troubleshooting, e.g. "what preset should I use for a margarita in the Slushi?"
+or "it's flashing and beeping every minute, what's wrong?". Claude reads
+[`SKILL.md`](.claude/skills/ninja-slushi/SKILL.md) and pulls in the relevant
+reference doc automatically.
 
 ## Layout
 
 ```
-SKILL.md                              Entry point (frontmatter + overview + links)
-references/
-  presets-and-temperature.md          Presets + ideal-texture bar chart per drink
-  recipes.md                          Starter recipes + how to adapt your own drink
-  official-recipes.md                 Full Inspiration Guide recipes + builder charts
-  sugar-alcohol-and-alerts.md         Exact sugar/alcohol limits + alert decoding
-  cleaning-and-troubleshooting.md     Setup, rinse cycle, disassembly, official fixes
-  additives-and-texture.md            Xanthan/guar + sugar-free sweeteners (community)
-  community-recipes.md                ~60 deduped community-tested recipes
-  community-troubleshooting.md        Consolidated problems → fixes (+ manual conflicts)
-  community-faq-and-tips.md           Recurring FAQ + durable tips beyond the manual
-data/
-  inspiration-guide.txt               Raw text of the official Inspiration Guide
-  submissions.ndjson, comments.ndjson Raw r/ninjaslushi archive (via pullpush.io)
-  threads.jsonl, digest/*.txt         Reconstructed, de-noised, bucketed
-scripts/
-  pull_dump.py                        Re-runnable subreddit archiver (pullpush.io)
-  distill.py                          Stage-1 cleaner: normalize → thread → bucket
-  README.md                           How to run the data pipeline
+.claude/skills/ninja-slushi/
+  SKILL.md                              Entry point (frontmatter + overview + links)
+  references/
+    presets-and-temperature.md          Presets + ideal-texture bar chart per drink
+    recipes.md                          Starter recipes + how to adapt your own drink
+    official-recipes.md                 Full Inspiration Guide recipes + builder charts
+    sugar-alcohol-and-alerts.md         Exact sugar/alcohol limits + alert decoding
+    cleaning-and-troubleshooting.md     Setup, rinse cycle, disassembly, official fixes
+    additives-and-texture.md            Xanthan/guar + sugar-free sweeteners (community)
+    community-recipes.md                ~60 deduped community-tested recipes
+    community-troubleshooting.md        Consolidated problems → fixes (+ manual conflicts)
+    community-faq-and-tips.md           Recurring FAQ + durable tips beyond the manual
+  data/
+    inspiration-guide.txt               Raw text of the official Inspiration Guide
+    submissions.ndjson, comments.ndjson Raw r/ninjaslushi archive (via pullpush.io)
+    threads.jsonl, digest/*.txt         Reconstructed, de-noised, bucketed
+  scripts/
+    pull_dump.py                        Re-runnable subreddit archiver (pullpush.io)
+    distill.py                          Stage-1 cleaner: normalize → thread → bucket
+    README.md                           How to run the data pipeline
 ```
 
 ## Refreshing the community data
 
 ```bash
-python3 scripts/pull_dump.py      # archive all submissions + comments
-python3 scripts/distill.py        # clean, reconstruct threads, bucket into digests
+python3 .claude/skills/ninja-slushi/scripts/pull_dump.py      # archive all submissions + comments
+python3 .claude/skills/ninja-slushi/scripts/distill.py        # clean, reconstruct threads, bucket into digests
 ```
 
-See [`scripts/README.md`](scripts/README.md) for details. The re-extraction of
-digests into the `community-*.md` docs is done with an LLM pass.
+See [`scripts/README.md`](.claude/skills/ninja-slushi/scripts/README.md) for
+details. The re-extraction of digests into the `community-*.md` docs is done
+with an LLM pass.
 
 ## Notes & provenance
 
