@@ -1077,7 +1077,10 @@ const CUSTOM_MIN_QUERY_LENGTH = 3;
  * ------------------------------------------------------------------- */
 
 const CUSTOM_DRINK_API_URL = "https://ninja-slushi-api.johnny-y-w-wang.workers.dev/";
-const CUSTOM_API_TIMEOUT_MS = 9000;
+// Must stay comfortably longer than the Worker's own GEMINI_TIMEOUT_MS
+// (worker/index.js) — otherwise the browser gives up and falls back to
+// offline before the Worker even finishes waiting on Gemini.
+const CUSTOM_API_TIMEOUT_MS = 25000;
 const CUSTOM_DEBOUNCE_MS = 500;
 
 async function fetchCustomRecipesFromApi(freeText, inspirationRecipes) {
@@ -1130,7 +1133,7 @@ const customState = {
 function renderCustomLoadingPlaceholder() {
   const el = document.createElement("p");
   el.className = "custom-loading";
-  el.textContent = "✨ Thinking of a custom drink…";
+  el.textContent = "✨ Thinking of a custom drink… (can take up to ~20s)";
   return el;
 }
 

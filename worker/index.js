@@ -40,7 +40,7 @@ const ALLOWED_ORIGINS = new Set([
 
 const MAX_QUERY_LENGTH = 300;
 const MAX_INSPIRATION_RECIPES = 6;
-const GEMINI_TIMEOUT_MS = 15000;
+const GEMINI_TIMEOUT_MS = 20000;
 
 // Same machine chemistry as the offline generator (see
 // references/sugar-alcohol-and-alerts.md and references/additives-and-texture.md
