@@ -735,6 +735,14 @@ function renderRecipeCard(recipe) {
     }
   }
 
+  const brixNote = formatBrixNote(recipe.ingredients, estimateBatchMlFromLines(recipe.ingredients));
+  if (brixNote) {
+    const brixEl = document.createElement("p");
+    brixEl.className = brixNote.inRange ? "brix-note" : "brix-note brix-warning";
+    brixEl.textContent = `🍬 ${brixNote.text}`;
+    card.appendChild(brixEl);
+  }
+
   if (state.sugarFree) {
     const note = recipe.sugarFreeNote;
     const noSugarSignal = !hasAnySugarSignal(recipe);
@@ -957,18 +965,164 @@ function recommendedSpiritMl(batchMl, factor = 0.85) {
   return round5(interpolateSpiritMaxMl(batchMl) * factor);
 }
 
-// Heuristic added-sugar target (~9% of batch weight) for a base with no
-// inherent sweetness — above the machine's bare ~4% floor, inside the
-// community's preferred ~10-15% Brix once combined with any natural sugars
-// already in a juice/soda ingredient.
-function recommendedSugarGrams(batchMl) {
-  return round5(batchMl * 0.09);
+
+/* ---------------------------------------------------------------------
+ * Brix estimation — the community's real target for texture (~13-15 Brix,
+ * i.e. ~13-15% dissolved sugar by weight) is tighter than the machine's
+ * bare ~4% freezing floor. This is a heuristic, not a lab refractometer
+ * reading: it estimates sugar content from the SAME ingredient lines
+ * everything else in this app already works from — explicit sugar/syrup
+ * amounts count at (approximately) their real weight, and juice/soda/dairy
+ * bases get a reasonable assumed natural-sugar content, since this app
+ * doesn't have real nutrition data per ingredient.
+ * ------------------------------------------------------------------- */
+
+const BRIX_TARGET_MIN = 13;
+const BRIX_TARGET_MAX = 15;
+const BRIX_TARGET_MID = 14;
+
+// Grams of dissolved sugar per ml of an ingredient at typical concentration
+// — used only for ingredients that AREN'T already a direct "N g sugar"
+// line. Deliberately approximate; sourced from typical nutrition-label
+// ballparks, not measured per-recipe.
+const SIMPLE_SYRUP_SUGAR_G_PER_ML = 0.6; // ~50 Brix 1:1 syrup at ~1.23 g/ml density
+const CONDENSED_MILK_SUGAR_G_PER_ML = 0.55; // sweetened condensed milk is very sugar-dense
+const NATURAL_SUGAR_G_PER_ML = {
+  juice: 0.11,
+  soda: 0.1,
+  dairy: 0.05, // lactose + any inherent sweetness; conservative
+  premadeMix: 0.12, // margarita/daiquiri mix, lemonade, sweetened iced tea
+};
+
+function estimateSugarGrams(ingredientLines) {
+  let grams = 0;
+  ingredientLines.forEach((line) => {
+    const parsed = parseQuantityToken(line);
+    if (!parsed) return;
+    const t = normalize(parsed.rest);
+    if (parsed.unit === "g" && /\b(sugar|allulose)\b/.test(t)) {
+      grams += parsed.avgVal;
+      return;
+    }
+    if (parsed.unit !== "ml") return;
+    if (/simple syrup|allulose syrup/.test(t)) {
+      grams += parsed.avgVal * SIMPLE_SYRUP_SUGAR_G_PER_ML;
+    } else if (/condensed milk/.test(t)) {
+      grams += parsed.avgVal * CONDENSED_MILK_SUGAR_G_PER_ML;
+    } else if (/margarita mix|daiquiri mix|lemonade|iced tea/.test(t)) {
+      grams += parsed.avgVal * NATURAL_SUGAR_G_PER_ML.premadeMix;
+    } else if (normalizedIncludesAny(t, JUICE_FRUIT_WORDS)) {
+      grams += parsed.avgVal * NATURAL_SUGAR_G_PER_ML.juice;
+    } else if (normalizedIncludesAny(t, SODA_WORDS)) {
+      grams += parsed.avgVal * NATURAL_SUGAR_G_PER_ML.soda;
+    } else if (normalizedIncludesAny(t, DAIRY_WORDS)) {
+      grams += parsed.avgVal * NATURAL_SUGAR_G_PER_ML.dairy;
+    }
+  });
+  return grams;
 }
 
-function hasInherentSweetness(ingredientLines) {
-  return /juice|soda|lemonade|nectar|cola|punch|cider|cream of coconut|condensed milk|margarita mix|daiquiri mix|mix\b/i.test(
-    ingredientLines.join(" ")
+// Approximates total solution mass as batch volume (water density ~1 g/ml)
+// — close enough for a heuristic, not lab-grade precision.
+function estimateBrix(ingredientLines, batchMl) {
+  if (!(batchMl > 0)) return null;
+  const sugarGrams = estimateSugarGrams(ingredientLines);
+  if (sugarGrams <= 0) return null;
+  // batchMl is the liquid volume (grams sugar aren't summed into it by
+  // estimateBatchMlFromLines) — Brix is dissolved solids over TOTAL
+  // solution mass, so the sugar's own mass has to be added to the
+  // denominator too, matching totalSugarGramsForBrix's solver exactly.
+  return (sugarGrams / (batchMl + sugarGrams)) * 100;
+}
+
+function formatBrixNote(ingredientLines, batchMl) {
+  const brix = estimateBrix(ingredientLines, batchMl);
+  if (brix == null) return null;
+  const rounded = Math.round(brix * 10) / 10;
+  const inRange = rounded >= BRIX_TARGET_MIN && rounded <= BRIX_TARGET_MAX;
+  const status = inRange
+    ? `right in the community's ~${BRIX_TARGET_MIN}-${BRIX_TARGET_MAX} Brix sweet spot`
+    : rounded < BRIX_TARGET_MIN
+    ? `below the ~${BRIX_TARGET_MIN}-${BRIX_TARGET_MAX} Brix sweet spot — may freeze harder/icier than ideal`
+    : `above the ~${BRIX_TARGET_MIN}-${BRIX_TARGET_MAX} Brix sweet spot — may turn out softer/slushier than ideal`;
+  return { text: `Estimated ~${rounded} Brix (sugar-equivalent) — ${status}.`, inRange };
+}
+
+// Solves for the total sugar mass (grams) needed to hit a target Brix in a
+// given batch, accounting for the fact that added sugar also adds mass:
+// targetBrix = totalSugarGrams / (batchMl + totalSugarGrams) * 100.
+function totalSugarGramsForBrix(batchMl, targetBrix) {
+  const frac = targetBrix / 100;
+  return (frac * batchMl) / (1 - frac);
+}
+
+// How much MORE sugar (grams) is needed on top of what's already estimated
+// in the lines to reach a target Brix — 0 if already there or above.
+function sugarGramsNeededForBrix(existingSugarGrams, batchMl, targetBrix) {
+  const totalNeeded = totalSugarGramsForBrix(batchMl, targetBrix);
+  return Math.max(0, round5(totalNeeded - existingSugarGrams));
+}
+
+// Defensive backstop applied to EVERY custom recipe (AI or offline) right
+// before it reaches the page: caps any single explicit sugar/syrup line at
+// a physically sane share of the batch. Catches cases like an AI response
+// (or a template combination) suggesting hundreds of ml of syrup in a
+// modest batch — clearly wrong regardless of how it got there.
+const SUGAR_LINE_MAX_FRACTION = 0.25;
+
+function isExplicitSugarLine(parsed, t) {
+  return (
+    (parsed.unit === "g" && /\b(sugar|allulose)\b/.test(t)) ||
+    (parsed.unit === "ml" && /simple syrup|allulose syrup|condensed milk/.test(t))
   );
+}
+
+function clampExcessiveSugarLines(lines, batchMl) {
+  return lines.map((line) => {
+    const parsed = parseQuantityToken(line);
+    if (!parsed) return line;
+    const t = normalize(parsed.rest);
+    if (!isExplicitSugarLine(parsed, t)) return line;
+    const maxAmount = batchMl * SUGAR_LINE_MAX_FRACTION;
+    if (parsed.avgVal <= maxAmount) return line;
+    return rescaleMlOrGLine(line, maxAmount / parsed.avgVal);
+  });
+}
+
+// Re-targets Brix after a serving-size/buzz-level rescale changed the
+// batch's proportions (a bigger buzz-level target claims more of a fixed
+// batch for alcohol, which otherwise drags the remaining sugar/mixer
+// portion — and therefore Brix — down along with it). Only scales the
+// EXPLICIT sugar-source lines (sugar/allulose/simple syrup/condensed milk)
+// that a recipe already added, never natural sugar from juice/soda/dairy,
+// so it stays a small correction rather than re-deriving the whole recipe.
+function applyBrixTargetToLines(lines, batchMl, targetBrix) {
+  const sugarLineInfo = lines
+    .map((line, i) => {
+      const parsed = parseQuantityToken(line);
+      if (!parsed) return null;
+      const t = normalize(parsed.rest);
+      if (!isExplicitSugarLine(parsed, t)) return null;
+      const gramsPerUnit = parsed.unit === "g" ? 1 : /condensed milk/.test(t) ? CONDENSED_MILK_SUGAR_G_PER_ML : SIMPLE_SYRUP_SUGAR_G_PER_ML;
+      return { i, val: parsed.avgVal, grams: parsed.avgVal * gramsPerUnit };
+    })
+    .filter(Boolean);
+
+  const totalSugarGrams = estimateSugarGrams(lines);
+  const explicitGrams = sugarLineInfo.reduce((a, x) => a + x.grams, 0);
+  const naturalGrams = totalSugarGrams - explicitGrams;
+  const targetTotalGrams = totalSugarGramsForBrix(batchMl, targetBrix);
+  const neededExplicitGrams = Math.max(0, targetTotalGrams - naturalGrams);
+
+  if (sugarLineInfo.length === 0) {
+    // No explicit sugar line to adjust — leave natural-sugar-only recipes
+    // alone rather than inventing a new ingredient mid-rescale.
+    return lines;
+  }
+
+  const scale = explicitGrams > 0 ? neededExplicitGrams / explicitGrams : 1;
+  const sugarIndexes = new Set(sugarLineInfo.map((x) => x.i));
+  return lines.map((line, i) => (sugarIndexes.has(i) ? rescaleMlOrGLine(line, scale) : line));
 }
 
 // ---- Batch size parsing ----
@@ -1072,6 +1226,10 @@ const JUICE_FRUIT_WORDS = [
   "passion fruit", "peach", "cherry", "raspberry", "blueberry", "grapefruit",
   "orange", "coconut", "apple", "grape", "lime", "lemon",
 ];
+// Fresh herbs/aromatics — never a pourable liquid base by themselves, so
+// they're handled as an infusion (see applyHerbPrep) rather than being
+// classified as a flavor base like a fruit/soda/dairy token would be.
+const HERB_WORDS = ["mint", "basil", "rosemary", "thyme", "sage", "lavender", "cilantro"];
 
 function normalizedIncludesAny(haystack, needles) {
   return needles.find((n) => haystack.includes(n)) || null;
@@ -1179,7 +1337,7 @@ function findDrinkFamily(normalizedText) {
 // group, driven by the same `mixerRatio` a style already carries (see
 // GENERIC_VARIANT_STYLES) — this is how the 3 custom-recipe variants differ
 // in flavor balance without touching sugar/spirit dosing math at all, which
-// stays governed entirely by recommendedSugarGrams/recommendedSpiritMl.
+// stays governed entirely by ensureSugar (Brix-targeted)/recommendedSpiritMl.
 function styleWeight(baseWeight, index, count, style) {
   if (!style || count < 2) return baseWeight;
   const delta = (style.mixerRatio - 0.8) * 0.5; // small: mixerRatio only ranges ~0.75-0.9
@@ -1223,18 +1381,36 @@ function applySpicyPrep(lines, prepSteps, spiritDisplay, spiritMl) {
 }
 
 function applyMintPrep(lines, prepSteps) {
-  lines.push("60 ml mint-infused simple syrup (see prep)");
+  applyHerbPrep(lines, prepSteps, "mint");
+}
+
+// A fresh herb/aromatic never becomes "the base" of a batch — it's an
+// infusion into a small amount of syrup instead. Used both for named
+// families with mintPrep (mojito) and for a bare herb mentioned in free
+// text or an ingredient list, so "mint, gin" never ends up trying to pour
+// hundreds of ml of literal mint as if it were a liquid.
+function applyHerbPrep(lines, prepSteps, herbName) {
+  lines.push(`60 ml ${herbName}-infused simple syrup (see prep)`);
   prepSteps.push(
-    "Muddle a handful of fresh mint leaves with 60 ml simple syrup (or allulose syrup), let steep 15-20 min, then strain out the leaves before adding to the batch."
+    `Muddle a handful of fresh ${herbName} leaves with 60 ml simple syrup (or allulose syrup), let steep 15-20 min, then strain out the leaves before adding to the batch.`
   );
 }
 
+// Tops up sugar to land at the community's ~13-15 Brix sweet spot
+// (targeting the midpoint, 14) rather than a flat percentage — computed
+// from whatever natural sugar is ALREADY estimated in the lines (juice,
+// soda, dairy, any syrup already added), so a juice-based drink that's
+// already close to 14 Brix gets little or nothing added, while a savory
+// base (a Bloody Mary, a bare spirit-and-water combo) gets however much it
+// actually needs, not a fixed guess.
 function ensureSugar(lines, batchMl, forceSugar) {
-  if (forceSugar || !hasInherentSweetness(lines)) {
-    lines.push(`${recommendedSugarGrams(batchMl)} g granulated sugar`);
-    return true;
-  }
-  return false;
+  const existingSugarGrams = estimateSugarGrams(lines);
+  const currentBrix = batchMl > 0 ? (existingSugarGrams / batchMl) * 100 : 0;
+  if (!forceSugar && currentBrix >= BRIX_TARGET_MIN) return false;
+  const neededGrams = sugarGramsNeededForBrix(existingSugarGrams, batchMl, BRIX_TARGET_MID);
+  if (neededGrams <= 0) return false;
+  lines.push(`${neededGrams} g granulated sugar`);
+  return true;
 }
 
 function machineFitNote({ isSpiked, isPremade, spiritMl, batchMl, addedSugar, mocktail, actualAbvPercent }) {
@@ -1447,7 +1623,7 @@ function buildFromFamily(family, normalizedText, batchMl, freeText, style, injec
 // variety at all, since the buzz-level slider is now the sole, explicit
 // control over how strong an alcoholic build is (see applyAbvTargetToLines
 // above); all 3 style variants of the same request land at the same target
-// ABV. The sugar dosing formula (recommendedSugarGrams via ensureSugar) is
+// ABV. The sugar dosing formula (Brix-targeted, via ensureSugar) is
 // also identical across every variant, so variety never comes at the cost
 // of the machine's freezing chemistry.
 
@@ -1526,6 +1702,13 @@ function buildGenericFromText(normalizedText, batchMl, freeText, style, injectab
 
   injectFilterHintIngredients(lines, injectableHints);
 
+  // A mentioned herb (mint, basil, ...) gets its own infusion rather than
+  // silently being ignored — the named-family path already does this for
+  // "mojito" via mintPrep, this covers the same idea for a bare mention
+  // like "mint gin drink" that doesn't match any named family.
+  const herbMentioned = normalizedIncludesAny(normalizedText, HERB_WORDS);
+  if (herbMentioned) applyHerbPrep(lines, prepSteps, herbMentioned);
+
   let actualAbvPercent = null;
   if (preset === "SPIKED SLUSH" && !mocktail) {
     const abvResult = applyAbvTargetToLines(lines, batchMl, currentTargetAbv());
@@ -1580,6 +1763,8 @@ function classifyIngredientToken(token) {
   const soda = normalizedIncludesAny(t, SODA_WORDS);
   if (soda) return { type: "soda", display: token, raw: token };
   if (/sugar|honey|agave|syrup|allulose/i.test(t)) return { type: "sweetener", display: token, raw: token };
+  const herb = normalizedIncludesAny(t, HERB_WORDS);
+  if (herb) return { type: "herb", display: token, raw: token, herbName: herb };
   return { type: "other", display: token, raw: token };
 }
 
@@ -1642,6 +1827,12 @@ function buildFromTokens(tokens, normalizedText, batchMl, freeText, variantLabel
   const explicitSweetener = used.find((t) => t.type === "sweetener");
   if (explicitSweetener) lines.push(explicitSweetener.display);
 
+  // Herbs (mint, basil, ...) are never a pourable base — each becomes its
+  // own small infusion instead of trying to fill the batch with "715 ml
+  // mint," which isn't a real liquid.
+  const herbTokens = used.filter((t) => t.type === "herb");
+  herbTokens.forEach((t) => applyHerbPrep(lines, prepSteps, t.herbName));
+
   let actualAbvPercent = null;
   if (preset === "SPIKED SLUSH" && !mocktail) {
     const abvResult = applyAbvTargetToLines(lines, batchMl, currentTargetAbv());
@@ -1691,7 +1882,7 @@ function buildFromIngredientList(freeText, normalizedText, batchMl) {
   // a full mix, a simplified two-ingredient twist, and a single-ingredient
   // highlight — the same "3 recipes for purely custom requests" treatment
   // as the generic fallback. Only which/how-many flavor tokens are used
-  // varies; recommendedSpiritMl/recommendedSugarGrams (called inside
+  // varies; recommendedSpiritMl/ensureSugar's Brix targeting (called inside
   // buildFromTokens) are unaffected by useCount, so safety math never
   // changes across variants.
   const results = [buildFromTokens(classified, normalizedText, batchMl, freeText, "Full Mix", classified.length)];
@@ -1941,7 +2132,10 @@ function rescaleRecipeForSelections(recipe, newBatchMl, targetAbvPercent) {
   }
 
   const abvResult = applyAbvTargetToLines(recipe.ingredients, newBatchMl, targetAbvPercent);
-  const newLines = abvResult.lines;
+  // Re-target Brix after the ABV/volume rescale — a bigger buzz-level
+  // target claims more of a fixed batch for alcohol, which otherwise drags
+  // the remaining sugar (and therefore Brix) down along with it.
+  const newLines = applyBrixTargetToLines(abvResult.lines, newBatchMl, BRIX_TARGET_MID);
   const sugarFreeLines = newLines.map(rewriteIngredientForSugarFree);
   const anyLineChanged = sugarFreeLines.some((l, i) => l !== newLines[i]);
   const sugarFreeNote = anyLineChanged
@@ -2021,6 +2215,16 @@ async function resolveCustomForQuery(freeText, mySeq) {
     const targetAbv = currentTargetAbv();
     recipes = recipes.map((r) => rescaleRecipeForSelections(r, targetBatchMl, targetAbv));
   }
+
+  // Defensive backstop against an absurdly large sugar/syrup line (AI or
+  // offline) — e.g. hundreds of ml of simple syrup in a modest batch —
+  // regardless of how it got there. Re-derives sugar_free_ingredients from
+  // the clamped lines too, so it doesn't go stale relative to `ingredients`.
+  recipes = recipes.map((r) => {
+    const clamped = clampExcessiveSugarLines(r.ingredients, r.batch_ml || targetBatchMl);
+    if (clamped.every((l, i) => l === r.ingredients[i])) return r; // nothing changed
+    return { ...r, ingredients: clamped, sugar_free_ingredients: clamped.map(rewriteIngredientForSugarFree) };
+  });
 
   // Applied uniformly regardless of source (AI or offline) — never relies on
   // the AI having honored the filter-selection hints itself.
@@ -2114,6 +2318,16 @@ function renderCustomRecipeCard(recipe, source) {
       abvEl.className = "abv-note";
       abvEl.textContent = `🍸 ${abvNote}`;
       card.appendChild(abvEl);
+    }
+  }
+
+  if (Array.isArray(recipe.ingredients)) {
+    const brixNote = formatBrixNote(recipe.ingredients, estimateBatchMlFromLines(recipe.ingredients));
+    if (brixNote) {
+      const brixEl = document.createElement("p");
+      brixEl.className = brixNote.inRange ? "brix-note" : "brix-note brix-warning";
+      brixEl.textContent = `🍬 ${brixNote.text}`;
+      card.appendChild(brixEl);
     }
   }
 

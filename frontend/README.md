@@ -133,6 +133,20 @@ that the footer with repo-relative links is gone).
   lower, wine ~12-13%, beer/cider/seltzer ~5%) — never asked of the AI or
   the offline generator directly, so it can't drift from the actual numbers
   in the recipe.
+- **Estimated Brix on every card** (dataset, AI, or offline-built) —
+  the community's real sweet spot for texture is a tighter ~13-15 Brix
+  (13-15% dissolved sugar by weight) than the machine's bare ~4% freezing
+  floor, so every card shows an estimate and flags it when it's outside
+  that window (dataset recipes show their own real number, which can
+  legitimately fall outside it — only custom builds actively target it).
+  Estimated the same way as ABV: from the real sugar content already in
+  the ingredient list (explicit sugar/allulose/syrup amounts, plus a
+  reasonable assumed natural-sugar content for juice/soda/dairy), never
+  asked of the AI directly. Custom builds solve for this target directly
+  when adding sugar (replacing an old flat "9% of batch weight" guess that
+  could land well outside 13-15 depending on the base), and a defensive
+  clamp catches an AI response suggesting an absurd amount of syrup for
+  the batch size regardless of how it got there.
 - **🕘 Recent custom drinks, with starring** — every resolved custom search
   (AI or offline) is saved locally (`localStorage`, per-browser) with its
   query text, filter/serving-size context, and the actual recipes it
@@ -213,12 +227,16 @@ that the footer with repo-relative links is gone).
     spirits capped per the official ml-per-batch-size table (recommended at
     ~85% of the max, landing in the community's tighter ~8-14% ABV sweet
     spot), premade alcohol flagged for the 2.8-16% ABV rule, and sugar
-    topped up (~9% of batch weight) whenever nothing in the mix already
-    looks sweet — so a savory request like a Bloody Mary still gets the
-    sugar it needs to freeze, correctly noted as such.
+    topped up to land at ~13-15 Brix, computed from whatever natural sugar
+    is already estimated in the mix — so a savory request like a Bloody
+    Mary still gets the sugar it needs to freeze, correctly noted as such.
   - "Spicy" triggers a real jalapeño infusion prep step (ratio + steep time)
-    on the spirit, or a chili-syrup method for mocktails; "mojito" gets a
-    mint-syrup prep step the same way.
+    on the spirit, or a chili-syrup method for mocktails; a mentioned herb
+    (mint, basil, rosemary, ...) always becomes its own small syrup
+    infusion rather than being (mis)treated as a pourable base — "mojito"
+    gets this via its named-family template, and a bare mention like
+    "mint, gin" or "mint gin drink" gets the same treatment even without a
+    recognized drink name.
   - "Mocktail" / "virgin" / "kid friendly" swaps any alcoholic family to its
     non-alcoholic form (SLUSH preset, zero-proof spirit noted), matching how
     the official docs themselves describe mocktail conversions.

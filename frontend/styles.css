@@ -490,6 +490,32 @@ h1, h2, h3 {
   cursor: pointer;
 }
 
+/* On a narrow/portrait phone, the row (caption - radios - caption) has no
+ * room to sit side by side without squishing or wrapping mid-word — stack
+ * it instead: caption above, a full-width row of radios, caption below. */
+@media (max-width: 480px) {
+  .buzz-slider {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .buzz-caption {
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .buzz-caption-left {
+    text-align: center;
+  }
+
+  .buzz-stops {
+    min-width: 0;
+    width: 100%;
+    justify-content: space-evenly;
+  }
+}
+
 .bottom-row {
   display: flex;
   align-items: center;
@@ -880,6 +906,21 @@ h1, h2, h3 {
   border-radius: 8px;
   margin: 0;
   color: var(--text);
+}
+
+.brix-note {
+  font-size: 0.8rem;
+  background: color-mix(in srgb, var(--accent2) 12%, transparent);
+  border-left: 4px solid var(--accent2);
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin: 0;
+  color: var(--text);
+}
+
+.brix-note.brix-warning {
+  background: color-mix(in srgb, #e0a800 18%, transparent);
+  border-left-color: #e0a800;
 }
 
 .adjusted-note {

@@ -91,7 +91,7 @@ SUGAR MINIMUM (roughly ≥4% sugar by weight; sugar-free artificial sweeteners l
 - 240 ml serving needs ≥8 g sugar
 - 355 ml serving needs ≥11 g sugar
 - 591 ml serving needs ≥18 g sugar
-The community's practical sweet spot for good texture is HIGHER than this legal floor: aim for ~10-15% Brix (sugar) for a cocktail-style recipe. If a base ingredient is tart/low-sugar, add 15-30 ml syrup/juice or sugar per serving.
+The community's practical sweet spot for good texture is HIGHER than this legal floor: TARGET 13-15 Brix (13-15% dissolved sugar by weight, i.e. sugar_grams / (total_liquid_grams + sugar_grams) x 100) for every recipe, alcoholic or not. Compute this from the REAL sugar content of what you're adding (explicit sugar/syrup grams, plus a reasonable estimate of natural sugar in any juice/soda/dairy already in the mix) — don't just add a fixed splash and hope. If a base ingredient is tart/low-sugar, add enough syrup/juice/sugar to land in that window, not just "some."
 Diet soda / sugar-free soda ALONE will not freeze. Exception: in a SPIKED SLUSH recipe the alcohol itself acts as antifreeze, so a diet mixer can work there.
 
 ALCOHOL (SPIKED SLUSH only):
