@@ -541,6 +541,78 @@ h1, h2, h3 {
   font-size: 0.95rem;
 }
 
+.history-section {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+
+.history-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 4px 2px 8px;
+  background: var(--bg);
+}
+
+.history-star,
+.history-delete,
+.history-label {
+  border: none;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.history-star {
+  font-size: 0.95rem;
+  padding: 2px 2px;
+  line-height: 1;
+}
+
+.history-star.starred {
+  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--accent) 60%, transparent));
+}
+
+.history-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 4px 2px;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-label:hover {
+  color: var(--accent-dark);
+  text-decoration: underline;
+}
+
+.history-delete {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+.history-delete:hover {
+  color: var(--accent-dark);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
 .results-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

@@ -1,8 +1,8 @@
 /**
  * Ninja Slushi custom-drink backend — Cloudflare Worker.
  *
- * Receives { query, sugarFree, targetBatchMl, servingBand, inspiration }
- * from the frontend, calls the
+ * Receives { query, sugarFree, targetBatchMl, driveTypeFilters,
+ * difficultyFilters, inspiration } from the frontend, calls the
  * Gemini API server-side (key never touches the browser), and returns
  * { recipes: [...] } in the same shape the frontend's offline generator
  * already produces, so the same rendering code handles either source.
@@ -111,9 +111,9 @@ CRITICAL — RECOGNIZE REAL INGREDIENTS: the user may name any real-world ingred
 
 You'll be given a short list of existing recipes from this machine's recipe database as style/flavor-pairing reference — draw on them, remix them, or invent something new, whichever best satisfies the request, as long as it respects every constraint above.
 
-RECIPE COUNT: if the request names a specific drink (a cocktail name, a specific flavor combo), return exactly 1 recipe. If the request is open-ended (a pile of ingredients with no named drink, "surprise me", a vague theme/mood), return exactly 3 DIFFERENT recipes — vary them by flavor balance, dilution ratio, or which optional ingredient is emphasized, but NEVER by weakening the sugar or alcohol dosing math above; every variant must independently satisfy the same sugar-minimum and ABV/spirit-cap rules.
+RECIPE COUNT: always return exactly 3 DIFFERENT recipes, whether the request names a specific drink (e.g. a cocktail name) or is a pile of ingredients/an open-ended vibe. Vary the 3 by flavor balance, dilution ratio, or which optional ingredient is emphasized, but NEVER by weakening the sugar or alcohol dosing math above; every one of the 3 must independently satisfy the same sugar-minimum and ABV/spirit-cap rules.
 
-BATCH SIZE / SERVING COUNT: if a target batch size in ml is given below, size the recipe (and its sugar/spirit amounts) to that exact batch size rather than picking your own — the total of all ingredient quantities should land at that number. If told the requested serving count exceeds what a single 1.9 L batch can hold, build the recipe at the 1.9 L max and say so explicitly in machine_fit_note (that the batch must be run twice back-to-back to reach the full requested serving count) — never silently pretend the machine can exceed its real 1.9 L ceiling in one pass.
+BATCH SIZE: if a target batch size in ml is given below, size every recipe (and its sugar/spirit amounts) to that exact batch size rather than picking your own — the total of all ingredient quantities should land at that number. This machine's real single-batch ceiling is 1.9 L (about 10 servings at this app's 6.4 oz reference serving) — never exceed it.
 
 Field meanings for the required JSON output:
 - batch_note: human-readable batch size + serving count, e.g. "1.2 L, about 4-6 servings"
@@ -232,7 +232,16 @@ export default {
       typeof body.targetBatchMl === "number" && body.targetBatchMl >= 475 && body.targetBatchMl <= 1900
         ? Math.round(body.targetBatchMl)
         : null;
-    const servingBand = ["2-4", "5-8", "9-12"].includes(body.servingBand) ? body.servingBand : null;
+    const KNOWN_DRINK_TYPE_FILTERS = [
+      "creamy", "milkshake", "refreshing", "fruity", "spicy",
+      "tropical", "citrus", "coffee", "chocolate", "cocktail", "mocktail",
+    ];
+    const driveTypeFilters = Array.isArray(body.driveTypeFilters)
+      ? body.driveTypeFilters.filter((t) => KNOWN_DRINK_TYPE_FILTERS.includes(t)).slice(0, 5)
+      : [];
+    const difficultyFilters = Array.isArray(body.difficultyFilters)
+      ? body.difficultyFilters.filter((d) => ["easy", "medium", "advanced"].includes(d)).slice(0, 3)
+      : [];
 
     let userText =
       `Existing recipes for reference:\n${buildInspirationText(inspiration)}\n\n` +
@@ -242,8 +251,11 @@ export default {
     if (targetBatchMl) {
       userText += `\n\nTarget batch size: ${targetBatchMl} ml — size every ingredient quantity (and the sugar/spirit dosing) to this exact total.`;
     }
-    if (servingBand === "9-12") {
-      userText += `\n\nThe visitor asked for 9 to 12 servings, which exceeds this machine's 1.9 L single-batch max (~7-8 servings). Build the recipe at the 1.9 L max and explicitly note in machine_fit_note that it needs to be run twice back-to-back to reach 9-12 total servings.`;
+    if (driveTypeFilters.length) {
+      userText += `\n\nThe visitor also selected these drink-type filters: ${driveTypeFilters.join(", ")}. These are hints, not hard requirements — if 3+ are selected, incorporate at least 2 of them coherently rather than forcing all of them into one recipe; note in machine_fit_note which ones you used if you had to leave any out.`;
+    }
+    if (difficultyFilters.length) {
+      userText += `\n\nThe visitor prefers this difficulty: ${difficultyFilters.join(" or ")}. Try to land there, but never sacrifice the sugar/alcohol safety requirements above to force a lower difficulty — if the safe build ends up a different difficulty, say so in machine_fit_note.`;
     }
 
     const geminiRequestBody = {

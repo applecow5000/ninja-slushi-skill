@@ -35,12 +35,15 @@ that the footer with repo-relative links is gone).
 - **Nothing loads until you search or filter** — the page opens empty with a
   prompt, not all 105 recipes at once; type something, or pick a filter, to
   see results.
-- **Typing alone doesn't search** — press **Enter** or click **🔍 Search**
-  once you're done typing. This matters more than it sounds: it's also what
-  triggers the custom-drink builder below, so it's one deliberate request
-  per finished thought, not one per keystroke. Filter chips and the
-  Sugar-Free toggle still act immediately on click, since those aren't typed
-  text.
+- **Typing and clicking filters/serving-size chips never search by
+  themselves** — press **Enter** or click **🔍 Search** once you've typed
+  something and made whatever selections you want. This is deliberate: you
+  can type "guava juice," select the Citrus chip and a serving size, and
+  nothing runs until you hit Search, at which point all of it is used
+  together for one generation. Only the Sugar-Free toggle still acts
+  immediately, since it's a display choice, not a new generation (every
+  custom recipe already carries both a regular and a sugar-free ingredient
+  list — toggling just switches which one is shown).
 - **One search box, two jobs** — it matches recipe names and ingredient lines
   in the dataset (comma-separate multiple terms, e.g. `rum, pineapple juice`,
   to require all of them) **and**, once you've typed at least 3 characters,
@@ -51,27 +54,40 @@ that the footer with repo-relative links is gone).
   that build is put together. Filtering with the chips alone (no typed text)
   shows dataset matches only, since there's no text to build a custom drink
   from.
-- **Drink type filters** (creamy, milkshake, refreshing, fruity, spicy,
-  tropical, citrus, coffee, chocolate, cocktail, mocktail) — a recipe can
-  carry several tags; selecting more than one tag is an OR (show recipes with
-  *any* selected tag).
+- **Drink type filters** (creamy, refreshing, fruity, tropical, citrus,
+  coffee, cocktail, mocktail — spicy/chocolate/milkshake aren't offered as
+  filter chips, though a recipe can still carry those tags and show them as
+  pills) — a recipe can carry several tags; selecting more than one tag is
+  an OR for dataset filtering (show recipes with *any* selected tag). For a
+  **custom build**, selected drink-type chips are hints, not hard
+  requirements: up to 2 of them get a real representative ingredient folded
+  in (e.g. Citrus adds fresh lime juice) without overriding whatever you
+  actually typed ("guava juice" + Citrus keeps guava as the main flavor and
+  adds a real citrus ingredient alongside it, rather than one replacing the
+  other) — if you select 3+, only 2 are actually used and the card says
+  which, rather than forcing an incoherent recipe to satisfy all of them.
 - **Difficulty filters** (easy / medium / advanced) — computed automatically
   from ingredient count (≤3 easy, 4–6 medium, 7+ advanced), with a manual
   override for a few recipes whose prep is trickier than their ingredient
-  count suggests (e.g. gelatin-stabilized frosé).
-- **Preset filters** (SLUSH / SPIKED SLUSH / FROZEN JUICE / MILKSHAKE / FRAPPÉ).
-- **Serving size** (2 to 4 / 5 to 8 / 9 to 12, single-select) — only affects
+  count suggests (e.g. gelatin-stabilized frosé). For dataset search this
+  narrows results as usual; for a custom build it's a preference the
+  generator tries to land on — if the flavor combo genuinely needs more
+  ingredients/prep to be safe, the card says so honestly rather than
+  stripping something chemistry-relevant just to hit "easy."
+- There's no preset filter — SLUSH / SPIKED SLUSH / FROZEN JUICE / MILKSHAKE
+  / FRAPPÉ is decided by the ingredients, and every card (dataset or custom)
+  shows which preset to run right in its badge.
+- **Servings** (3 / 4 / 6 / 8 / 10, single-select) — only affects
   custom-drink generation (both the AI backend and the offline generator),
   not dataset filtering, since dataset recipes already have a fixed batch.
-  Picking a band overrides whatever batch size the typed text implies.
-  "9 to 12" is honest about the machine's real 1.9 L single-batch ceiling
-  (about 7-8 servings at a ~240 ml reference serving): the recipe is built
-  at the 1.9 L max with an explicit note that it needs to run twice
-  back-to-back to reach 9-12 total servings, rather than silently pretending
-  the machine can exceed its own limit in one pass.
+  This app's reference serving is 6.4 US fl oz, so the batch size is exactly
+  `servings × 6.4 oz` — "10" lands right at the machine's real 1.9 L / 64 oz
+  single-batch max, and every option is sized to genuinely fit in one pass
+  (no serving count here can exceed what the machine can actually hold).
 - All filters and the search boxes **combine (AND across facets, OR within a
-  facet)** rather than overwriting each other — narrow with as many as you
-  like, and "Clear all filters" resets everything at once.
+  facet)** for dataset search, rather than overwriting each other — narrow
+  with as many as you like, and "Clear all filters" resets everything at
+  once.
 - **Dual-unit measurements** — every ingredient quantity shows its metric
   amount plus a parenthetical imperial conversion, on dataset cards and
   custom-built cards alike: volume (ml/L) converts to cups/tbsp/tsp using
@@ -87,13 +103,25 @@ that the footer with repo-relative links is gone).
   from the midpoint and get an extra "~" to flag it.
 - **Estimated ABV for alcoholic drinks** — any SPIKED SLUSH card (dataset,
   AI, or offline-built) shows an estimated batch-wide ABV% and roughly how
-  many standard drinks (14 g pure alcohol each) that works out to per
-  ~240 ml serving. This is computed client-side from the ml quantities
-  already in the ingredient list against a small per-spirit/per-premade-
-  alcohol ABV table (standard spirits ~40%, triple sec/schnapps/Kahlúa/
-  Irish cream lower, wine ~12-13%, beer/cider/seltzer ~5%) — never asked of
-  the AI or the offline generator directly, so it can't drift from the
-  actual numbers in the recipe.
+  many standard drinks (14 g pure alcohol each) that works out to per this
+  app's 6.4 oz (~189 ml) reference serving — the same serving the servings
+  selector sizes a batch against, so "per serving" means the same thing
+  everywhere. This is computed client-side from the ml quantities already
+  in the ingredient list against a small per-spirit/per-premade-alcohol ABV
+  table (standard spirits ~40%, triple sec/schnapps/Kahlúa/Irish cream
+  lower, wine ~12-13%, beer/cider/seltzer ~5%) — never asked of the AI or
+  the offline generator directly, so it can't drift from the actual numbers
+  in the recipe.
+- **🕘 Recent custom drinks, with starring** — every resolved custom search
+  (AI or offline) is saved locally (`localStorage`, per-browser) with its
+  query text, filter/serving-size context, and the actual recipes it
+  produced. Click an entry to bring back that *exact* result — no
+  re-query, no regeneration — which matters because an AI build can vary
+  run-to-run even for a similar request; this is how you get back to the
+  one you actually liked. Click ⭐ to star an entry so it's never
+  auto-evicted (up to 20 unstarred entries are kept; older ones roll off),
+  and ✕ to remove one you don't want. This never leaves your browser — it
+  doesn't sync across devices and isn't visible to anyone else.
 - **Sugar-Free mode** — a toggle that rewrites sugar ingredients on the fly:
   - `sugar` → `allulose (granulated)`, scaled ×1.33 (allulose is ~70% as
     sweet as sugar by weight, so the common conversion is about 1⅓ cups
@@ -120,10 +148,9 @@ that the footer with repo-relative links is gone).
   skipped automatically if your OS has "reduce motion" turned on.
 - **✨ Custom Drink Creator (built into the search box)** — type a drink idea
   in plain English ("spicy margarita") or list what you have on hand
-  ("mango, coconut milk, dark rum") into the same search box above, and it
-  designs one or two custom recipes on the spot, shown alongside any dataset
-  matches, after a ~500ms debounce (see `CUSTOM_DEBOUNCE_MS` — waits until
-  you stop typing rather than firing on every keystroke). There are two
+  ("mango, coconut milk, dark rum") into the same search box above, make any
+  filter/serving-size selections, and click Search — it designs 3 custom
+  recipes on the spot, shown alongside any dataset matches. There are two
   layers underneath it, and the second one only runs if the first can't
   place it:
 
@@ -147,18 +174,19 @@ that the footer with repo-relative links is gone).
     mule, mimosa, sangria, painkiller, paloma, mojito, cosmopolitan,
     screwdriver, bloody mary, frappé, milkshake, (spiked) lemonade, iced tea)
     and detects spirits, premade alcohol, dairy, coffee, fruit/juice, and
-    soda keywords for anything else. A **named drink gets exactly 1 recipe**
-    (it's a specific request); a **purely custom/open-ended request gets 3**
-    — either "list your ingredients" mode (comma-separated, no recognized
-    drink name), which builds "Full Mix," "Simplified Twist," and "Solo
-    Highlight" variants using progressively fewer of the listed ingredients,
-    or the generic fallback (a described drink matching no named family),
-    which builds "Classic," "Lighter Pour," and "Extra Fruity" variants that
-    differ only in mixer ratio and, when alcoholic, how much of the *already
-    safe* recommended spirit amount they use — never in the sugar dosing
-    formula, which stays identical and safe across every variant. The live
-    backend follows the same rule (exactly 1 for a named drink, exactly 3
-    for an open-ended one).
+    soda keywords for anything else. **Every custom build returns exactly 3
+    recipes**, whether it's a named drink, a comma-separated ingredient
+    list, or an open-ended description: a named family gets "Classic,"
+    "Lighter Pour," and "Extra Fruity" variants; "list your ingredients"
+    mode (comma-separated, no recognized drink name) gets "Full Mix,"
+    "Simplified Twist," and "Solo Highlight" using progressively fewer of
+    the listed ingredients; the generic fallback (a description matching no
+    named family) gets the same "Classic"/"Lighter Pour"/"Extra Fruity"
+    treatment. The 3 variants differ only in mixer ratio and, when
+    alcoholic, how much of the *already safe* recommended spirit amount
+    they use — never in the sugar dosing formula, which stays identical and
+    safe across every variant. The live backend follows the same rule
+    (always exactly 3).
   - Every recipe is sized against the machine's real chemistry from
     `../references/sugar-alcohol-and-alerts.md`: batch 475 ml–1.9 L, straight
     spirits capped per the official ml-per-batch-size table (recommended at

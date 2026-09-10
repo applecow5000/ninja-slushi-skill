@@ -56,7 +56,10 @@
           <input id="query" type="search" placeholder='e.g. "margarita", "mango, coconut milk, rum", "spicy daiquiri"' autocomplete="off" />
           <button id="searchBtn" type="button" class="clear-btn search-btn">🔍 Search</button>
         </div>
-        <p class="search-hint">Press Enter or click Search when you're done typing.</p>
+        <p class="search-hint">
+          Make any selections below, then press Enter or click Search — typing
+          or clicking a filter alone won't run anything by itself.
+        </p>
       </div>
 
       <div class="filter-group">
@@ -70,13 +73,8 @@
       </div>
 
       <div class="filter-group">
-        <span class="filter-label">Preset</span>
-        <div id="presetFilters" class="chip-row"></div>
-      </div>
-
-      <div class="filter-group">
-        <span class="filter-label">Serving size (custom builds only)</span>
-        <div id="servingBandFilters" class="chip-row"></div>
+        <span class="filter-label">Servings (custom builds only)</span>
+        <div id="servingSizeFilters" class="chip-row"></div>
       </div>
 
       <div class="bottom-row">
@@ -87,6 +85,13 @@
         </label>
         <button id="clearFilters" type="button" class="clear-btn">Clear all filters</button>
       </div>
+    </section>
+
+    <section class="history-section" id="historyPanel" hidden>
+      <div class="results-header">
+        <span class="filter-label">🕘 Recent custom drinks</span>
+      </div>
+      <div id="historyList" class="history-list"></div>
     </section>
 
     <section class="results-section">

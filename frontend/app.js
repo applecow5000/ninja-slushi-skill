@@ -252,7 +252,13 @@ function addImperialUnits(line) {
  * per-serving standard-drink count.
  * ------------------------------------------------------------------- */
 
-const STANDARD_SERVING_ML = 240;
+// This app's reference serving is 6.4 US fl oz (~189 ml) — the same number
+// the serving-size selector below sizes a batch against, so "per serving"
+// always means the same serving everywhere in the app (ABV note, batch
+// note, and the serving-size selector's own math).
+const OZ_TO_ML = 29.5735;
+const STANDARD_SERVING_OZ = 6.4;
+const STANDARD_SERVING_ML = Math.round(STANDARD_SERVING_OZ * OZ_TO_ML);
 // 1 US standard drink = 14 g pure ethanol; ethanol density ~0.789 g/ml, so
 // 14 / 0.789 ≈ 17.7 ml of pure ethanol per standard drink.
 const ML_ETHANOL_PER_STANDARD_DRINK = 17.7;
@@ -364,7 +370,7 @@ const state = {
   activeTags: new Set(),
   activeDifficulties: new Set(),
   sugarFree: false,
-  servingBand: null, // "2-4" | "5-8" | "9-12" | null — overrides batch size for custom builds only
+  servingCount: null, // 3 | 4 | 6 | 8 | 10 | null — overrides batch size for custom builds only
 };
 
 function normalize(s) {
@@ -418,13 +424,20 @@ const els = {
   results: document.getElementById("results"),
   resultCount: document.getElementById("resultCount"),
   clearFilters: document.getElementById("clearFilters"),
-  presetFilters: document.getElementById("presetFilters"),
-  servingBandFilters: document.getElementById("servingBandFilters"),
+  servingSizeFilters: document.getElementById("servingSizeFilters"),
+  historyPanel: document.getElementById("historyPanel"),
+  historyList: document.getElementById("historyList"),
 };
 
 const DIFFICULTIES = ["easy", "medium", "advanced"];
-const PRESETS = ["SLUSH", "SPIKED SLUSH", "FROZEN JUICE", "MILKSHAKE", "FRAPPE"];
+// "spicy"/"chocolate"/"milkshake" are still valid recipe tags (dataset
+// recipes can carry them, and they still show as pills on a card) — they're
+// just not offered as filter chips, per request.
+const CATEGORY_TAGS_FOR_FILTER = CATEGORY_TAGS.filter((t) => !["spicy", "chocolate", "milkshake"].includes(t));
 
+// Filter/serving chips update state only — they never call render()
+// themselves. That's deliberate: you type something, make your selections,
+// then hit Search/Enter once to generate — not one execution per click.
 function buildChip(label, kind, value) {
   const chip = document.createElement("button");
   chip.type = "button";
@@ -434,8 +447,7 @@ function buildChip(label, kind, value) {
   chip.dataset.value = value;
   chip.setAttribute("aria-pressed", "false");
   chip.addEventListener("click", () => {
-    const targetSet =
-      kind === "tag" ? state.activeTags : kind === "difficulty" ? state.activeDifficulties : state.activePresets;
+    const targetSet = kind === "tag" ? state.activeTags : state.activeDifficulties;
     if (targetSet.has(value)) {
       targetSet.delete(value);
       chip.classList.remove("active");
@@ -445,21 +457,16 @@ function buildChip(label, kind, value) {
       chip.classList.add("active");
       chip.setAttribute("aria-pressed", "true");
     }
-    render();
   });
   return chip;
 }
 
 function initFilterChips() {
-  CATEGORY_TAGS.forEach((tag) => {
+  CATEGORY_TAGS_FOR_FILTER.forEach((tag) => {
     els.tagFilters.appendChild(buildChip(capitalize(tag), "tag", tag));
   });
   DIFFICULTIES.forEach((d) => {
     els.difficultyFilters.appendChild(buildChip(capitalize(d), "difficulty", d));
-  });
-  state.activePresets = new Set();
-  PRESETS.forEach((p) => {
-    els.presetFilters.appendChild(buildChip(p, "preset", p));
   });
 }
 
@@ -467,47 +474,35 @@ function capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function matchesPreset(recipe, activePresets) {
-  if (!activePresets || activePresets.size === 0) return true;
-  return activePresets.has(recipe.preset);
-}
-
 // Single-select (unlike the multi-select chips above): only one serving
-// band applies at a time, since it maps directly to one batch size. Only
-// affects custom-drink generation, never dataset filtering.
-const SERVING_BAND_OPTIONS = [
-  { value: "2-4", label: "2 to 4" },
-  { value: "5-8", label: "5 to 8" },
-  { value: "9-12", label: "9 to 12" },
-];
+// count applies at a time, since it maps directly to one batch size. Only
+// affects custom-drink generation, never dataset filtering — dataset
+// recipes already have a fixed batch.
+const SERVING_SIZE_OPTIONS = [3, 4, 6, 8, 10];
 
-function initServingBandChips() {
-  if (!els.servingBandFilters) return;
-  SERVING_BAND_OPTIONS.forEach(({ value, label }) => {
+function initServingSizeChips() {
+  if (!els.servingSizeFilters) return;
+  SERVING_SIZE_OPTIONS.forEach((count) => {
     const chip = document.createElement("button");
     chip.type = "button";
     chip.className = "chip";
-    chip.textContent = label;
-    chip.dataset.kind = "servingBand";
-    chip.dataset.value = value;
+    chip.textContent = String(count);
+    chip.dataset.kind = "servingCount";
+    chip.dataset.value = String(count);
     chip.setAttribute("aria-pressed", "false");
     chip.addEventListener("click", () => {
-      const wasActive = state.servingBand === value;
-      els.servingBandFilters.querySelectorAll(".chip").forEach((c) => {
+      const wasActive = state.servingCount === count;
+      els.servingSizeFilters.querySelectorAll(".chip").forEach((c) => {
         c.classList.remove("active");
         c.setAttribute("aria-pressed", "false");
       });
-      state.servingBand = wasActive ? null : value;
+      state.servingCount = wasActive ? null : count;
       if (!wasActive) {
         chip.classList.add("active");
         chip.setAttribute("aria-pressed", "true");
       }
-      // Force the custom build to re-run at the new batch size even if the
-      // query text itself hasn't changed.
-      customState.query = null;
-      render();
     });
-    els.servingBandFilters.appendChild(chip);
+    els.servingSizeFilters.appendChild(chip);
   });
 }
 
@@ -833,41 +828,27 @@ function clamp(n, min, max) {
 
 function batchNote(batchMl) {
   const liters = (batchMl / 1000).toFixed(batchMl % 1000 === 0 ? 0 : 1);
-  const servings = batchMl <= 720 ? "2-3" : batchMl <= 1440 ? "4-6" : "6-8";
-  return `${liters} L, about ${servings} servings`;
+  const oz = Math.round(batchMl / OZ_TO_ML);
+  const servings = Math.max(1, Math.round(batchMl / STANDARD_SERVING_ML));
+  return `${liters} L (~${oz} oz), about ${servings} serving${servings === 1 ? "" : "s"} at ${STANDARD_SERVING_OZ} oz each`;
 }
 
 // ---- Serving-size selector ----
 //
-// A single-select control (see initServingBandChips()) that, when set,
+// A single-select control (see initServingSizeChips()) that, when set,
 // overrides the free-text batch-size parsing above for custom builds only
-// (it never affects dataset filtering). "9 to 12" is honest about the
-// machine's real 1.9 L single-batch ceiling (~7-8 servings at a 240 ml
-// reference serving) rather than silently pretending it can do more —
-// applyServingBandCaveat() appends a note explaining the batch needs to run
-// twice to reach that count.
-const SERVING_BANDS = {
-  "2-4": { batchMl: 720 },
-  "5-8": { batchMl: 1600 },
-  "9-12": { batchMl: 1900, exceedsSingleBatch: true },
-};
-
-function resolveBatchMl(freeText) {
-  const band = state.servingBand && SERVING_BANDS[state.servingBand];
-  if (band) return band.batchMl;
-  return parseBatchMl(freeText);
+// (it never affects dataset filtering, since dataset recipes already have a
+// fixed batch). Sizing is exact: batchMl = servings × 6.4 oz, so selecting
+// "10" lands right at the machine's real 1.9 L / 64 oz single-batch max —
+// there's no serving count in SERVING_SIZE_OPTIONS that can exceed it, so
+// every option is honest about what one batch can actually hold.
+function batchMlForServings(count) {
+  return clamp(round5(count * STANDARD_SERVING_OZ * OZ_TO_ML), 475, 1900);
 }
 
-const SERVING_BAND_CAVEAT =
-  "This machine's max single batch is 1.9 L (about 7-8 servings at a ~240 ml serving) — for 9 to 12 servings, run this exact recipe twice back-to-back rather than trying to fit it all in one pass.";
-
-function applyServingBandCaveat(recipes) {
-  const band = state.servingBand && SERVING_BANDS[state.servingBand];
-  if (!band || !band.exceedsSingleBatch) return recipes;
-  return recipes.map((r) => ({
-    ...r,
-    machine_fit_note: r.machine_fit_note ? `${r.machine_fit_note} ${SERVING_BAND_CAVEAT}` : SERVING_BAND_CAVEAT,
-  }));
+function resolveBatchMl(freeText) {
+  if (state.servingCount) return batchMlForServings(state.servingCount);
+  return parseBatchMl(freeText);
 }
 
 // ---- Keyword vocabularies ----
@@ -912,7 +893,13 @@ const PREMADE_ALCOHOL = [
 const DAIRY_WORDS = ["condensed milk", "half and half", "half-and-half", "ice cream", "yogurt", "milk", "cream"];
 const COFFEE_WORDS = ["cold brew", "espresso", "coffee"];
 const SODA_WORDS = ["ginger beer", "ginger ale", "grapefruit soda", "lemon-lime soda", "root beer", "cola", "coke", "pepsi", "sprite", "7up", "dr pepper", "tonic", "soda", "seltzer"];
+// Guava/lychee/etc. are listed first so a real named fruit in the typed
+// request always wins over a filter-chip hint fruit (pineapple/lime/lemon,
+// injected later in the array) when only one can be "the" primary flavor —
+// see selectedDrinkTypeHints()/injectFilterHintIngredients() below for how
+// the hint still gets folded in as an additional ingredient either way.
 const JUICE_FRUIT_WORDS = [
+  "guava", "lychee", "kiwi", "dragonfruit", "dragon fruit", "pomegranate",
   "pineapple", "mango", "strawberry", "cranberry", "watermelon", "passionfruit",
   "passion fruit", "peach", "cherry", "raspberry", "blueberry", "grapefruit",
   "orange", "coconut", "apple", "grape", "lime", "lemon",
@@ -1020,13 +1007,30 @@ function findDrinkFamily(normalizedText) {
 
 // ---- Building ingredient lines from a family/component list ----
 
-function buildComponentIngredients(components, batchMl, spiritMl, spiritDisplay) {
-  const nonSweetenerWeight = components.filter((c) => !c.isSweetener).reduce((a, c) => a + c.weight, 0);
+// Nudges a component's weight slightly toward the first or last item in its
+// group, driven by the same `mixerRatio` a style already carries (see
+// GENERIC_VARIANT_STYLES) — this is how the 3 custom-recipe variants differ
+// in flavor balance without touching sugar/spirit dosing math at all, which
+// stays governed entirely by recommendedSugarGrams/recommendedSpiritMl.
+function styleWeight(baseWeight, index, count, style) {
+  if (!style || count < 2) return baseWeight;
+  const delta = (style.mixerRatio - 0.8) * 0.5; // small: mixerRatio only ranges ~0.75-0.9
+  if (index === 0) return baseWeight * (1 - delta);
+  if (index === count - 1) return baseWeight * (1 + delta);
+  return baseWeight;
+}
+
+function buildComponentIngredients(components, batchMl, spiritMl, spiritDisplay, style) {
+  const nonSweetenerComponents = components.filter((c) => !c.isSweetener);
+  const nonSweetenerWeight = nonSweetenerComponents.reduce(
+    (a, c, i) => a + styleWeight(c.weight, i, nonSweetenerComponents.length, style),
+    0
+  );
   const remainingMl = batchMl - spiritMl;
   const lines = [];
-  components.forEach((c) => {
-    if (c.isSweetener) return; // handled by the sugar pass below, to stay consistent with the rewriter
-    const ml = round5((c.weight / nonSweetenerWeight) * remainingMl);
+  nonSweetenerComponents.forEach((c, i) => {
+    const w = styleWeight(c.weight, i, nonSweetenerComponents.length, style);
+    const ml = round5((w / nonSweetenerWeight) * remainingMl);
     if (ml > 0) lines.push(`${ml} ml ${c.name}`);
   });
   if (spiritMl > 0 && spiritDisplay) {
@@ -1157,7 +1161,33 @@ function injectExtraFruit(lines, normalizedText) {
   lines.splice(1, 0, `${fruitMl} ml ${fruit} juice`);
 }
 
-function buildFromFamily(family, normalizedText, batchMl, freeText) {
+// Additive version of the same idea, for drink-type filter-chip hints
+// (fresh lime juice for Citrus, pineapple juice for Tropical, etc.): each
+// hint gets folded in as its own small line pulled out of the biggest
+// existing one, UNLESS it's already represented — so "guava juice" + the
+// Citrus chip keeps guava as the star and adds a real citrus ingredient
+// alongside it, rather than one silently replacing the other. Never used
+// for the cocktail/mocktail hints — those work through the normal spirit-
+// detection/mocktail-conversion text scan instead, so alcohol amounts stay
+// governed by recommendedSpiritMl's cap rather than a naive proportional
+// split like this.
+function injectFilterHintIngredients(lines, hints) {
+  if (!hints || !hints.length || lines.length === 0) return;
+  hints.forEach((hint) => {
+    if (normalize(lines.join(" ")).includes(normalize(hint))) return; // already represented
+    const match = lines[0].match(/^(\d+(?:\.\d+)?)\s*ml\s+(.*)$/i);
+    if (!match) return;
+    const totalMl = parseFloat(match[1]);
+    const hintMl = round5(totalMl * 0.2);
+    const remainMl = round5(totalMl - hintMl);
+    if (hintMl <= 0 || remainMl <= 0) return;
+    lines[0] = `${remainMl} ml ${match[2]}`;
+    lines.splice(1, 0, `${hintMl} ml ${hint}`);
+  });
+}
+
+function buildFromFamily(family, normalizedText, batchMl, freeText, style, injectableHints) {
+  style = style || GENERIC_VARIANT_STYLES[0];
   const mocktail = MOCKTAIL_KEYWORDS.some((k) => normalizedText.includes(k));
   const spicy = SPICY_KEYWORDS.some((k) => normalizedText.includes(k));
   batchMl = Math.max(batchMl, family.minBatch || 0);
@@ -1169,10 +1199,16 @@ function buildFromFamily(family, normalizedText, batchMl, freeText) {
 
   let spiritMl = 0;
   if (isAlcoholicFamily && !mocktail && !family.premade && spiritDisplay) {
-    spiritMl = recommendedSpiritMl(batchMl);
+    spiritMl = recommendedSpiritMl(batchMl, style.spiritFactor);
   }
 
-  const lines = buildComponentIngredients(family.components, batchMl, spiritMl, isAlcoholicFamily && !mocktail && !family.premade ? spiritDisplay : null);
+  const lines = buildComponentIngredients(
+    family.components,
+    batchMl,
+    spiritMl,
+    isAlcoholicFamily && !mocktail && !family.premade ? spiritDisplay : null,
+    style
+  );
   if (family.fixedExtras) lines.push(...family.fixedExtras);
   if (isAlcoholicFamily && mocktail && spiritDisplay) {
     lines.push(`zero-proof ${spiritDisplay}, to taste`);
@@ -1182,6 +1218,7 @@ function buildFromFamily(family, normalizedText, batchMl, freeText) {
     // of these templates, so nothing extra to add here beyond what buildComponentIngredients did.
   }
   injectExtraFruit(lines, normalizedText);
+  injectFilterHintIngredients(lines, injectableHints);
 
   const prepSteps = [];
   if (family.mintPrep) applyMintPrep(lines, prepSteps);
@@ -1203,9 +1240,10 @@ function buildFromFamily(family, normalizedText, batchMl, freeText) {
   const extraFruit = normalizedIncludesAny(normalizedText, JUICE_FRUIT_WORDS);
   if (extraFruit && !normalize(familyLabel).includes(extraFruit)) familyLabel = `${titleCase(extraFruit)} ${familyLabel}`;
   const sugarFreeAsked = SUGAR_FREE_KEYWORDS.some((k) => normalizedText.includes(k));
-  const name = `${sugarFreeAsked ? "Sugar-Free " : ""}${mocktail && isAlcoholicFamily ? "Mocktail " : ""}${spicy ? "Spicy " : ""}${familyLabel}`;
+  const name = `${style.label} ${sugarFreeAsked ? "Sugar-Free " : ""}${mocktail && isAlcoholicFamily ? "Mocktail " : ""}${spicy ? "Spicy " : ""}${familyLabel}`;
 
-  const directions = `Combine everything${prepSteps.length ? " (after the prep step above)" : ""}, run ${preset}${preset === "SPIKED SLUSH" ? ", starting near the middle of the temperature range and adjusting to taste" : ""}.`;
+  let directions = `Combine everything${prepSteps.length ? " (after the prep step above)" : ""}, run ${preset}${preset === "SPIKED SLUSH" ? ", starting near the middle of the temperature range and adjusting to taste" : ""}.`;
+  if (style.note) directions += ` ${style.note}`;
 
   return finishRecipe({
     name, preset, tags, batchMl, lines, prepSteps, directions, fitInfo, freeText,
@@ -1238,7 +1276,7 @@ const GENERIC_VARIANT_STYLES = [
   },
 ];
 
-function buildGenericFromText(normalizedText, batchMl, freeText, style) {
+function buildGenericFromText(normalizedText, batchMl, freeText, style, injectableHints) {
   style = style || GENERIC_VARIANT_STYLES[0];
   const mocktail = MOCKTAIL_KEYWORDS.some((k) => normalizedText.includes(k));
   const spicy = SPICY_KEYWORDS.some((k) => normalizedText.includes(k));
@@ -1296,6 +1334,7 @@ function buildGenericFromText(normalizedText, batchMl, freeText, style) {
     noFlavorDetected = true;
   }
 
+  injectFilterHintIngredients(lines, injectableHints);
   if (spicy) applySpicyPrep(lines, prepSteps, spiritDisplay, spiritMl);
   const addedSugar = ensureSugar(lines, batchMl, preset === "MILKSHAKE" || preset === "FRAPPE" || noFlavorDetected);
 
@@ -1320,8 +1359,8 @@ function buildGenericFromText(normalizedText, batchMl, freeText, style) {
 
 // Purely custom, open-ended requests (no named family) get 3 varied
 // recipes — see GENERIC_VARIANT_STYLES above for how they differ.
-function buildGenericVariants(normalizedText, batchMl, freeText) {
-  return GENERIC_VARIANT_STYLES.map((style) => buildGenericFromText(normalizedText, batchMl, freeText, style));
+function buildGenericVariants(normalizedText, batchMl, freeText, injectableHints) {
+  return GENERIC_VARIANT_STYLES.map((style) => buildGenericFromText(normalizedText, batchMl, freeText, style, injectableHints));
 }
 
 // ---- Ingredient-list mode ("mango, coconut milk, dark rum") ----
@@ -1344,7 +1383,8 @@ function classifyIngredientToken(token) {
   return { type: "other", display: token, raw: token };
 }
 
-function buildFromTokens(tokens, normalizedText, batchMl, freeText, variantLabel, useCount) {
+function buildFromTokens(tokens, normalizedText, batchMl, freeText, variantLabel, useCount, style) {
+  style = style || GENERIC_VARIANT_STYLES[0];
   const mocktail = MOCKTAIL_KEYWORDS.some((k) => normalizedText.includes(k));
   const spicy = SPICY_KEYWORDS.some((k) => normalizedText.includes(k));
   const used = tokens.slice(0, useCount);
@@ -1367,22 +1407,24 @@ function buildFromTokens(tokens, normalizedText, batchMl, freeText, variantLabel
   let isPremade = false;
   let noFlavorDetected = false;
 
-  if (spiritToken) spiritMl = recommendedSpiritMl(batchMl);
+  if (spiritToken) spiritMl = recommendedSpiritMl(batchMl, style.spiritFactor);
   if (premadeToken) isPremade = true;
 
   const flavorBases = baseTokens.length ? baseTokens : used.filter((t) => t.type === "other");
-  const reserved = spiritMl + (isPremade ? round5(batchMl * 0.85) : 0);
+  const premadeRatio = clamp(style.mixerRatio, 0.75, 0.9);
+  const reserved = spiritMl + (isPremade ? round5(batchMl * premadeRatio) : 0);
   const remaining = batchMl - reserved;
 
   if (isPremade) {
-    lines.push(`${round5(batchMl * 0.85)} ml ${premadeToken.display}`);
-    lines.push(`${round5(batchMl * 0.15)} ml water or soda (to keep it in the 2.8-16% ABV range)`);
+    lines.push(`${round5(batchMl * premadeRatio)} ml ${premadeToken.display}`);
+    lines.push(`${round5(batchMl * (1 - premadeRatio))} ml water or soda (to keep it in the 2.8-16% ABV range)`);
   } else if (flavorBases.length > 0) {
-    const weights = flavorBases.map((_, i) => (i === 0 ? 2 : 1));
+    const weights = flavorBases.map((_, i) => styleWeight(i === 0 ? 2 : 1, i, flavorBases.length, style));
     const totalWeight = weights.reduce((a, b) => a + b, 0);
     flavorBases.forEach((tok, i) => {
       const ml = round5((weights[i] / totalWeight) * remaining);
-      const label = tok.type === "fruit" ? `${tok.display} juice or purée` : tok.type === "dairy" ? tok.display : tok.type === "soda" ? tok.display : tok.display;
+      const alreadyDescribesForm = /juice|pur[ée]e|nectar|smoothie/i.test(tok.display);
+      const label = tok.type === "fruit" && !alreadyDescribesForm ? `${tok.display} juice or purée` : tok.display;
       if (ml > 0) lines.push(`${ml} ml ${label}`);
     });
   } else {
@@ -1418,6 +1460,7 @@ function buildFromTokens(tokens, normalizedText, batchMl, freeText, variantLabel
   const name = `${spicy ? "Spicy " : ""}${variantLabel} (${usedNames})`;
   let directions = `Combine everything${prepSteps.length ? " (after the prep step above)" : ""}, run ${preset}, adjusting the temperature bar to taste.`;
   if (leftOutNames.length) directions += ` (Left out ${leftOutNames.join(", ")} for this variant — see the other version if you want everything in one batch.)`;
+  if (style.note) directions += ` ${style.note}`;
 
   return finishRecipe({ name, preset, tags, batchMl, lines, prepSteps, directions, fitInfo, freeText });
 }
@@ -1426,7 +1469,12 @@ function buildFromIngredientList(freeText, normalizedText, batchMl) {
   const rawTokens = freeText.split(",").map((t) => t.trim()).filter(Boolean);
   const classified = rawTokens.map(classifyIngredientToken);
   if (classified.length <= 2) {
-    return [buildFromTokens(classified, normalizedText, batchMl, freeText, "Custom Mix", classified.length)];
+    // Few enough tokens that dropping any would leave almost nothing — vary
+    // by flavor-balance style instead (same 3-variant treatment as
+    // everything else), using the full token set every time.
+    return GENERIC_VARIANT_STYLES.map((style) =>
+      buildFromTokens(classified, normalizedText, batchMl, freeText, style.label, classified.length, style)
+    );
   }
   // Multiple candidate ingredients, open-ended request: offer 3 variants —
   // a full mix, a simplified two-ingredient twist, and a single-ingredient
@@ -1460,27 +1508,114 @@ function pickInspirationRecipes(freeText, limit) {
     .map((s) => s.r);
 }
 
+// ---- Drink-type filter chips as generation hints (not hard requirements) ----
+//
+// The chips only ever update state (see buildChip above) — this is where
+// that state actually reaches the generator. A representative real
+// ingredient for each selected drink-type tag gets folded into the text the
+// generator scans, so "guava juice" + the Citrus chip really does end up
+// with a citrus ingredient in the result, not just a tag label on the card.
+// Selections never have to ALL be satisfied — only up to 2 of them are
+// actually used (a real requirement, not a suggestion, for keeping a
+// generated drink coherent instead of a kitchen-sink mess); applyFilter
+// SelectionNotes() below explains on the card when a selection got left out.
+const TAG_INGREDIENT_HINTS = {
+  creamy: "heavy cream",
+  refreshing: "club soda",
+  fruity: "mixed berry purée",
+  tropical: "pineapple juice",
+  citrus: "fresh lime juice",
+  coffee: "chilled cold brew",
+  cocktail: "vodka",
+  mocktail: "mocktail",
+};
+// cocktail/mocktail are scan-only: they steer the existing spirit-detection/
+// mocktail-conversion text scan (so alcohol amounts stay governed by
+// recommendedSpiritMl's cap, or get zeroed out, exactly as normal), rather
+// than being spliced in as a naive raw ingredient line the way a flavor
+// hint is — injecting alcohol that way would bypass the machine's cap.
+const SCAN_ONLY_HINT_TAGS = new Set(["cocktail", "mocktail"]);
+
+function selectedDrinkTypeHints(rawNormalizedText) {
+  const selected = Array.from(state.activeTags);
+  const used = selected.slice(0, Math.min(2, selected.length));
+  const hints = [];
+  const injectableHints = [];
+  used.forEach((tag) => {
+    // Don't override an already-named spirit/premade alcohol with the
+    // "cocktail" chip's default vodka hint.
+    if (tag === "cocktail" && (detectSpirit(rawNormalizedText) || detectPremadeAlcohol(rawNormalizedText))) return;
+    const hint = TAG_INGREDIENT_HINTS[tag];
+    if (!hint) return;
+    hints.push(hint);
+    if (!SCAN_ONLY_HINT_TAGS.has(tag)) injectableHints.push(hint);
+  });
+  return { selected, used, hints, injectableHints };
+}
+
 // ---- Entry point ----
 
-// Pure: given free text, returns an array of 1-2 custom recipe objects.
-// No DOM side effects — the caller (render()) decides where these go.
+// Pure (aside from reading the module-level `state` for filter-chip hints):
+// given free text, returns an array of custom recipe objects — always at
+// least 3, whether that's a named-family match, an ingredient list, or an
+// open-ended description (see buildFromFamily/buildFromIngredientList/
+// buildGenericVariants). No DOM side effects — the caller (render()) decides
+// where these go.
 function buildCustomRecipesFromText(freeText) {
-  const normalizedText = normalize(freeText);
+  const rawNormalizedText = normalize(freeText);
+  const { hints, injectableHints } = selectedDrinkTypeHints(rawNormalizedText);
+  const scanText = hints.length ? `${freeText} ${hints.join(" ")}` : freeText;
+  const normalizedText = normalize(scanText);
   const batchMl = resolveBatchMl(freeText);
   const looksLikeIngredientList =
     freeText.includes(",") &&
-    !/\b(i want|i'd like|need|craving|give me|make me|for a)\b/i.test(normalizedText) &&
+    !/\b(i want|i'd like|need|craving|give me|make me|for a)\b/i.test(rawNormalizedText) &&
     !findDrinkFamily(normalizedText);
 
   if (looksLikeIngredientList) {
-    return buildFromIngredientList(freeText, normalizedText, batchMl);
+    // Ingredient-list mode already treats commas as literal tokens, so the
+    // hints go in as real extra tokens here rather than through
+    // injectFilterHintIngredients (which is for the text-description paths
+    // below).
+    const listFreeText = hints.length ? `${freeText}, ${hints.join(", ")}` : freeText;
+    return buildFromIngredientList(listFreeText, normalizedText, batchMl);
   }
   const family = findDrinkFamily(normalizedText);
-  // A named drink (e.g. "margarita") gets exactly one recipe — it's a
-  // specific request, not an open-ended one. Only a purely custom request
-  // (no recognized family) gets 3 varied recipes.
-  if (family) return [buildFromFamily(family, normalizedText, batchMl, freeText)];
-  return buildGenericVariants(normalizedText, batchMl, freeText);
+  // A named drink family (e.g. "margarita") and a purely custom/open-ended
+  // request both now return 3 varied recipes — see GENERIC_VARIANT_STYLES.
+  if (family) {
+    return GENERIC_VARIANT_STYLES.map((style) => buildFromFamily(family, normalizedText, batchMl, freeText, style, injectableHints));
+  }
+  return buildGenericVariants(normalizedText, batchMl, freeText, injectableHints);
+}
+
+// Applied uniformly to whatever came back (AI or offline) in
+// resolveCustomForQuery — a recipe's tags get the actually-used drink-type
+// selections unioned in (defensive: the hint ingredient above should already
+// make detectTags() pick them up, but this guarantees it), and an honest
+// note is added whenever a selection had to be left out or the built
+// difficulty didn't land on a selected one, rather than silently dropping
+// the mismatch or forcing an incoherent recipe to comply.
+function applyFilterSelectionNotes(recipes, hintInfo) {
+  const { selected, used } = hintInfo;
+  const leftOut = selected.filter((t) => !used.includes(t));
+  const tagNote = leftOut.length
+    ? `You selected ${selected.length} drink-type filters — this build leans into ${used.map(capitalize).join(" and ")} for a coherent flavor rather than also forcing in ${leftOut.map(capitalize).join(", ")}.`
+    : null;
+  const difficultySelected = state.activeDifficulties.size > 0;
+  return recipes.map((r) => {
+    const notes = [];
+    if (tagNote) notes.push(tagNote);
+    if (difficultySelected && r.difficulty && !state.activeDifficulties.has(r.difficulty)) {
+      notes.push(`This build came out "${r.difficulty}" rather than your selected difficulty — that's what the ingredients/prep this flavor combo needed to hit safely.`);
+    }
+    if (notes.length === 0) return r;
+    return {
+      ...r,
+      tags: Array.from(new Set([...(r.tags || []), ...used])),
+      machine_fit_note: r.machine_fit_note ? `${r.machine_fit_note} ${notes.join(" ")}` : notes.join(" "),
+    };
+  });
 }
 
 // If the query mentions "sugar free"/"diet"/etc., flip the toggle on for
@@ -1514,7 +1649,7 @@ const CUSTOM_DRINK_API_URL = "https://ninja-slushi-api.johnny-y-w-wang.workers.d
 // offline before the Worker even finishes waiting on Gemini.
 const CUSTOM_API_TIMEOUT_MS = 25000;
 
-async function fetchCustomRecipesFromApi(freeText, inspirationRecipes, targetBatchMl, servingBand) {
+async function fetchCustomRecipesFromApi(freeText, inspirationRecipes, targetBatchMl, hintInfo) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), CUSTOM_API_TIMEOUT_MS);
   try {
@@ -1525,7 +1660,12 @@ async function fetchCustomRecipesFromApi(freeText, inspirationRecipes, targetBat
         query: freeText,
         sugarFree: state.sugarFree,
         targetBatchMl,
-        servingBand: servingBand || null,
+        // Best-effort hints for the AI — the client-side guarantee (real
+        // ingredient injection for offline, tag-union + honest note either
+        // way) lives in applyFilterSelectionNotes(), so this never needs to
+        // be perfectly honored to still work.
+        driveTypeFilters: hintInfo.selected,
+        difficultyFilters: Array.from(state.activeDifficulties),
         inspiration: inspirationRecipes.map((r) => ({
           name: r.name,
           preset: r.preset,
@@ -1556,10 +1696,11 @@ async function fetchCustomRecipesFromApi(freeText, inspirationRecipes, targetBat
 // initial render() call that kicked it off.
 const customState = {
   query: null, // the query text the current result/pending-state corresponds to
-  recipes: [], // last resolved recipes (AI or offline) for `query`
+  key: null, // full request fingerprint (text + filters + serving + sugar-free) — see computeCustomRequestKey()
+  recipes: [], // last resolved recipes (AI or offline) for `key`
   pending: false, // true while a fetch is in flight
   source: null, // "ai" | "offline", for the small provenance note on the card
-  requestSeq: 0, // bumped on every new query — lets a stale resolve bail out
+  requestSeq: 0, // bumped on every new request — lets a stale resolve bail out
 };
 
 function renderCustomLoadingPlaceholder() {
@@ -1572,11 +1713,12 @@ function renderCustomLoadingPlaceholder() {
 async function resolveCustomForQuery(freeText, mySeq) {
   const inspiration = pickInspirationRecipes(freeText, 6);
   const targetBatchMl = resolveBatchMl(freeText);
+  const hintInfo = selectedDrinkTypeHints(normalize(freeText));
   let recipes;
   let source;
   if (CUSTOM_DRINK_API_URL) {
     try {
-      recipes = await fetchCustomRecipesFromApi(freeText, inspiration, targetBatchMl, state.servingBand);
+      recipes = await fetchCustomRecipesFromApi(freeText, inspiration, targetBatchMl, hintInfo);
       source = "ai";
     } catch (err) {
       recipes = buildCustomRecipesFromText(freeText);
@@ -1587,13 +1729,26 @@ async function resolveCustomForQuery(freeText, mySeq) {
     source = "offline";
   }
 
-  if (mySeq !== customState.requestSeq) return; // superseded by a newer query since we started
+  if (mySeq !== customState.requestSeq) return; // superseded by a newer request since we started
 
-  // Applied uniformly regardless of source (AI or offline) — never relies
-  // on the AI having remembered the "9-12 needs 2 runs" instruction itself.
-  customState.recipes = applyServingBandCaveat(recipes);
+  // Applied uniformly regardless of source (AI or offline) — never relies on
+  // the AI having honored the filter-selection hints itself.
+  const finalRecipes = applyFilterSelectionNotes(recipes, hintInfo);
+  customState.recipes = finalRecipes;
   customState.pending = false;
   customState.source = source;
+  addHistoryEntry({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    query: freeText,
+    timestamp: Date.now(),
+    source,
+    sugarFree: state.sugarFree,
+    servingCount: state.servingCount,
+    activeTags: Array.from(state.activeTags),
+    activeDifficulties: Array.from(state.activeDifficulties),
+    recipes: finalRecipes,
+    starred: false,
+  });
   render();
 }
 
@@ -1694,9 +1849,181 @@ function renderCustomRecipeCard(recipe, source) {
   return card;
 }
 
+/* ---------------------------------------------------------------------
+ * Local custom-drink history, with starring
+ *
+ * Every resolved custom search (AI or offline) gets recorded in
+ * localStorage — query text, the filter/serving/sugar-free context it was
+ * built under, and the actual resolved recipes. Clicking an entry restores
+ * it exactly (no re-query, no regeneration) — the point being: an AI build
+ * can vary run-to-run even for a similar request, so this is how you get
+ * back to the *exact* one you saw before rather than a fresh, possibly
+ * different, one. Starring exempts an entry from the trim-to-cap eviction
+ * below, so favorites stick around indefinitely; per-browser only (this
+ * never leaves localStorage, so it doesn't sync across devices).
+ * ------------------------------------------------------------------- */
+
+const HISTORY_STORAGE_KEY = "ninja-slushi-custom-history";
+const HISTORY_MAX_UNSTARRED = 20;
+
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return []; // localStorage unavailable (private mode, etc.) — history just won't persist
+  }
+}
+
+function saveHistory(history) {
+  try {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+  } catch (e) {
+    /* localStorage unavailable — silently skip persisting */
+  }
+}
+
+function addHistoryEntry(entry) {
+  const history = loadHistory();
+  history.unshift(entry);
+  // Trim unstarred entries beyond the cap; never evict a starred one.
+  let unstarredSeen = 0;
+  const trimmed = history.filter((h) => {
+    if (h.starred) return true;
+    unstarredSeen += 1;
+    return unstarredSeen <= HISTORY_MAX_UNSTARRED;
+  });
+  saveHistory(trimmed);
+  renderHistoryPanel();
+}
+
+function toggleStarHistoryEntry(id) {
+  const history = loadHistory();
+  const entry = history.find((h) => h.id === id);
+  if (!entry) return;
+  entry.starred = !entry.starred;
+  saveHistory(history);
+  renderHistoryPanel();
+}
+
+function deleteHistoryEntry(id) {
+  saveHistory(loadHistory().filter((h) => h.id !== id));
+  renderHistoryPanel();
+}
+
+function formatHistoryTimestamp(ts) {
+  return new Date(ts).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
+// Restores every part of the search context an entry was built under, then
+// feeds its stored recipes straight into customState — no fetch, no
+// regeneration — which is the entire point of the feature.
+function restoreHistoryEntry(entry) {
+  state.query = entry.query;
+  state.sugarFree = Boolean(entry.sugarFree);
+  state.servingCount = entry.servingCount || null;
+  state.activeTags = new Set(entry.activeTags || []);
+  state.activeDifficulties = new Set(entry.activeDifficulties || []);
+
+  els.query.value = entry.query;
+  els.sugarFreeToggle.checked = state.sugarFree;
+  document.body.classList.toggle("sugar-free-mode", state.sugarFree);
+  document.querySelectorAll("#tagFilters .chip").forEach((c) => {
+    const active = state.activeTags.has(c.dataset.value);
+    c.classList.toggle("active", active);
+    c.setAttribute("aria-pressed", String(active));
+  });
+  document.querySelectorAll("#difficultyFilters .chip").forEach((c) => {
+    const active = state.activeDifficulties.has(c.dataset.value);
+    c.classList.toggle("active", active);
+    c.setAttribute("aria-pressed", String(active));
+  });
+  if (els.servingSizeFilters) {
+    els.servingSizeFilters.querySelectorAll(".chip").forEach((c) => {
+      const active = Number(c.dataset.value) === state.servingCount;
+      c.classList.toggle("active", active);
+      c.setAttribute("aria-pressed", String(active));
+    });
+  }
+
+  const trimmedQuery = entry.query.trim();
+  customState.query = trimmedQuery;
+  customState.key = computeCustomRequestKey(trimmedQuery);
+  customState.recipes = entry.recipes;
+  customState.pending = false;
+  customState.source = entry.source;
+  customState.requestSeq++; // invalidate any in-flight fetch for a different request
+  render();
+}
+
+function renderHistoryPanel() {
+  if (!els.historyPanel || !els.historyList) return;
+  const history = loadHistory();
+  els.historyList.innerHTML = "";
+  if (history.length === 0) {
+    els.historyPanel.hidden = true;
+    return;
+  }
+  els.historyPanel.hidden = false;
+  const sorted = [...history].sort((a, b) => Number(b.starred) - Number(a.starred) || b.timestamp - a.timestamp);
+  sorted.forEach((entry) => {
+    const item = document.createElement("div");
+    item.className = "history-item";
+
+    const starBtn = document.createElement("button");
+    starBtn.type = "button";
+    starBtn.className = `history-star${entry.starred ? " starred" : ""}`;
+    starBtn.setAttribute("aria-label", entry.starred ? "Unstar this build" : "Star this build");
+    starBtn.textContent = entry.starred ? "⭐" : "☆";
+    starBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleStarHistoryEntry(entry.id);
+    });
+
+    const label = document.createElement("button");
+    label.type = "button";
+    label.className = "history-label";
+    label.textContent = `${entry.query} · ${formatHistoryTimestamp(entry.timestamp)}`;
+    label.title = "View this custom build again (no re-query)";
+    label.addEventListener("click", () => restoreHistoryEntry(entry));
+
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "history-delete";
+    delBtn.setAttribute("aria-label", "Remove from history");
+    delBtn.textContent = "✕";
+    delBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      deleteHistoryEntry(entry.id);
+    });
+
+    item.appendChild(starBtn);
+    item.appendChild(label);
+    item.appendChild(delBtn);
+    els.historyList.appendChild(item);
+  });
+}
+
+// A full fingerprint of everything that changes what gets GENERATED — not
+// just the typed text, but every chip and the serving size too. Changing
+// any of it and hitting Search counts as a new request; an exact repeat
+// reuses the cached result instead of re-querying. Sugar-Free is
+// deliberately excluded: every generated recipe already carries both a
+// regular and a sugar-free ingredient list, so toggling it is a display
+// choice handled at render time, not something that needs regenerating.
+function computeCustomRequestKey(trimmedQuery) {
+  return JSON.stringify({
+    q: trimmedQuery,
+    tags: Array.from(state.activeTags).sort(),
+    diff: Array.from(state.activeDifficulties).sort(),
+    serving: state.servingCount,
+  });
+}
+
 function render() {
   const trimmedQuery = state.query.trim();
-  const hasFilters = state.activeTags.size > 0 || state.activeDifficulties.size > 0 || state.activePresets.size > 0;
+  const hasFilters = state.activeTags.size > 0 || state.activeDifficulties.size > 0;
   const hasSearched = trimmedQuery.length > 0 || hasFilters;
   const wantsCustom = trimmedQuery.length >= CUSTOM_MIN_QUERY_LENGTH;
 
@@ -1705,6 +2032,7 @@ function render() {
   if (!hasSearched) {
     customState.requestSeq++; // invalidate any in-flight fetch
     customState.query = null;
+    customState.key = null;
     customState.recipes = [];
     customState.pending = false;
     const prompt = document.createElement("p");
@@ -1717,28 +2045,32 @@ function render() {
 
   if (wantsCustom) {
     maybeAutoEnableSugarFree(normalize(trimmedQuery));
-    if (trimmedQuery !== customState.query) {
-      // New query text — reset and kick off the fetch/build right away.
-      // render() only runs on an explicit action (Search button, Enter, a
-      // filter click), never on every keystroke, so there's no need to
-      // additionally debounce here — the button *is* the debounce.
+    const requestKey = computeCustomRequestKey(trimmedQuery);
+    if (requestKey !== customState.key) {
+      // Text OR any selection (filters, serving size, sugar-free) changed
+      // since the last search — reset and kick off the fetch/build right
+      // away. render() only runs on an explicit action (Search button,
+      // Enter), never on every keystroke or chip click, so there's no need
+      // to additionally debounce here — the Search button *is* the debounce.
       customState.query = trimmedQuery;
+      customState.key = requestKey;
       customState.recipes = [];
       customState.pending = true;
       customState.requestSeq++;
       const mySeq = customState.requestSeq;
       resolveCustomForQuery(trimmedQuery, mySeq);
     }
-    // else: same query as last render (e.g. only a filter/toggle changed) —
-    // customState already holds the right pending/resolved data, reuse it.
+    // else: an exact repeat of the last search — customState already holds
+    // the right pending/resolved data, reuse it rather than re-querying.
   } else {
     customState.requestSeq++;
     customState.query = null;
+    customState.key = null;
     customState.recipes = [];
     customState.pending = false;
   }
 
-  const filtered = getFilteredRecipes().filter((r) => matchesPreset(r, state.activePresets));
+  const filtered = getFilteredRecipes();
 
   if (filtered.length === 0 && !wantsCustom) {
     const empty = document.createElement("p");
@@ -1779,11 +2111,13 @@ function render() {
 function init() {
   initThemeSwitcher();
   initFilterChips();
-  initServingBandChips();
+  initServingSizeChips();
+  renderHistoryPanel();
 
-  // Typing alone doesn't trigger a search — only an explicit action does
-  // (the Search button, pressing Enter, or a filter chip), so the custom
-  // drink builder only ever fires once per finished query, not per keystroke.
+  // Typing alone doesn't trigger a search, and neither does clicking a
+  // filter/serving chip — only an explicit action does (the Search button
+  // or pressing Enter), so the custom drink builder fires once per finished
+  // selection, not once per click.
   els.query.addEventListener("input", (e) => {
     state.query = e.target.value;
   });
@@ -1808,8 +2142,7 @@ function init() {
     state.query = "";
     state.activeTags.clear();
     state.activeDifficulties.clear();
-    state.activePresets.clear();
-    state.servingBand = null;
+    state.servingCount = null;
     els.query.value = "";
     document.querySelectorAll(".chip.active").forEach((c) => {
       c.classList.remove("active");
