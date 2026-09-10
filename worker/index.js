@@ -41,6 +41,37 @@ const ALLOWED_ORIGINS = new Set([
 const MAX_QUERY_LENGTH = 300;
 const MAX_INSPIRATION_RECIPES = 6;
 const GEMINI_TIMEOUT_MS = 20000;
+const GEMINI_RETRY_STATUSES = new Set([429, 503]); // rate-limited / temporarily overloaded — Google's own guidance is "try again"
+const GEMINI_RETRY_DELAY_MS = 1500;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function callGeminiOnce(apiKey, requestBody) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
+  try {
+    return await fetch(geminiUrl(apiKey), {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+// One retry, only for transient failures (429 rate-limited / 503 overloaded)
+// — never for 400/403/404, where retrying the same bad request just wastes
+// another 20s timeout window for no benefit.
+async function callGeminiWithRetry(apiKey, requestBody) {
+  const first = await callGeminiOnce(apiKey, requestBody);
+  if (first.ok || !GEMINI_RETRY_STATUSES.has(first.status)) return first;
+  await sleep(GEMINI_RETRY_DELAY_MS);
+  return callGeminiOnce(apiKey, requestBody);
+}
 
 // Same machine chemistry as the offline generator (see
 // references/sugar-alcohol-and-alerts.md and references/additives-and-texture.md
@@ -208,18 +239,7 @@ export default {
 
     let geminiResponse;
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
-      try {
-        geminiResponse = await fetch(geminiUrl(env.GEMINI_API_KEY), {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(geminiRequestBody),
-          signal: controller.signal,
-        });
-      } finally {
-        clearTimeout(timeoutId);
-      }
+      geminiResponse = await callGeminiWithRetry(env.GEMINI_API_KEY, geminiRequestBody);
     } catch (err) {
       return json({ error: `Upstream request failed: ${err.message}` }, 502, headers);
     }
