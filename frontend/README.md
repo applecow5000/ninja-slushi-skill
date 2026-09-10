@@ -147,6 +147,34 @@ that the footer with repo-relative links is gone).
   could land well outside 13-15 depending on the base), and a defensive
   clamp catches an AI response suggesting an absurd amount of syrup for
   the batch size regardless of how it got there.
+- **Fixed a real word-collision bug in the ABV/Brix math**: "gin" (the
+  spirit) was matching as a plain substring inside "ginger" — meaning
+  "ginger ale"/"ginger beer" (both extremely common mixers in this exact
+  app) got miscounted as alcohol, corrupting the ABV, the batch total, and
+  the ingredient ratios for anything built around them (a Moscow Mule, a
+  Whiskey & Ginger, ...). Separately, "beer" (a real premade-alcohol
+  keyword) was matching inside "ginger beer"/"root beer," which really are
+  non-alcoholic sodas that happen to contain that word. All keyword
+  matching now requires a real word boundary (`\bgin\b`, not just
+  "contains gin somewhere"), so a short keyword can never misfire inside a
+  longer, unrelated word again.
+- **Lime/lemon are treated as a sour accent, not a base juice** — earlier
+  custom builds could call for 80%+ straight lime or lemon juice (plus a
+  large sugar dose to compensate for how sour that actually is) whenever
+  lime/lemon was the only detected flavor, which isn't a realistic recipe.
+  They're now capped to a small splash (water fills the rest) unless
+  they're part of a named family (margarita, daiquiri, ...) that already
+  specifies its own realistic ratio. "Limeade"/"spiked limeade" are also
+  now recognized as their own already-balanced, already-sweetened mixer
+  (the lime counterpart to the existing lemonade family), instead of
+  "limeade" being parsed as if you'd asked for straight lime juice.
+- The AI backend is now explicitly instructed to always use metric
+  ml/g units in an exact "<number> ml/g <name>" format (never a range,
+  "to taste," or an imperial unit) — the client-side math depends on
+  parsing that exact shape — and the client itself now has a fallback
+  parser for oz/cup/tbsp/tsp as a defense-in-depth measure if it ever
+  slips. Also strengthened the prompt to explicitly forbid returning a
+  single-serving/single-glass recipe when a full batch size was requested.
 - **🕘 Recent custom drinks, with starring** — every resolved custom search
   (AI or offline) is saved locally (`localStorage`, per-browser) with its
   query text, filter/serving-size context, and the actual recipes it

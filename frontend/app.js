@@ -181,6 +181,10 @@ const ML_PER_LITER = 1000;
 function unitToMlOrG(value, unit) {
   const u = unit.toLowerCase();
   if (u === "l") return value * ML_PER_LITER;
+  if (u === "oz") return value * OZ_TO_ML;
+  if (u === "cup" || u === "cups") return value * 240;
+  if (u === "tbsp") return value * 15;
+  if (u === "tsp") return value * 5;
   return value; // "ml" or "g" pass through as-is
 }
 
@@ -208,12 +212,16 @@ function parseQuantityToken(line) {
     const hi = unitToMlOrG(parseFloat(m[2]), unit);
     return { loVal: lo, hiVal: hi, avgVal: (lo + hi) / 2, unit: unit === "l" ? "ml" : unit, isRange: true, rest: m[4] };
   }
-  // A plain single value, e.g. "600 ml ...", "50 g ...", "1.2 L ...".
-  m = line.match(/^(\d+(?:\.\d+)?)\s*(ml|g|l)\b(.*)$/i);
+  // A plain single value, e.g. "600 ml ...", "50 g ...", "1.2 L ...". Also
+  // accepts oz/cup/tbsp/tsp as a fallback — the AI backend is instructed to
+  // always use ml/g, but this keeps ABV/Brix math working even if it slips
+  // and uses an imperial unit instead.
+  m = line.match(/^(\d+(?:\.\d+)?)\s*(ml|g|l|oz|cups?|tbsp|tsp)\b(.*)$/i);
   if (m) {
-    const unit = m[2].toLowerCase();
-    const val = unitToMlOrG(parseFloat(m[1]), unit);
-    return { loVal: val, hiVal: val, avgVal: val, unit: unit === "l" ? "ml" : unit, isRange: false, rest: m[3] };
+    const rawUnit = m[2].toLowerCase();
+    const unit = rawUnit === "g" ? "g" : "ml"; // everything else is a volume, normalized to ml
+    const val = unitToMlOrG(parseFloat(m[1]), rawUnit);
+    return { loVal: val, hiVal: val, avgVal: val, unit, isRange: false, rest: m[3] };
   }
   return null;
 }
@@ -324,13 +332,13 @@ function estimateAbv(ingredientLines, batchMl) {
     if (!parsed || parsed.unit !== "ml") return;
     const qty = parsed.avgVal; // range recipes: estimate from the midpoint
     const t = normalize(parsed.rest);
-    const spiritKey = SPIRITS.find((s) => t.includes(s));
+    const spiritKey = SPIRITS.find((s) => includesWord(t, s));
     if (spiritKey) {
       found = true;
       totalEthanolMl += qty * (spiritAbvPercent(spiritKey) / 100);
       return;
     }
-    const premadeKey = PREMADE_ALCOHOL.find((s) => t.includes(s));
+    const premadeKey = PREMADE_ALCOHOL.find((s) => isPremadeAlcoholMatch(t, s));
     if (premadeKey) {
       found = true;
       totalEthanolMl += qty * (premadeAbvPercent(premadeKey) / 100);
@@ -435,9 +443,9 @@ function applyAbvTargetToLines(lines, batchMl, targetAbvPercent) {
       const parsed = parseQuantityToken(line);
       if (!parsed || parsed.unit !== "ml") return null;
       const t = normalize(parsed.rest);
-      const spiritKey = SPIRITS.find((s) => t.includes(s));
+      const spiritKey = SPIRITS.find((s) => includesWord(t, s));
       if (spiritKey) return { i, kind: "spirit", ml: parsed.avgVal, abvPct: spiritAbvPercent(spiritKey) };
-      const premadeKey = PREMADE_ALCOHOL.find((s) => t.includes(s));
+      const premadeKey = PREMADE_ALCOHOL.find((s) => isPremadeAlcoholMatch(t, s));
       if (premadeKey) return { i, kind: "premade", ml: parsed.avgVal, abvPct: premadeAbvPercent(premadeKey) };
       return null;
     })
@@ -510,6 +518,33 @@ const state = {
 
 function normalize(s) {
   return s.toLowerCase().trim();
+}
+
+// Word-boundary-aware substring check. Plain .includes() lets short
+// keywords collide with common longer words that happen to contain
+// them — most importantly "gin" (a real spirit) matching inside "ginger"
+// (as in "ginger ale"/"ginger beer", both extremely common in this app's
+// own vocabulary), which without this fix miscounts a plain mixer as
+// alcohol and corrupts every downstream ABV/volume calculation. \b treats
+// each candidate as a whole word/phrase, so "gin" only matches standalone
+// "gin," never "ginger."
+function includesWord(haystack, word) {
+  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`\\b${escaped}\\b`, "i").test(haystack);
+}
+
+// "ginger beer"/"root beer"/"birch beer" are non-alcoholic sodas that
+// happen to contain "beer" as a genuine standalone word — includesWord
+// alone can't tell them apart from the alcoholic drink, since "beer" really
+// is its own word in "ginger beer" too. Strip these known phrases out
+// before matching PREMADE_ALCOHOL's "beer" entry, so it only ever matches
+// the real thing.
+function withoutNonAlcoholicBeerPhrases(text) {
+  return text.replace(/\b(?:ginger|root|birch)\s+beer\b/gi, "");
+}
+
+function isPremadeAlcoholMatch(haystack, s) {
+  return includesWord(s === "beer" ? withoutNonAlcoholicBeerPhrases(haystack) : haystack, s);
 }
 
 // One combined search box: matches the recipe name OR any ingredient line
@@ -1226,13 +1261,37 @@ const JUICE_FRUIT_WORDS = [
   "passion fruit", "peach", "cherry", "raspberry", "blueberry", "grapefruit",
   "orange", "coconut", "apple", "grape", "lime", "lemon",
 ];
+// Lime/lemon are sour accents, never a mild base juice like orange/mango/
+// guava/etc. — real recipes use them as a splash (a squeeze, a couple
+// tablespoons), not as 80%+ of the batch. Anywhere a lone detected fruit
+// would otherwise become "most of the batch," these two get capped to a
+// small accent share with water filling the rest instead — see
+// buildGenericFromText/buildFromTokens. Named families (margarita,
+// daiquiri, ...) already specify their own realistic lime/lemon ratios and
+// aren't affected.
+const ACCENT_CITRUS_WORDS = ["lime", "lemon"];
+const ACCENT_CITRUS_FRACTION = 0.12;
 // Fresh herbs/aromatics — never a pourable liquid base by themselves, so
 // they're handled as an infusion (see applyHerbPrep) rather than being
 // classified as a flavor base like a fruit/soda/dairy token would be.
 const HERB_WORDS = ["mint", "basil", "rosemary", "thyme", "sage", "lavender", "cilantro"];
 
 function normalizedIncludesAny(haystack, needles) {
-  return needles.find((n) => haystack.includes(n)) || null;
+  return needles.find((n) => includesWord(haystack, n)) || null;
+}
+
+// Builds the "flavor + water" split of a batch, treating a lone lime/lemon
+// detection as a small accent splash (see ACCENT_CITRUS_WORDS) rather than
+// the usual mixerRatio-sized base — used by both the generic fallback and
+// (via the same idea) anywhere else a single detected fruit would
+// otherwise become the bulk of the batch.
+function buildFruitOrSodaLines(remainingMl, fruit, soda, mixerRatio) {
+  if (fruit && ACCENT_CITRUS_WORDS.includes(fruit) && !soda) {
+    const accentMl = round5(remainingMl * ACCENT_CITRUS_FRACTION);
+    return [`${accentMl} ml fresh ${fruit} juice`, `${round5(remainingMl - accentMl)} ml water`];
+  }
+  const mixerName = fruit ? `${fruit} juice` : soda || "juice or soda of choice";
+  return [`${round5(remainingMl * mixerRatio)} ml ${mixerName}`, `${round5(remainingMl * (1 - mixerRatio))} ml water`];
 }
 
 // ---- Named drink-family templates ----
@@ -1313,20 +1372,35 @@ const DRINK_FAMILIES = [
     components: [{ name: "lemonade", weight: 5 }],
   },
   {
+    // "limeade" is its own already-diluted, already-sweetened mixer — same
+    // template shape as lemonade, so plain "lime" detection in the generic
+    // fallback below never mistakes it for straight lime juice.
+    aliases: ["spiked limeade"], preset: "SPIKED SLUSH", tags: ["cocktail", "citrus", "refreshing"], spirit: "vodka",
+    components: [{ name: "limeade", weight: 4 }],
+  },
+  {
+    aliases: ["limeade"], preset: "SLUSH", tags: ["refreshing", "citrus"],
+    components: [{ name: "limeade", weight: 5 }],
+  },
+  {
     aliases: ["iced tea", "ice tea"], preset: "SLUSH", tags: ["refreshing"],
     components: [{ name: "sweetened iced tea", weight: 5 }],
   },
 ];
 
 function findDrinkFamily(normalizedText) {
-  // "spiked lemonade" must win over plain "lemonade"; families are checked
-  // in the declared order above, so list the more specific one first.
+  // "spiked lemonade"/"spiked limeade" must win over the plain form;
+  // families are checked in the declared order above, so list the more
+  // specific one first.
   for (const family of DRINK_FAMILIES) {
     if (family.aliases.some((a) => normalizedText.includes(a))) return family;
   }
-  // "lemonade" + any spirit word but no named cocktail → treat as spiked lemonade
-  if (normalizedText.includes("lemonade") && SPIRITS.some((s) => normalizedText.includes(s))) {
+  // "lemonade"/"limeade" + any spirit word but no named cocktail → treat as spiked
+  if (normalizedText.includes("lemonade") && SPIRITS.some((s) => includesWord(normalizedText, s))) {
     return DRINK_FAMILIES.find((f) => f.aliases.includes("spiked lemonade"));
+  }
+  if (normalizedText.includes("limeade") && SPIRITS.some((s) => includesWord(normalizedText, s))) {
+    return DRINK_FAMILIES.find((f) => f.aliases.includes("spiked limeade"));
   }
   return null;
 }
@@ -1482,11 +1556,11 @@ function titleCase(s) {
 }
 
 function detectSpirit(normalizedText) {
-  return SPIRITS.find((s) => normalizedText.includes(s)) || null;
+  return SPIRITS.find((s) => includesWord(normalizedText, s)) || null;
 }
 
 function detectPremadeAlcohol(normalizedText) {
-  return PREMADE_ALCOHOL.find((s) => normalizedText.includes(s)) || null;
+  return PREMADE_ALCOHOL.find((s) => isPremadeAlcoholMatch(normalizedText, s)) || null;
 }
 
 function detectTags(normalizedText) {
@@ -1666,9 +1740,9 @@ function buildGenericFromText(normalizedText, batchMl, freeText, style, injectab
     // Seed amount only — applyAbvTargetToLines below resizes this (and
     // rebalances the mixer/water split) to the buzz-level's real target ABV.
     spiritMl = recommendedSpiritMl(batchMl);
-    const mixerName = fruit ? `${fruit} juice` : soda ? soda : "juice or soda of choice";
     const remaining = batchMl - spiritMl;
-    lines.push(`${round5(remaining * style.mixerRatio)} ml ${mixerName}`, `${round5(remaining * (1 - style.mixerRatio))} ml water`, `${spiritMl} ml ${spiritDisplay}`);
+    lines.push(...buildFruitOrSodaLines(remaining, fruit, soda, style.mixerRatio));
+    lines.push(`${spiritMl} ml ${spiritDisplay}`);
   } else if (premadeAlcohol) {
     preset = "SPIKED SLUSH";
     isPremade = true;
@@ -1688,11 +1762,17 @@ function buildGenericFromText(normalizedText, batchMl, freeText, style, injectab
     batchMl = Math.max(batchMl, 720);
     const coffeeRatio = clamp(0.65 + (style.mixerRatio - 0.8) * 0.3, 0.55, 0.75);
     lines.push(`${round5(batchMl * coffeeRatio)} ml chilled black coffee`, `${round5(batchMl * (0.98 - coffeeRatio))} ml half & half`);
-  } else if (normalizedText.includes("smoothie") || normalizedText.includes("100% juice") || normalizedText.includes("real juice")) {
+  } else if (
+    (normalizedText.includes("smoothie") || normalizedText.includes("100% juice") || normalizedText.includes("real juice")) &&
+    !(fruit && ACCENT_CITRUS_WORDS.includes(fruit) && !soda)
+  ) {
+    // Excluded when the only detected flavor is straight lime/lemon — a
+    // "100% lime juice" batch isn't realistic even when asked for "100%
+    // juice"; falls through to the accent-aware handling below instead.
     preset = "FROZEN JUICE";
     lines.push(`${round5(batchMl)} ml ${fruit ? `${fruit} juice` : "100% juice of choice"}`);
   } else if (fruit || soda) {
-    lines.push(`${round5(batchMl * style.mixerRatio)} ml ${fruit ? `${fruit} juice` : soda}`, `${round5(batchMl * (1 - style.mixerRatio))} ml water`);
+    lines.push(...buildFruitOrSodaLines(batchMl, fruit, soda, style.mixerRatio));
   } else {
     // No flavor detected at all — plain water needs sugar force-added below
     // regardless of keyword matching (there's nothing sweet to detect yet).
@@ -1802,9 +1882,18 @@ function buildFromTokens(tokens, normalizedText, batchMl, freeText, variantLabel
   const reserved = spiritMl + (isPremade ? round5(batchMl * premadeRatio) : 0);
   const remaining = batchMl - reserved;
 
+  const soleAccentCitrus =
+    flavorBases.length === 1 && flavorBases[0].type === "fruit" && ACCENT_CITRUS_WORDS.includes(normalize(flavorBases[0].display));
+
   if (isPremade) {
     lines.push(`${round5(batchMl * premadeRatio)} ml ${premadeToken.display}`);
     lines.push(`${round5(batchMl * (1 - premadeRatio))} ml water or soda (to keep it in the 2.8-16% ABV range)`);
+  } else if (soleAccentCitrus) {
+    // A lone lime/lemon is a sour accent, never the bulk of the batch (see
+    // ACCENT_CITRUS_WORDS) — cap it to a splash and fill the rest with
+    // water, the same treatment the generic fallback already gets.
+    const accentMl = round5(remaining * ACCENT_CITRUS_FRACTION);
+    lines.push(`${accentMl} ml fresh ${flavorBases[0].display} juice`, `${round5(remaining - accentMl)} ml water`);
   } else if (flavorBases.length > 0) {
     const weights = flavorBases.map((_, i) => styleWeight(i === 0 ? 2 : 1, i, flavorBases.length, style));
     const totalWeight = weights.reduce((a, b) => a + b, 0);
@@ -2146,7 +2235,7 @@ function rescaleRecipeForSelections(recipe, newBatchMl, targetAbvPercent) {
   if (recipe.preset === "SPIKED SLUSH" && abvResult.actualAbvPercent != null) {
     const isPremadeLine = newLines.some((l) => {
       const p = parseQuantityToken(l);
-      return p && p.unit === "ml" && PREMADE_ALCOHOL.some((s) => normalize(p.rest).includes(s));
+      return p && p.unit === "ml" && PREMADE_ALCOHOL.some((s) => isPremadeAlcoholMatch(normalize(p.rest), s));
     });
     machineFit = machineFitNote({
       isSpiked: !isPremadeLine,

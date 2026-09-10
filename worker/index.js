@@ -120,9 +120,9 @@ BATCH SIZE: if a target batch size in ml is given below, size every recipe (and 
 Field meanings for the required JSON output:
 - batch_note: human-readable batch size + serving count, e.g. "1.2 L, about 4-6 servings"
 - prep_steps: any advance prep/infusion steps with real quantities and times; empty array if none needed
-- ingredients: the regular (full-sugar/full-alcohol) ingredient list, each a "qty + ingredient" string
+- ingredients: the regular (full-sugar/full-alcohol) ingredient list. CRITICAL FORMAT RULE: every entry MUST start with exactly "<number> ml <name>" or "<number> g <name>" — metric units ONLY (never oz/cup/tbsp/tsp/fl oz), a single plain number (never a range like "2-3", never "to taste", never "a splash of"). A downstream calculator parses this exact leading "<number> <unit>" pattern to compute real ABV/sugar content — any other format silently breaks that math.
 - machine_fit_note: 1-2 sentences on why this hits the sugar/alcohol requirements (cite approx ABV%/Brix% or the relevant rule)
-- sugar_free_ingredients: the allulose-substituted ingredient list
+- sugar_free_ingredients: the allulose-substituted ingredient list, same format rule as above
 - sugar_free_note: what changed for the sugar-free version and why it still freezes
 - inspired_by: names of the given reference recipes this drew from, or an empty array`;
 
@@ -255,7 +255,7 @@ export default {
       (sugarFreeHint ? "\n\n(The visitor currently has Sugar-Free mode on — both versions are still required, but lean into making the sugar-free version genuinely good.)" : "");
 
     if (targetBatchMl) {
-      userText += `\n\nTarget batch size: ${targetBatchMl} ml — size every ingredient quantity (and the sugar/spirit dosing) to this exact total.`;
+      userText += `\n\nTarget batch size: ${targetBatchMl} ml — the sum of every ingredient's ml quantity in the "ingredients" array MUST add up to this exact total (grams of sugar/allulose don't count toward this sum). Do NOT return a single-serving/single-glass recipe (e.g. a typical "2 oz spirit + 4 oz mixer" drink) even if that's the well-known ratio for this drink — scale that ratio UP to fill the full ${targetBatchMl} ml batch.`;
     }
     if (targetAbvPercent && targetBatchMl) {
       userText += `\n\nTarget ABV (alcoholic recipes only): ${targetAbvPercent}% of the total batch — solve for the spirit/premade-alcohol volume that achieves this REAL ABV (using each ingredient's actual strength, not just a volume ratio — see the ALCOHOL section above), then still respect the hard spirit-volume cap for this batch size; if the cap forces a lower actual ABV, that's fine, just say so in machine_fit_note. Not applicable to non-alcoholic recipes.`;
