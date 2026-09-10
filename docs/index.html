@@ -41,16 +41,17 @@
     </div>
     <h1>🎂 Erica's Birthday Bash Slushi Station <span class="wiggle">🥳</span></h1>
     <p class="subtitle">
-      Search the recipe box, filter by drink type and difficulty, or describe a
-      custom drink and build it within the machine's real limits. 🍭
+      Search by name or ingredient, or describe a custom drink ("spicy
+      margarita", "mango, coconut milk, rum") to get a build made within the
+      machine's real limits — right alongside any matching recipes. 🍭
     </p>
   </header>
 
   <main class="app-main">
     <section class="controls">
       <div class="field">
-        <label for="query">Search recipes by name or ingredient</label>
-        <input id="query" type="search" placeholder="e.g. margarita, mango, vodka…" autocomplete="off" />
+        <label for="query">Search recipes, or describe a custom drink</label>
+        <input id="query" type="search" placeholder='e.g. "margarita", "mango, coconut milk, rum", "spicy daiquiri"' autocomplete="off" />
       </div>
 
       <div class="filter-group">
@@ -83,30 +84,6 @@
         <span id="resultCount"></span>
       </div>
       <div id="results" class="results-grid"></div>
-    </section>
-
-    <section class="custom-section">
-      <div class="custom-header">
-        <h2>✨ Custom Drink Creator</h2>
-      </div>
-      <p class="custom-blurb">
-        Describe what you're craving ("I want a spicy margarita", "something
-        creamy and chocolatey") or just list what's in your fridge ("mango,
-        coconut milk, dark rum") — this builds one or more custom recipes that
-        actually work in the machine (right sugar/alcohol balance to freeze,
-        batch size, any advance prep like an infusion), inspired by recipes
-        already in this dataset where relevant. Runs fully offline — no API
-        key, no network call, just keyword matching against the machine's
-        real chemistry.
-      </p>
-
-      <div class="custom-input-row">
-        <textarea id="customPrompt" rows="2" placeholder='e.g. "I want a spicy margarita" or "mango, coconut milk, dark rum"'></textarea>
-        <button id="generateCustomBtn" type="button" class="clear-btn generate-btn">Create My Drink ✨</button>
-      </div>
-
-      <p id="customStatus" class="custom-status" hidden></p>
-      <div id="customResults" class="results-grid custom-results-grid"></div>
     </section>
   </main>
 

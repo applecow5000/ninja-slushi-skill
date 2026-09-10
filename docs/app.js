@@ -140,10 +140,6 @@ const els = {
   resultCount: document.getElementById("resultCount"),
   clearFilters: document.getElementById("clearFilters"),
   presetFilters: document.getElementById("presetFilters"),
-  customPrompt: document.getElementById("customPrompt"),
-  generateCustomBtn: document.getElementById("generateCustomBtn"),
-  customStatus: document.getElementById("customStatus"),
-  customResults: document.getElementById("customResults"),
 };
 
 const DIFFICULTIES = ["easy", "medium", "advanced"];
@@ -395,20 +391,22 @@ function initThemeSwitcher() {
 }
 
 /* =======================================================================
- * Custom Drink Creator (fully offline, rule-based)
+ * Custom drink builder (fully offline, rule-based)
  *
- * Free-text ("I want a spicy margarita" / "mango, coconut milk, dark rum")
- * is parsed with keyword/template matching — no API key, no network call,
- * works from file://. It's matched against a small library of named-drink
- * templates and the machine's real chemistry (see references/sugar-alcohol-
- * and-alerts.md and references/additives-and-texture.md) to size the batch,
- * cap alcohol, and top up sugar so what comes back will actually freeze.
- * Every generated recipe reuses the same rewriteIngredientForSugarFree()
- * used for the dataset, so its sugar-free variant is consistent app-wide,
- * and pickInspirationRecipes() credits the closest dataset matches.
+ * Folded into the single search box: whatever you type there both filters
+ * the dataset (as before) AND — once it's at least CUSTOM_MIN_QUERY_LENGTH
+ * characters — is parsed with keyword/template matching into a synthesized
+ * custom recipe, appended into the same results grid. No API key, no
+ * network call, works from file://. Free text ("I want a spicy margarita",
+ * "mango, coconut milk, dark rum") is matched against a small library of
+ * named-drink templates and the machine's real chemistry (see references/
+ * sugar-alcohol-and-alerts.md and references/additives-and-texture.md) to
+ * size the batch, cap alcohol, and top up sugar so what comes back will
+ * actually freeze. Every generated recipe reuses the same
+ * rewriteIngredientForSugarFree() used for the dataset, so its sugar-free
+ * variant is consistent app-wide, and pickInspirationRecipes() credits the
+ * closest dataset matches.
  * ===================================================================== */
-
-let lastCustomRecipes = [];
 
 // ---- Machine chemistry (see references/sugar-alcohol-and-alerts.md) ----
 
@@ -1036,47 +1034,36 @@ function pickInspirationRecipes(freeText, limit) {
 
 // ---- Entry point ----
 
-function setCustomStatus(message, kind) {
-  if (!message) {
-    els.customStatus.hidden = true;
-    els.customStatus.textContent = "";
-    return;
-  }
-  els.customStatus.hidden = false;
-  els.customStatus.textContent = message;
-  els.customStatus.className = `custom-status ${kind || ""}`.trim();
-}
-
-function generateCustomDrinks() {
-  const freeText = els.customPrompt.value.trim();
-  if (!freeText) {
-    setCustomStatus("Type what you're craving, or list a few ingredients, first.", "error");
-    return;
-  }
-
+// Pure: given free text, returns an array of 1-2 custom recipe objects.
+// No DOM side effects — the caller (render()) decides where these go.
+function buildCustomRecipesFromText(freeText) {
   const normalizedText = normalize(freeText);
   const batchMl = parseBatchMl(freeText);
-  const looksLikeIngredientList = freeText.includes(",") && !/\b(i want|i'd like|need|craving|give me|make me|for a)\b/i.test(normalizedText) && !findDrinkFamily(normalizedText);
+  const looksLikeIngredientList =
+    freeText.includes(",") &&
+    !/\b(i want|i'd like|need|craving|give me|make me|for a)\b/i.test(normalizedText) &&
+    !findDrinkFamily(normalizedText);
 
-  let recipes;
   if (looksLikeIngredientList) {
-    recipes = buildFromIngredientList(freeText, normalizedText, batchMl);
-  } else {
-    const family = findDrinkFamily(normalizedText);
-    recipes = [family ? buildFromFamily(family, normalizedText, batchMl, freeText) : buildGenericFromText(normalizedText, batchMl, freeText)];
+    return buildFromIngredientList(freeText, normalizedText, batchMl);
   }
-
-  if (SUGAR_FREE_KEYWORDS.some((k) => normalizedText.includes(k)) && !state.sugarFree) {
-    els.sugarFreeToggle.checked = true;
-    state.sugarFree = true;
-    document.body.classList.add("sugar-free-mode");
-    render();
-  }
-
-  lastCustomRecipes = recipes;
-  renderCustomResults();
-  setCustomStatus(`✨ Created ${recipes.length} custom recipe${recipes.length === 1 ? "" : "s"} — built offline from the machine's real sugar/alcohol limits.`, "success");
+  const family = findDrinkFamily(normalizedText);
+  return [family ? buildFromFamily(family, normalizedText, batchMl, freeText) : buildGenericFromText(normalizedText, batchMl, freeText)];
 }
+
+// If the query mentions "sugar free"/"diet"/etc., flip the toggle on for
+// them (never auto-off) — a one-way convenience, not a recursive re-render.
+function maybeAutoEnableSugarFree(normalizedText) {
+  if (state.sugarFree) return;
+  if (!SUGAR_FREE_KEYWORDS.some((k) => normalizedText.includes(k))) return;
+  state.sugarFree = true;
+  els.sugarFreeToggle.checked = true;
+  document.body.classList.add("sugar-free-mode");
+}
+
+// Minimum query length before we bother synthesizing a custom recipe —
+// avoids a nonsense card while someone is still mid-word.
+const CUSTOM_MIN_QUERY_LENGTH = 3;
 
 function renderCustomRecipeCard(recipe) {
   const card = document.createElement("article");
@@ -1164,33 +1151,42 @@ function renderCustomRecipeCard(recipe) {
   return card;
 }
 
-function renderCustomResults() {
-  els.customResults.innerHTML = "";
-  lastCustomRecipes.forEach((r) => els.customResults.appendChild(renderCustomRecipeCard(r)));
-}
-
-function initCustomDrinkCreator() {
-  els.generateCustomBtn.addEventListener("click", generateCustomDrinks);
-  els.customPrompt.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      generateCustomDrinks();
-    }
-  });
-}
-
 function render() {
-  const filtered = getFilteredRecipes().filter((r) => matchesPreset(r, state.activePresets));
+  const trimmedQuery = state.query.trim();
+  const hasFilters = state.activeTags.size > 0 || state.activeDifficulties.size > 0 || state.activePresets.size > 0;
+  const hasSearched = trimmedQuery.length > 0 || hasFilters;
+
   els.results.innerHTML = "";
-  if (filtered.length === 0) {
+
+  if (!hasSearched) {
+    const prompt = document.createElement("p");
+    prompt.className = "empty-state";
+    prompt.textContent = "👀 Search a recipe or ingredient, describe a custom drink, or pick a filter to see results.";
+    els.results.appendChild(prompt);
+    els.resultCount.textContent = "";
+    return;
+  }
+
+  if (trimmedQuery.length >= CUSTOM_MIN_QUERY_LENGTH) {
+    maybeAutoEnableSugarFree(normalize(trimmedQuery));
+  }
+
+  const filtered = getFilteredRecipes().filter((r) => matchesPreset(r, state.activePresets));
+  const customRecipes = trimmedQuery.length >= CUSTOM_MIN_QUERY_LENGTH ? buildCustomRecipesFromText(trimmedQuery) : [];
+
+  if (filtered.length === 0 && customRecipes.length === 0) {
     const empty = document.createElement("p");
     empty.className = "empty-state";
     empty.textContent = "No recipes match your search and filters. Try clearing some filters.";
     els.results.appendChild(empty);
   } else {
     filtered.forEach((r) => els.results.appendChild(renderRecipeCard(r)));
+    customRecipes.forEach((r) => els.results.appendChild(renderCustomRecipeCard(r)));
   }
-  els.resultCount.textContent = `${filtered.length} recipe${filtered.length === 1 ? "" : "s"}`;
+
+  const recipeCountText = `${filtered.length} recipe${filtered.length === 1 ? "" : "s"}`;
+  const customCountText = customRecipes.length ? ` + ${customRecipes.length} custom build${customRecipes.length === 1 ? "" : "s"}` : "";
+  els.resultCount.textContent = recipeCountText + customCountText;
 }
 
 /* ---------------------------------------------------------------------
@@ -1210,7 +1206,6 @@ function init() {
     state.sugarFree = e.target.checked;
     document.body.classList.toggle("sugar-free-mode", state.sugarFree);
     render();
-    renderCustomResults();
   });
 
   els.clearFilters.addEventListener("click", () => {
@@ -1225,8 +1220,6 @@ function init() {
     });
     render();
   });
-
-  initCustomDrinkCreator();
 
   render();
 }

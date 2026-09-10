@@ -34,9 +34,19 @@ in isolation.
 
 ## What it does
 
-- **Search by name or ingredient** — one search box matches recipe names and
-  ingredient lines in the dataset; comma-separate multiple terms (e.g.
-  `rum, pineapple juice`) to require all of them.
+- **Nothing loads until you search or filter** — the page opens empty with a
+  prompt, not all 105 recipes at once; type something, or pick a filter, to
+  see results.
+- **One search box, two jobs** — it matches recipe names and ingredient lines
+  in the dataset (comma-separate multiple terms, e.g. `rum, pineapple juice`,
+  to require all of them) **and**, once you've typed at least 3 characters,
+  also builds a custom recipe from that same text and appends it into the
+  same results grid, clearly labeled "✨ Custom Build." Search for
+  "margarita" and you get every dataset margarita *plus* one synthesized to
+  your exact phrasing — see the Custom Drink Creator section below for how
+  that build is put together. Filtering with the chips alone (no typed text)
+  shows dataset matches only, since there's no text to build a custom drink
+  from.
 - **Drink type filters** (creamy, milkshake, refreshing, fruity, spicy,
   tropical, citrus, coffee, chocolate, cocktail, mocktail) — a recipe can
   carry several tags; selecting more than one tag is an OR (show recipes with
@@ -72,12 +82,13 @@ in isolation.
   Party adds a bobbing-balloon header, an animated rainbow title, drifting
   confetti, floating cake/cupcake shapes, and dancing unicorns — all skipped
   automatically if your OS has "reduce motion" turned on.
-- **✨ Custom Drink Creator** — describe a drink in plain English ("I want a
-  spicy margarita") or list what you have on hand ("mango, coconut milk, dark
-  rum") and it designs one or two custom recipes on the spot. **Fully
-  offline, no API key, no network call** — it's a rule-based
-  keyword/template matcher (see `generateCustomDrinks()` and friends in
-  `app.js`), not a live model call:
+- **✨ Custom Drink Creator (built into the search box)** — type a drink idea
+  in plain English ("spicy margarita") or list what you have on hand
+  ("mango, coconut milk, dark rum") into the same search box above, and it
+  designs one or two custom recipes on the spot, shown alongside any dataset
+  matches. **Fully offline, no API key, no network call** — it's a
+  rule-based keyword/template matcher (see `buildCustomRecipesFromText()`
+  and friends in `app.js`), not a live model call:
   - Recognizes ~16 named drink families (margarita, daiquiri, piña colada,
     mule, mimosa, sangria, painkiller, paloma, mojito, cosmopolitan,
     screwdriver, bloody mary, frappé, milkshake, (spiked) lemonade, iced tea)
