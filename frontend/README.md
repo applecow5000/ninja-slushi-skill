@@ -88,7 +88,10 @@ tooling, just edit and reload. Each recipe looks like:
 }
 ```
 
-The dataset currently covers ~45 recipes curated from
+The dataset currently covers 105 recipes curated from
 [`../references/official-recipes.md`](../references/official-recipes.md) and
-[`../references/community-recipes.md`](../references/community-recipes.md).
-It's not exhaustive of every recipe in those docs — add more the same way.
+[`../references/community-recipes.md`](../references/community-recipes.md),
+including the official "Create Your Own" builder-chart combos expanded into
+individual recipes. A handful of near-duplicate variants (e.g. multiple
+posted ratios for the same drink) and a few "to taste, no real quantities"
+entries were deliberately left out — add them the same way if you want them.
