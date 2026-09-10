@@ -1065,7 +1065,101 @@ function maybeAutoEnableSugarFree(normalizedText) {
 // avoids a nonsense card while someone is still mid-word.
 const CUSTOM_MIN_QUERY_LENGTH = 3;
 
-function renderCustomRecipeCard(recipe) {
+/* ---------------------------------------------------------------------
+ * Optional live backend (Gemini via a Cloudflare Worker) for open-
+ * vocabulary custom-recipe understanding — the offline generator above
+ * only recognizes ingredients in its hardcoded keyword lists, so
+ * "guava" or "Yakult" fall through to a generic filler. If this URL is
+ * reachable it's tried first; on any failure (network, timeout, bad
+ * shape) we silently fall back to the offline generator, so the feature
+ * never just breaks. Leave CUSTOM_DRINK_API_URL empty ("") to skip the
+ * network call entirely and always use the offline generator.
+ * ------------------------------------------------------------------- */
+
+const CUSTOM_DRINK_API_URL = "https://ninja-slushi-api.johnny-y-w-wang.workers.dev/";
+const CUSTOM_API_TIMEOUT_MS = 9000;
+const CUSTOM_DEBOUNCE_MS = 500;
+
+async function fetchCustomRecipesFromApi(freeText, inspirationRecipes) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), CUSTOM_API_TIMEOUT_MS);
+  try {
+    const response = await fetch(CUSTOM_DRINK_API_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        query: freeText,
+        sugarFree: state.sugarFree,
+        inspiration: inspirationRecipes.map((r) => ({
+          name: r.name,
+          preset: r.preset,
+          tags: r.tags,
+          ingredients: r.ingredients,
+        })),
+      }),
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`API responded ${response.status}`);
+    const data = await response.json();
+    if (!Array.isArray(data.recipes) || data.recipes.length === 0) {
+      throw new Error("No recipes in API response");
+    }
+    // Light shape check — enough to trust rendering, not full schema validation.
+    const looksValid = data.recipes.every(
+      (r) => r && typeof r.name === "string" && Array.isArray(r.ingredients) && typeof r.directions === "string"
+    );
+    if (!looksValid) throw new Error("Malformed recipe in API response");
+    return data.recipes;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+// State for the debounced/async custom-recipe slot. Kept separate from the
+// synchronous dataset filtering above, since it resolves later than the
+// initial render() call that kicked it off.
+const customState = {
+  query: null, // the query text the current result/pending-state corresponds to
+  recipes: [], // last resolved recipes (AI or offline) for `query`
+  pending: false, // true while a fetch (or its debounce wait) is in flight
+  source: null, // "ai" | "offline", for the small provenance note on the card
+  requestSeq: 0, // bumped on every new query — lets a stale resolve bail out
+  debounceTimer: null,
+};
+
+function renderCustomLoadingPlaceholder() {
+  const el = document.createElement("p");
+  el.className = "custom-loading";
+  el.textContent = "✨ Thinking of a custom drink…";
+  return el;
+}
+
+async function resolveCustomForQuery(freeText, mySeq) {
+  const inspiration = pickInspirationRecipes(freeText, 6);
+  let recipes;
+  let source;
+  if (CUSTOM_DRINK_API_URL) {
+    try {
+      recipes = await fetchCustomRecipesFromApi(freeText, inspiration);
+      source = "ai";
+    } catch (err) {
+      recipes = buildCustomRecipesFromText(freeText);
+      source = "offline";
+    }
+  } else {
+    recipes = buildCustomRecipesFromText(freeText);
+    source = "offline";
+  }
+
+  if (mySeq !== customState.requestSeq) return; // superseded by a newer query since we started
+
+  customState.recipes = recipes;
+  customState.pending = false;
+  customState.source = source;
+  render();
+}
+
+function renderCustomRecipeCard(recipe, source) {
   const card = document.createElement("article");
   card.className = "card custom-card";
 
@@ -1077,12 +1171,13 @@ function renderCustomRecipeCard(recipe) {
   `;
   card.appendChild(header);
 
+  const badgeLabel = source === "ai" ? "✨ Custom Build (AI)" : "✨ Custom Build";
   const meta = document.createElement("div");
   meta.className = "card-meta";
   const difficulty = recipe.difficulty || "medium";
   meta.innerHTML = `
     <span class="badge difficulty-${escapeHtml(difficulty)}">${escapeHtml(capitalize(difficulty))}</span>
-    <span class="badge ai-badge">✨ Custom Build</span>
+    <span class="badge ai-badge">${badgeLabel}</span>
     ${recipe.batch_note ? `<span class="badge source-badge">${escapeHtml(recipe.batch_note)}</span>` : ""}
   `;
   card.appendChild(meta);
@@ -1155,10 +1250,16 @@ function render() {
   const trimmedQuery = state.query.trim();
   const hasFilters = state.activeTags.size > 0 || state.activeDifficulties.size > 0 || state.activePresets.size > 0;
   const hasSearched = trimmedQuery.length > 0 || hasFilters;
+  const wantsCustom = trimmedQuery.length >= CUSTOM_MIN_QUERY_LENGTH;
 
   els.results.innerHTML = "";
 
   if (!hasSearched) {
+    clearTimeout(customState.debounceTimer);
+    customState.requestSeq++; // invalidate any in-flight fetch
+    customState.query = null;
+    customState.recipes = [];
+    customState.pending = false;
     const prompt = document.createElement("p");
     prompt.className = "empty-state";
     prompt.textContent = "👀 Search a recipe or ingredient, describe a custom drink, or pick a filter to see results.";
@@ -1167,25 +1268,59 @@ function render() {
     return;
   }
 
-  if (trimmedQuery.length >= CUSTOM_MIN_QUERY_LENGTH) {
+  if (wantsCustom) {
     maybeAutoEnableSugarFree(normalize(trimmedQuery));
+    if (trimmedQuery !== customState.query) {
+      // New query text — reset and (re)schedule a debounced fetch/build.
+      customState.query = trimmedQuery;
+      customState.recipes = [];
+      customState.pending = true;
+      customState.requestSeq++;
+      const mySeq = customState.requestSeq;
+      clearTimeout(customState.debounceTimer);
+      customState.debounceTimer = setTimeout(() => resolveCustomForQuery(trimmedQuery, mySeq), CUSTOM_DEBOUNCE_MS);
+    }
+    // else: same query as last render (e.g. only a filter/toggle changed) —
+    // customState already holds the right pending/resolved data, reuse it.
+  } else {
+    clearTimeout(customState.debounceTimer);
+    customState.requestSeq++;
+    customState.query = null;
+    customState.recipes = [];
+    customState.pending = false;
   }
 
   const filtered = getFilteredRecipes().filter((r) => matchesPreset(r, state.activePresets));
-  const customRecipes = trimmedQuery.length >= CUSTOM_MIN_QUERY_LENGTH ? buildCustomRecipesFromText(trimmedQuery) : [];
 
-  if (filtered.length === 0 && customRecipes.length === 0) {
+  if (filtered.length === 0 && !wantsCustom) {
     const empty = document.createElement("p");
     empty.className = "empty-state";
     empty.textContent = "No recipes match your search and filters. Try clearing some filters.";
     els.results.appendChild(empty);
   } else {
     filtered.forEach((r) => els.results.appendChild(renderRecipeCard(r)));
-    customRecipes.forEach((r) => els.results.appendChild(renderCustomRecipeCard(r)));
+    if (wantsCustom) {
+      const slot = document.createElement("div");
+      slot.id = "customSlot";
+      slot.className = "contents";
+      if (customState.pending) {
+        slot.appendChild(renderCustomLoadingPlaceholder());
+      } else {
+        customState.recipes.forEach((r) => slot.appendChild(renderCustomRecipeCard(r, customState.source)));
+      }
+      els.results.appendChild(slot);
+    }
   }
 
   const recipeCountText = `${filtered.length} recipe${filtered.length === 1 ? "" : "s"}`;
-  const customCountText = customRecipes.length ? ` + ${customRecipes.length} custom build${customRecipes.length === 1 ? "" : "s"}` : "";
+  let customCountText = "";
+  if (wantsCustom) {
+    customCountText = customState.pending
+      ? " + ✨ building a custom drink…"
+      : customState.recipes.length
+      ? ` + ${customState.recipes.length} custom build${customState.recipes.length === 1 ? "" : "s"}`
+      : "";
+  }
   els.resultCount.textContent = recipeCountText + customCountText;
 }
 

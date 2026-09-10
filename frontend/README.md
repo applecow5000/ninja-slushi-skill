@@ -86,9 +86,27 @@ in isolation.
   in plain English ("spicy margarita") or list what you have on hand
   ("mango, coconut milk, dark rum") into the same search box above, and it
   designs one or two custom recipes on the spot, shown alongside any dataset
-  matches. **Fully offline, no API key, no network call** — it's a
-  rule-based keyword/template matcher (see `buildCustomRecipesFromText()`
-  and friends in `app.js`), not a live model call:
+  matches, after a ~500ms debounce (see `CUSTOM_DEBOUNCE_MS` — waits until
+  you stop typing rather than firing on every keystroke). There are two
+  layers underneath it, and the second one only runs if the first can't
+  place it:
+
+  **1. Live backend (optional).** If `CUSTOM_DRINK_API_URL` in `app.js`
+  points at a deployed backend (see [`../worker/`](../worker/) for the
+  Cloudflare Worker + Gemini setup this repo ships with), the query is sent
+  there first — that's real open-vocabulary NLP, so "guava juice" or "a
+  Yakult-style yogurt drink" get identified correctly instead of falling
+  back to a generic filler, which the offline layer below can't do (it only
+  recognizes ingredients in its hardcoded keyword lists). Cards built this
+  way carry an "(AI)" tag on their badge. Leave `CUSTOM_DRINK_API_URL` empty
+  to skip the network call entirely and always use the offline generator.
+
+  **2. Offline rule-based generator (always available, the fallback).** No
+  API key, no network call — a keyword/template matcher (see
+  `buildCustomRecipesFromText()` and friends). This is what runs if the
+  live backend is unreachable, misconfigured, rate-limited, or simply not
+  configured — the feature never just breaks, it just stops being the
+  "smarter" version for a while:
   - Recognizes ~16 named drink families (margarita, daiquiri, piña colada,
     mule, mimosa, sangria, painkiller, paloma, mojito, cosmopolitan,
     screwdriver, bloody mary, frappé, milkshake, (spiked) lemonade, iced tea)

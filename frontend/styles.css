@@ -685,6 +685,30 @@ h1, h2, h3 {
  * Custom-built recipe cards (rendered inline in the same results grid)
  * ------------------------------------------------------------------- */
 
+/* Lets #customSlot sit inside the CSS grid without adding its own nested
+   grid — its children lay out as if they were direct children of #results. */
+.contents {
+  display: contents;
+}
+
+.custom-loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 20px 0;
+  color: var(--text-muted);
+  font-weight: 700;
+  animation: custom-loading-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes custom-loading-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .custom-loading { animation: none; }
+}
+
 .custom-card {
   border-top-color: var(--sugar-free) !important;
   background: linear-gradient(180deg, color-mix(in srgb, var(--sugar-free) 5%, var(--surface)) 0%, var(--surface) 60%);
