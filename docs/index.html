@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ninja Slushi Recipe Finder</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>🧊 Ninja Slushi Recipe Finder</h1>
+    <p class="subtitle">
+      Search by name or ingredient, filter by drink type and difficulty, and flip
+      on Sugar-Free mode to auto-swap sugar for allulose.
+    </p>
+  </header>
+
+  <main class="app-main">
+    <section class="controls">
+      <div class="search-row">
+        <div class="field">
+          <label for="query">Search recipes or ingredients</label>
+          <input id="query" type="search" placeholder="e.g. margarita, mango, vodka…" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="ingredientQuery">I have these ingredients</label>
+          <input id="ingredientQuery" type="search" placeholder="e.g. rum, pineapple juice (comma-separated)" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Drink type</span>
+        <div id="tagFilters" class="chip-row"></div>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Difficulty</span>
+        <div id="difficultyFilters" class="chip-row"></div>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Preset</span>
+        <div id="presetFilters" class="chip-row"></div>
+      </div>
+
+      <div class="bottom-row">
+        <label class="switch-label">
+          <input type="checkbox" id="sugarFreeToggle" />
+          <span class="switch"></span>
+          Sugar-Free mode (auto-swap sugar → allulose)
+        </label>
+        <button id="clearFilters" type="button" class="clear-btn">Clear all filters</button>
+      </div>
+    </section>
+
+    <section class="results-section">
+      <div class="results-header">
+        <span id="resultCount"></span>
+      </div>
+      <div id="results" class="results-grid"></div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>
+      Recipes curated from this repo's
+      <a href="https://github.com/applecow5000/ninja-slushi-skill/blob/master/references/official-recipes.md">official-recipes.md</a> and
+      <a href="https://github.com/applecow5000/ninja-slushi-skill/blob/master/references/community-recipes.md">community-recipes.md</a>.
+      Edit <code>recipes-data.js</code> to add more.
+    </p>
+  </footer>
+
+  <script src="recipes-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

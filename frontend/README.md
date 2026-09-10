@@ -23,9 +23,14 @@ python3 -m http.server 8000
 # then visit http://localhost:8000
 ```
 
-You can also enable **GitHub Pages** for this repo (Settings → Pages → serve
-from the `frontend/` folder, or copy this folder to the repo root/`docs/`) to
-get a hosted link with no local setup at all.
+A copy of this app also lives in [`/docs`](../docs/) at the repo root, since
+**GitHub Pages** can only serve from a repo's root or its `/docs` folder (not
+an arbitrary path like `frontend/`). Settings → Pages → Deploy from branch →
+`master` / `/docs` gives you a hosted link with no local setup at all. If you
+edit the app, keep `frontend/` (for local dev) and `docs/` (for the live
+Pages site) in sync — `docs/index.html` points its footer links at GitHub
+instead of relative repo paths, since Pages only serves the `docs/` folder
+in isolation.
 
 ## What it does
 
