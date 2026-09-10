@@ -1150,8 +1150,16 @@ function applyBrixTargetToLines(lines, batchMl, targetBrix) {
   const neededExplicitGrams = Math.max(0, targetTotalGrams - naturalGrams);
 
   if (sugarLineInfo.length === 0) {
-    // No explicit sugar line to adjust — leave natural-sugar-only recipes
-    // alone rather than inventing a new ingredient mid-rescale.
+    // No explicit sugar/syrup line at all — if natural sugar (juice/soda/
+    // dairy already in the mix) genuinely isn't enough, ADD one rather than
+    // silently leaving the recipe under-sugared. This is exactly what
+    // catches an AI response (or an offline build) that forgot sugar
+    // entirely — e.g. "ginger beer + whiskey + lime" with nothing else has
+    // only ~8 Brix from the ginger beer alone, well short of the 13-15
+    // target, and needs real sugar added to actually freeze into slush.
+    if (neededExplicitGrams > 0) {
+      return [...lines, `${round5(neededExplicitGrams)} g granulated sugar`];
+    }
     return lines;
   }
 
@@ -2216,9 +2224,10 @@ function rescaleRecipeForSelections(recipe, newBatchMl, targetAbvPercent) {
   if (!Array.isArray(recipe.ingredients) || recipe.ingredients.length === 0) return recipe;
   const oldBatchMl = recipe.batch_ml || estimateBatchMlFromLines(recipe.ingredients);
   if (!(oldBatchMl > 0)) return recipe;
-  if (Math.round(oldBatchMl) === Math.round(newBatchMl) && recipe.preset !== "SPIKED SLUSH") {
-    return recipe; // nothing would change
-  }
+  // Always runs the ABV+Brix correction, even when the batch size hasn't
+  // changed and the recipe isn't alcoholic — Brix can need fixing (e.g. an
+  // AI response that forgot sugar entirely) independent of batch size, and
+  // both passes are cheap no-ops when a recipe is already correct.
 
   const abvResult = applyAbvTargetToLines(recipe.ingredients, newBatchMl, targetAbvPercent);
   // Re-target Brix after the ABV/volume rescale — a bigger buzz-level

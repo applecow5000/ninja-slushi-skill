@@ -147,6 +147,18 @@ that the footer with repo-relative links is gone).
   could land well outside 13-15 depending on the base), and a defensive
   clamp catches an AI response suggesting an absurd amount of syrup for
   the batch size regardless of how it got there.
+- **Fixed a real gap in the Brix correction**: `applyBrixTargetToLines()`
+  (the pass that re-targets Brix on every custom recipe, AI or offline,
+  after ABV/serving-size adjustments) would leave a recipe with NO sugar
+  line entirely alone — meaning an AI response that forgot sugar (e.g. a
+  ginger beer + whiskey + lime combo with nothing else) kept whatever
+  low Brix the natural sugar alone produced, since there was no existing
+  sugar line to rescale. It now adds a real sugar line when one is
+  genuinely needed and none exists, exactly like the offline generator's
+  `ensureSugar()` already did — and since the sugar-free variant is always
+  re-derived from the final ingredient list, that newly-added sugar
+  automatically becomes an allulose line in Sugar-Free mode too, with no
+  extra logic needed.
 - **Fixed a real word-collision bug in the ABV/Brix math**: "gin" (the
   spirit) was matching as a plain substring inside "ginger" — meaning
   "ginger ale"/"ginger beer" (both extremely common mixers in this exact
