@@ -34,10 +34,9 @@ in isolation.
 
 ## What it does
 
-- **Search by name or ingredient** — the top search box matches recipe names
-  and any word in the ingredient list.
-- **"I have these ingredients"** — type a comma-separated list (e.g.
-  `rum, pineapple juice`) and it shows recipes containing all of them.
+- **Search by name or ingredient** — one search box matches recipe names and
+  ingredient lines in the dataset; comma-separate multiple terms (e.g.
+  `rum, pineapple juice`) to require all of them.
 - **Drink type filters** (creamy, milkshake, refreshing, fruity, spicy,
   tropical, citrus, coffee, chocolate, cocktail, mocktail) — a recipe can
   carry several tags; selecting more than one tag is an OR (show recipes with
@@ -73,6 +72,28 @@ in isolation.
   Party adds a bobbing-balloon header, an animated rainbow title, drifting
   confetti, floating cake/cupcake shapes, and dancing unicorns — all skipped
   automatically if your OS has "reduce motion" turned on.
+- **✨ Custom Drink Creator** — describe a drink in plain English ("I want a
+  spicy margarita") or list what you have on hand ("mango, coconut milk, dark
+  rum") and it designs one to three custom recipes with a real Claude API
+  call, constrained by the machine's actual sugar/alcohol chemistry (see
+  below) so what comes back will actually freeze — including any advance prep
+  a flavor needs (e.g. a jalapeño-infused vodka with a real ratio and steep
+  time), a fitting preset/temperature, and its own pre-computed sugar-free
+  variant that the Sugar-Free toggle switches to automatically. A handful of
+  the closest-matching dataset recipes are sent along as style/flavor-pairing
+  reference, credited under "Inspired by" if the model draws on them.
+
+  **This calls the Anthropic API directly from your browser with your own
+  API key** — click **🔑 API Key** to paste one (get one at
+  [console.anthropic.com](https://console.anthropic.com/settings/keys)). The
+  key is stored only in your browser's `localStorage` and sent only to
+  `api.anthropic.com`, never anywhere else — but it *is* client-side
+  JavaScript, so anyone with access to that browser/profile (or its dev
+  tools) can read it back out. Don't paste in a key you wouldn't want exposed
+  that way, and use "Clear" to remove it when you're done. This is the one
+  feature in this app that needs network access and isn't free to use (it's
+  billed on your Anthropic account, standard API rates) — everything else
+  (search, filters, sugar-free rewriter, themes) works fully offline.
 
 ## Adding / editing recipes
 

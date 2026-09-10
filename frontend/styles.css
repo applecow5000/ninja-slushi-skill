@@ -681,6 +681,193 @@ h1, h2, h3 {
   font-size: 1.05rem;
 }
 
+/* ---------------------------------------------------------------------
+ * Custom Drink Creator
+ * ------------------------------------------------------------------- */
+
+.custom-section {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: 24px;
+  box-shadow: var(--shadow);
+}
+
+:root[data-theme="party"] .custom-section {
+  border: 3px dashed var(--accent2);
+}
+
+.custom-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.custom-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: var(--accent-dark);
+}
+
+.api-key-btn {
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.api-key-btn:hover {
+  border-color: var(--accent2);
+}
+
+.custom-blurb {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  margin: 0 0 14px;
+}
+
+.api-key-panel {
+  background: var(--bg);
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.api-key-note {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0 0 10px;
+}
+
+.api-key-note a {
+  color: var(--accent-dark);
+  font-weight: 800;
+}
+
+.api-key-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.api-key-row input {
+  flex: 1 1 220px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.custom-input-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.custom-input-row textarea {
+  flex: 1 1 280px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 44px;
+}
+
+.custom-input-row textarea:focus {
+  outline: none;
+  border-color: var(--accent2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent2) 25%, transparent);
+}
+
+.generate-btn {
+  white-space: nowrap;
+  align-self: flex-start;
+}
+
+.generate-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+  transform: none;
+}
+
+.custom-status {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.custom-status.error { color: var(--advanced); }
+.custom-status.success { color: var(--easy); }
+.custom-status.loading { color: var(--accent2); }
+
+.custom-results-grid {
+  margin-top: 16px;
+}
+
+.custom-card {
+  border-top-color: var(--sugar-free) !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--sugar-free) 5%, var(--surface)) 0%, var(--surface) 60%);
+}
+
+.ai-badge {
+  background: linear-gradient(135deg, var(--sugar-free), var(--accent3));
+  color: #fff;
+}
+
+.prep-label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--accent2);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.prep-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.machine-fit-note {
+  font-size: 0.8rem;
+  background: color-mix(in srgb, var(--accent2) 12%, transparent);
+  border-left: 4px solid var(--accent2);
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin: 0;
+  color: var(--text);
+}
+
+.inspired-by {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
 .app-footer {
   max-width: 1100px;
   margin: 32px auto 0;
