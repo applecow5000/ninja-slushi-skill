@@ -161,6 +161,18 @@ export default {
       return json({ error: "Server misconfigured: GEMINI_API_KEY is not set" }, 500, headers);
     }
 
+    // Rate limiting: only active once a "Rate Limiting" binding named
+    // RATE_LIMITER is added on this Worker (Settings → Bindings, no custom
+    // domain required — see worker/README.md). Skips silently until then,
+    // so the feature works before you've set that up, just unprotected.
+    if (env.RATE_LIMITER) {
+      const clientId = request.headers.get("CF-Connecting-IP") || "unknown";
+      const { success } = await env.RATE_LIMITER.limit({ key: clientId });
+      if (!success) {
+        return json({ error: "Rate limit exceeded — please wait a moment and try again." }, 429, headers);
+      }
+    }
+
     let body;
     try {
       body = await request.json();

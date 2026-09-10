@@ -34,10 +34,18 @@ has an outage.
    folder → **Save and deploy**.
 
 5. **Add rate limiting** so a bot (or an enthusiastic visitor) can't burn
-   through your free Gemini quota: on the Worker's route, add a Rate
-   Limiting rule (Cloudflare's free plan includes a basic allowance) —
-   something like 10 requests/minute per visitor is plenty for a personal
-   site.
+   through your free Gemini quota. Because this Worker lives on the default
+   `*.workers.dev` subdomain (not a custom domain/zone you own), the
+   classic WAF-based "Rate limiting rules" (Security → WAF) don't apply
+   here — those attach to a zone. Use the Workers-native **Rate Limiting
+   binding** instead, which needs no custom domain:
+   - Worker → **Settings → Bindings → Add binding → Rate Limiting**.
+   - Variable name: **`RATE_LIMITER`** (exactly — `index.js` already looks
+     for this name and enforces it automatically once it exists; the check
+     is a no-op until you add the binding, so nothing breaks before then).
+   - Limit: something like **10 requests per 60 seconds** is plenty for a
+     personal site.
+   - Save and deploy.
 
 6. **Point the frontend at your Worker's URL** — it's the
    `CUSTOM_DRINK_API_URL` constant near the top of the "Optional live
