@@ -17,13 +17,17 @@
  * See worker/README.md for the full walkthrough.
  */
 
-// "gemini-flash-latest" is Google's alias for their current recommended
-// flash-tier model, so it tracks renames/upgrades automatically instead of
-// 404ing the way a pinned version (e.g. "gemini-2.0-flash") eventually will
-// once Google retires it. If you want a specific pinned version instead,
-// call GET https://generativelanguage.googleapis.com/v1beta/models?key=YOUR_KEY
-// to see exactly which model names your account can use right now.
-const GEMINI_MODEL = "gemini-flash-latest";
+// "gemini-flash-lite-latest" — Google's alias for their current lightest
+// flash-tier model. Lighter/cheaper/faster than plain "gemini-flash-latest",
+// which also means less exposure to the free tier's capacity limits (lower
+// chance of a 429/503 or a timeout) — plenty of quality for filling in a
+// recipe template within given constraints, which is what this task is.
+// Being an alias, it also tracks Google's renames/upgrades automatically
+// instead of 404ing the way a pinned version (e.g. "gemini-2.0-flash")
+// eventually will once Google retires it. To see exactly which model names
+// your account can use right now (pinned or otherwise), call
+// GET https://generativelanguage.googleapis.com/v1beta/models?key=YOUR_KEY
+const GEMINI_MODEL = "gemini-flash-lite-latest";
 
 function geminiUrl(apiKey) {
   return `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
