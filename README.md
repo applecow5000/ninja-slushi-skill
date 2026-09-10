@@ -26,10 +26,20 @@ skill activates when you ask about making a frozen drink, choosing a preset,
 dialing in texture, following/adapting a recipe, decoding a beeping alert,
 cleaning, or troubleshooting. Start from [`SKILL.md`](SKILL.md).
 
+## Visual recipe finder (frontend)
+
+Prefer clicking around to reading markdown? [`frontend/`](frontend/) has a
+small, dependency-free static web app: search by name/ingredient, filter by
+drink type (creamy, milkshake, refreshing, fruity, spicy, etc.) and
+difficulty, and flip a Sugar-Free toggle to auto-swap sugar for allulose.
+Runs locally with no build step or server — see
+[`frontend/README.md`](frontend/README.md) for how to open it.
+
 ## Layout
 
 ```
 SKILL.md                              Entry point (frontmatter + overview + links)
+frontend/                             Visual recipe search/filter web app (see frontend/README.md)
 references/
   presets-and-temperature.md          Presets + ideal-texture bar chart per drink
   recipes.md                          Starter recipes + how to adapt your own drink
