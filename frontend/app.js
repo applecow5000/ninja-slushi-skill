@@ -140,11 +140,6 @@ const els = {
   resultCount: document.getElementById("resultCount"),
   clearFilters: document.getElementById("clearFilters"),
   presetFilters: document.getElementById("presetFilters"),
-  apiKeyBtn: document.getElementById("apiKeyBtn"),
-  apiKeyPanel: document.getElementById("apiKeyPanel"),
-  apiKeyInput: document.getElementById("apiKeyInput"),
-  saveApiKeyBtn: document.getElementById("saveApiKeyBtn"),
-  clearApiKeyBtn: document.getElementById("clearApiKeyBtn"),
   customPrompt: document.getElementById("customPrompt"),
   generateCustomBtn: document.getElementById("generateCustomBtn"),
   customStatus: document.getElementById("customStatus"),
@@ -400,96 +395,633 @@ function initThemeSwitcher() {
 }
 
 /* =======================================================================
- * Custom Drink Creator
+ * Custom Drink Creator (fully offline, rule-based)
  *
  * Free-text ("I want a spicy margarita" / "mango, coconut milk, dark rum")
- * goes to Claude (the visitor's own Anthropic API key, called directly from
- * this browser — see the privacy note in the API key panel), constrained by
- * the machine's actual sugar/alcohol chemistry so what comes back is
- * something that will really freeze in a Ninja Slushi, not just a cocktail
- * recipe. A handful of the closest-matching dataset recipes are sent along
- * as style/inspiration reference. Response is a JSON array of 1-3 recipes,
- * each carrying its own pre-computed sugar-free variant (rendered instead
- * of the regular ingredients when the global Sugar-Free toggle is on).
+ * is parsed with keyword/template matching — no API key, no network call,
+ * works from file://. It's matched against a small library of named-drink
+ * templates and the machine's real chemistry (see references/sugar-alcohol-
+ * and-alerts.md and references/additives-and-texture.md) to size the batch,
+ * cap alcohol, and top up sugar so what comes back will actually freeze.
+ * Every generated recipe reuses the same rewriteIngredientForSugarFree()
+ * used for the dataset, so its sugar-free variant is consistent app-wide,
+ * and pickInspirationRecipes() credits the closest dataset matches.
  * ===================================================================== */
-
-const ANTHROPIC_API_KEY_STORAGE = "ninja-slushi-anthropic-key";
-const ANTHROPIC_MODEL = "claude-opus-5";
-const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 
 let lastCustomRecipes = [];
 
-function getStoredApiKey() {
-  try {
-    return localStorage.getItem(ANTHROPIC_API_KEY_STORAGE) || "";
-  } catch (e) {
-    return "";
+// ---- Machine chemistry (see references/sugar-alcohol-and-alerts.md) ----
+
+// ml of straight spirit (~35-40%+ ABV) the machine can handle per batch size.
+const MAX_SPIRIT_TABLE = [
+  [720, 120],
+  [1080, 180],
+  [1440, 240],
+  [1900, 300],
+];
+
+function round5(n) {
+  return Math.round(n / 5) * 5;
+}
+
+function interpolateSpiritMaxMl(batchMl) {
+  const table = MAX_SPIRIT_TABLE;
+  if (batchMl <= table[0][0]) return batchMl * (table[0][1] / table[0][0]);
+  for (let i = 0; i < table.length - 1; i++) {
+    const [x0, y0] = table[i];
+    const [x1, y1] = table[i + 1];
+    if (batchMl >= x0 && batchMl <= x1) {
+      const t = (batchMl - x0) / (x1 - x0);
+      return y0 + t * (y1 - y0);
+    }
+  }
+  return table[table.length - 1][1];
+}
+
+// Recommend ~85% of the hard cap — lands near the community's tighter
+// practical ABV window (~8-14%) rather than the bare legal ceiling.
+function recommendedSpiritMl(batchMl) {
+  return round5(interpolateSpiritMaxMl(batchMl) * 0.85);
+}
+
+// Heuristic added-sugar target (~9% of batch weight) for a base with no
+// inherent sweetness — above the machine's bare ~4% floor, inside the
+// community's preferred ~10-15% Brix once combined with any natural sugars
+// already in a juice/soda ingredient.
+function recommendedSugarGrams(batchMl) {
+  return round5(batchMl * 0.09);
+}
+
+function hasInherentSweetness(ingredientLines) {
+  return /juice|soda|lemonade|nectar|cola|punch|cider|cream of coconut|condensed milk|margarita mix|daiquiri mix|mix\b/i.test(
+    ingredientLines.join(" ")
+  );
+}
+
+// ---- Batch size parsing ----
+
+function parseBatchMl(text) {
+  const literMatch = text.match(/(\d+(?:\.\d+)?)\s*(l|liter|litre|liters|litres)\b/i);
+  if (literMatch) return clamp(parseFloat(literMatch[1]) * 1000, 475, 1900);
+  const mlMatch = text.match(/(\d+(?:\.\d+)?)\s*ml\b/i);
+  if (mlMatch) return clamp(parseFloat(mlMatch[1]), 475, 1900);
+  const servingsMatch = text.match(/(\d+)\s*(?:-|to)?\s*(\d+)?\s*servings?/i);
+  if (servingsMatch) {
+    const lo = parseInt(servingsMatch[1], 10);
+    const hi = servingsMatch[2] ? parseInt(servingsMatch[2], 10) : lo;
+    const avg = (lo + hi) / 2;
+    if (avg <= 3) return 720;
+    if (avg <= 6) return 1200;
+    return 1800;
+  }
+  return 1200; // default: a solid 4-6 serving batch
+}
+
+function clamp(n, min, max) {
+  return Math.min(max, Math.max(min, n));
+}
+
+function batchNote(batchMl) {
+  const liters = (batchMl / 1000).toFixed(batchMl % 1000 === 0 ? 0 : 1);
+  const servings = batchMl <= 720 ? "2-3" : batchMl <= 1440 ? "4-6" : "6-8";
+  return `${liters} L, about ${servings} servings`;
+}
+
+// ---- Keyword vocabularies ----
+
+const MOCKTAIL_KEYWORDS = [
+  "mocktail", "virgin", "non-alcoholic", "nonalcoholic", "no alcohol",
+  "zero proof", "zero-proof", "alcohol free", "alcohol-free", "kid friendly",
+  "kid-friendly", "kids",
+];
+const SUGAR_FREE_KEYWORDS = ["sugar free", "sugar-free", "diet", "zero sugar", "no sugar", "keto", "low sugar", "low-sugar"];
+const SPICY_KEYWORDS = ["spicy", "spice", "chili", "chile", "chilli", "jalapeno", "jalapeño", "habanero", "serrano", "ghost pepper", "cayenne", "hot pepper", "hot sauce"];
+
+const TAG_KEYWORDS = {
+  creamy: ["creamy", "cream"],
+  milkshake: ["milkshake", "milk shake", "shake", "frosty"],
+  refreshing: ["refreshing", "refresh", "light", "crisp", "cooling"],
+  fruity: ["fruity", "fruit", "berry"],
+  spicy: SPICY_KEYWORDS,
+  tropical: ["tropical", "pineapple", "coconut", "mango", "passionfruit", "passion fruit", "piña", "pina"],
+  citrus: ["citrus", "lime", "lemon", "orange", "grapefruit"],
+  coffee: ["coffee", "espresso", "latte", "frappe", "frappé", "mocha", "cappuccino"],
+  chocolate: ["chocolate", "cocoa", "mocha", "fudge"],
+  cocktail: ["cocktail"],
+  mocktail: MOCKTAIL_KEYWORDS,
+};
+
+// Straight spirits (subject to the ml-per-batch cap table)
+const SPIRITS = [
+  "dark rum", "white rum", "light rum", "spiced rum", "rum",
+  "tequila", "vodka", "gin", "whiskey", "whisky", "bourbon", "brandy",
+  "mezcal", "triple sec", "cointreau", "schnapps", "kahlúa", "kahlua",
+  "irish cream", "baileys",
+].sort((a, b) => b.length - a.length);
+
+// Premade alcoholic inputs (subject to the 2.8-16% ABV rule, not the ml cap)
+const PREMADE_ALCOHOL = [
+  "sparkling wine", "champagne", "prosecco", "rosé wine", "rosé", "rose wine",
+  "red wine", "white wine", "wine", "hard seltzer", "seltzer", "hard cider",
+  "cider", "beer",
+].sort((a, b) => b.length - a.length);
+
+const DAIRY_WORDS = ["condensed milk", "half and half", "half-and-half", "ice cream", "yogurt", "milk", "cream"];
+const COFFEE_WORDS = ["cold brew", "espresso", "coffee"];
+const SODA_WORDS = ["ginger beer", "ginger ale", "grapefruit soda", "lemon-lime soda", "root beer", "cola", "coke", "pepsi", "sprite", "7up", "dr pepper", "tonic", "soda", "seltzer"];
+const JUICE_FRUIT_WORDS = [
+  "pineapple", "mango", "strawberry", "cranberry", "watermelon", "passionfruit",
+  "passion fruit", "peach", "cherry", "raspberry", "blueberry", "grapefruit",
+  "orange", "coconut", "apple", "grape", "lime", "lemon",
+];
+
+function normalizedIncludesAny(haystack, needles) {
+  return needles.find((n) => haystack.includes(n)) || null;
+}
+
+// ---- Named drink-family templates ----
+// `components` are relative weights (not required to sum to 1) split across
+// the batch volume left over after any spirit is poured; `spirit` gives the
+// family's default straight spirit (overridden if the request names one).
+
+const DRINK_FAMILIES = [
+  {
+    aliases: ["mojito"], preset: "SPIKED SLUSH", tags: ["cocktail", "citrus", "refreshing"], spirit: "white rum",
+    components: [{ name: "club soda or sparkling water", weight: 2.5 }, { name: "fresh lime juice", weight: 0.5 }],
+    mintPrep: true,
+  },
+  {
+    aliases: ["margarita"], preset: "SPIKED SLUSH", tags: ["cocktail", "citrus"], spirit: "tequila",
+    components: [{ name: "margarita mix (or orange liqueur + agave for a from-scratch build)", weight: 3 }, { name: "water", weight: 1 }, { name: "fresh lime juice", weight: 0.6 }],
+  },
+  {
+    aliases: ["daiquiri", "daquiri"], preset: "SPIKED SLUSH", tags: ["cocktail", "fruity"], spirit: "white rum",
+    components: [{ name: "strawberry (or other fruit) daiquiri mix", weight: 3 }, { name: "water", weight: 1 }, { name: "fresh lime juice", weight: 0.4 }],
+  },
+  {
+    aliases: ["piña colada", "pina colada", "colada"], preset: "SPIKED SLUSH", tags: ["cocktail", "tropical", "creamy"], spirit: "white rum",
+    components: [{ name: "pineapple juice", weight: 2.5 }, { name: "cream of coconut", weight: 1 }, { name: "unsweetened coconut milk", weight: 1 }],
+  },
+  {
+    aliases: ["moscow mule", "mule"], preset: "SPIKED SLUSH", tags: ["cocktail", "spicy", "refreshing", "citrus"], spirit: "vodka",
+    components: [{ name: "ginger beer", weight: 4 }, { name: "fresh lime juice", weight: 0.5 }],
+  },
+  {
+    aliases: ["mimosa"], preset: "SPIKED SLUSH", tags: ["cocktail", "citrus", "fruity"], premade: true,
+    components: [{ name: "orange juice", weight: 1 }, { name: "sparkling wine (Champagne, Prosecco, or Cava)", weight: 1.4 }],
+  },
+  {
+    aliases: ["sangria"], preset: "SPIKED SLUSH", tags: ["cocktail", "fruity"], premade: true,
+    components: [
+      { name: "red wine", weight: 2.5 }, { name: "orange juice", weight: 1.2 },
+      { name: "orange liqueur or brandy", weight: 0.3 }, { name: "light brown sugar", weight: 0.15, isSweetener: true },
+    ],
+  },
+  {
+    aliases: ["painkiller", "pain killer"], preset: "SPIKED SLUSH", tags: ["cocktail", "tropical"], spirit: "dark rum",
+    components: [{ name: "pineapple juice", weight: 2.5 }, { name: "orange juice", weight: 1.2 }, { name: "cream of coconut", weight: 1 }],
+    servingTip: "Grate fresh nutmeg on top just before serving.",
+  },
+  {
+    aliases: ["paloma"], preset: "SPIKED SLUSH", tags: ["cocktail", "citrus", "refreshing"], spirit: "tequila",
+    components: [{ name: "grapefruit soda", weight: 4 }, { name: "fresh lime juice", weight: 0.3 }],
+  },
+  {
+    aliases: ["cosmopolitan", "cosmo"], preset: "SPIKED SLUSH", tags: ["cocktail", "fruity", "citrus"], spirit: "vodka",
+    components: [{ name: "cranberry juice", weight: 2.5 }, { name: "fresh lime juice", weight: 0.4 }, { name: "triple sec", weight: 0.6 }],
+  },
+  {
+    aliases: ["screwdriver"], preset: "SPIKED SLUSH", tags: ["cocktail", "citrus"], spirit: "vodka",
+    components: [{ name: "orange juice", weight: 5 }],
+  },
+  {
+    aliases: ["bloody mary", "bloody caesar"], preset: "SPIKED SLUSH", tags: ["cocktail", "spicy"], spirit: "vodka",
+    components: [{ name: "tomato juice", weight: 5 }, { name: "hot sauce, a few dashes", weight: 0.03 }, { name: "Worcestershire sauce", weight: 0.05 }],
+  },
+  {
+    aliases: ["frappe", "frappé", "frappuccino"], preset: "FRAPPE", tags: ["coffee", "creamy"], minBatch: 720,
+    components: [{ name: "chilled black coffee", weight: 3 }, { name: "half & half", weight: 1.5 }],
+    fixedExtras: ["10 ml vanilla extract"], forceSugar: true,
+  },
+  {
+    aliases: ["milkshake", "milk shake"], preset: "MILKSHAKE", tags: ["creamy", "milkshake"], minBatch: 720,
+    components: [{ name: "whole milk", weight: 3 }, { name: "heavy cream", weight: 1 }],
+    fixedExtras: ["10 ml vanilla extract"], forceSugar: true,
+  },
+  {
+    aliases: ["spiked lemonade"], preset: "SPIKED SLUSH", tags: ["cocktail", "citrus", "refreshing"], spirit: "vodka",
+    components: [{ name: "lemonade", weight: 4 }],
+  },
+  {
+    aliases: ["lemonade"], preset: "SLUSH", tags: ["refreshing", "citrus"],
+    components: [{ name: "lemonade", weight: 5 }],
+  },
+  {
+    aliases: ["iced tea", "ice tea"], preset: "SLUSH", tags: ["refreshing"],
+    components: [{ name: "sweetened iced tea", weight: 5 }],
+  },
+];
+
+function findDrinkFamily(normalizedText) {
+  // "spiked lemonade" must win over plain "lemonade"; families are checked
+  // in the declared order above, so list the more specific one first.
+  for (const family of DRINK_FAMILIES) {
+    if (family.aliases.some((a) => normalizedText.includes(a))) return family;
+  }
+  // "lemonade" + any spirit word but no named cocktail → treat as spiked lemonade
+  if (normalizedText.includes("lemonade") && SPIRITS.some((s) => normalizedText.includes(s))) {
+    return DRINK_FAMILIES.find((f) => f.aliases.includes("spiked lemonade"));
+  }
+  return null;
+}
+
+// ---- Building ingredient lines from a family/component list ----
+
+function buildComponentIngredients(components, batchMl, spiritMl, spiritDisplay) {
+  const nonSweetenerWeight = components.filter((c) => !c.isSweetener).reduce((a, c) => a + c.weight, 0);
+  const remainingMl = batchMl - spiritMl;
+  const lines = [];
+  components.forEach((c) => {
+    if (c.isSweetener) return; // handled by the sugar pass below, to stay consistent with the rewriter
+    const ml = round5((c.weight / nonSweetenerWeight) * remainingMl);
+    if (ml > 0) lines.push(`${ml} ml ${c.name}`);
+  });
+  if (spiritMl > 0 && spiritDisplay) {
+    lines.push(`${spiritMl} ml ${spiritDisplay}`);
+  }
+  return lines;
+}
+
+function applySpicyPrep(lines, prepSteps, spiritDisplay, spiritMl) {
+  if (spiritDisplay && spiritMl > 0) {
+    const idx = lines.findIndex((l) => l.endsWith(spiritDisplay));
+    if (idx !== -1) lines[idx] = `${spiritMl} ml jalapeño-infused ${spiritDisplay}`;
+    prepSteps.push(
+      `Infuse the ${spiritDisplay}: muddle 3-4 fresh jalapeño slices (deseed for less heat, leave seeds in for more) into ${spiritMl} ml ${spiritDisplay}. Steep sealed at room temperature 24-48h, tasting at 24h, then strain before using.`
+    );
+  } else {
+    lines.push("120 ml chili-infused simple syrup (or allulose syrup)");
+    prepSteps.push(
+      "Make a chili syrup: warm 120 ml simple syrup (or allulose syrup) with 1-2 sliced fresh or dried chilis for 10-15 min over low heat (do not boil), then strain and cool before using."
+    );
   }
 }
 
-function setStoredApiKey(key) {
-  try {
-    if (key) localStorage.setItem(ANTHROPIC_API_KEY_STORAGE, key);
-    else localStorage.removeItem(ANTHROPIC_API_KEY_STORAGE);
-  } catch (e) {
-    /* localStorage unavailable — key just won't persist across reloads */
-  }
+function applyMintPrep(lines, prepSteps) {
+  lines.push("60 ml mint-infused simple syrup (see prep)");
+  prepSteps.push(
+    "Muddle a handful of fresh mint leaves with 60 ml simple syrup (or allulose syrup), let steep 15-20 min, then strain out the leaves before adding to the batch."
+  );
 }
 
-// The machine's real chemistry, straight from references/sugar-alcohol-and-alerts.md
-// and references/additives-and-texture.md, so generated recipes actually freeze.
-const MACHINE_CONSTRAINTS_PROMPT = `You are a recipe designer for the Ninja Slushi (FS300/FS301), a countertop frozen-drink maker. It needs sugar or alcohol (or both) to freeze into slush rather than a solid block or thin liquid — you must design every recipe to satisfy these REAL machine constraints:
+function ensureSugar(lines, batchMl, forceSugar) {
+  if (forceSugar || !hasInherentSweetness(lines)) {
+    lines.push(`${recommendedSugarGrams(batchMl)} g granulated sugar`);
+    return true;
+  }
+  return false;
+}
 
-BATCH SIZE: total liquid must be between 475 ml and 1.9 L.
+function machineFitNote({ isSpiked, isPremade, spiritMl, batchMl, addedSugar, mocktail }) {
+  if (mocktail) {
+    return `Made non-alcoholic per your request — without alcohol as antifreeze, the sugar in this batch is what lets it freeze, so keep the full-sugar (or allulose, in Sugar-Free mode) version rather than a diet base alone.`;
+  }
+  if (isPremade) {
+    return `Premade alcoholic inputs (wine/beer/cider/sparkling wine) need to land between 2.8%-16% ABV to freeze — check the label and dilute with a splash of water/soda if it runs hot, and make sure it still has real sugar (the machine's low-sugar alert will fire otherwise).`;
+  }
+  if (isSpiked) {
+    const maxMl = Math.round(interpolateSpiritMaxMl(batchMl));
+    return `Spirit capped at ${spiritMl} ml (official max for this batch size is ~${maxMl} ml) to land in the community's practical ~8-14% ABV sweet spot rather than the legal 16% ceiling — too much and it won't freeze at all.${addedSugar ? " Sugar topped up since the base alone was too tart/low-sugar to hit the machine's freezing threshold." : ""}`;
+  }
+  return addedSugar
+    ? `Sugar topped up to roughly the community's ~10-15% Brix target — this base alone was under the machine's low-sugar threshold and would freeze into hard ice instead of slush.`
+    : `This base already carries enough natural sugar (from the juice/soda/mix) to clear the machine's freezing threshold.`;
+}
 
-SUGAR MINIMUM (roughly ≥4% sugar by weight; sugar-free artificial sweeteners like stevia/aspartame/sucralose do NOT count and will fail to freeze):
-- 240 ml serving needs ≥8 g sugar
-- 355 ml serving needs ≥11 g sugar
-- 591 ml serving needs ≥18 g sugar
-The community's practical sweet spot for good texture is HIGHER than this legal floor: aim for ~10-15% Brix (sugar) for a cocktail-style recipe. If a base ingredient is tart/low-sugar (e.g. cranberry, black coffee, plain tomato juice), add 15-30 ml syrup/juice or sugar per serving.
-Diet soda / sugar-free soda ALONE will not freeze. Exception: in a SPIKED SLUSH recipe the alcohol itself acts as antifreeze, so a diet mixer can work there.
+function difficultyFor(lines, prepSteps) {
+  if (prepSteps.length > 0) return "advanced";
+  if (lines.length <= 3) return "easy";
+  if (lines.length <= 6) return "medium";
+  return "advanced";
+}
 
-ALCOHOL (SPIKED SLUSH only):
-- A premade alcoholic input (wine, beer, hard seltzer, a premade cocktail mix) must be 2.8%-16% ABV, AND still meet the sugar minimum above.
-- If adding straight spirits (vodka/tequila/rum/whiskey/gin, ~35-40%+), cap the spirit volume: max 120 ml per 720 ml batch, 180 ml per 1.08 L, 240 ml per 1.44 L, 300 ml per 1.9 L total recipe.
-- The community's practical sweet spot for cocktails is ABV ~8-14% total (not the bare legal ceiling of 16%) alongside the ~10-15% Brix sugar target above.
-- Too concentrated (over the max) won't freeze at all; too little sugar/alcohol freezes into hard ice instead of slush. If you're unsure, err toward the middle of these windows, not the edges.
+function finishRecipe({ name, preset, tags, batchMl, lines, prepSteps, directions, fitInfo, freeText, servingTip }) {
+  if (servingTip) directions = `${directions} ${servingTip}`;
+  const sugarFreeLines = lines.map(rewriteIngredientForSugarFree);
+  // Base the note on whether the rewriter actually changed anything (not a
+  // separate keyword re-check) so it never contradicts machine_fit_note.
+  const anyLineChanged = sugarFreeLines.some((l, i) => l !== lines[i]);
+  const sugarFreeNote = anyLineChanged
+    ? "Sugar swapped for allulose (~1.33x, since it's about 70% as sweet as sugar by weight) so this still clears the machine's freezing threshold — taste and adjust."
+    : "This base likely needs sugar to freeze — if using a diet/zero-sugar version of any soda or juice here, add ~15-20 g granulated allulose per 355 ml to restore the sugar the machine needs.";
+  return {
+    name,
+    preset,
+    tags: Array.from(new Set(tags)),
+    difficulty: difficultyFor(lines, prepSteps),
+    batch_note: batchNote(batchMl),
+    prep_steps: prepSteps,
+    ingredients: lines,
+    directions,
+    machine_fit_note: fitInfo,
+    sugar_free_ingredients: sugarFreeLines,
+    sugar_free_note: sugarFreeNote,
+    inspired_by: pickInspirationRecipes(freeText, 3).map((r) => r.name),
+  };
+}
 
-NEVER include hot ingredients, ice, or solids (fresh fruit chunks, ice cream, frozen fruit) — everything poured into the machine must be a pourable liquid or a fully dissolved/puréed-and-strained mixture.
+function titleCase(s) {
+  // Capitalize each space-separated word's first character only — JS's \w is
+  // ASCII-only, so a \b-based regex misfires on accented names like "piña".
+  return s
+    .split(" ")
+    .map((w) => (w.length ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
 
-SUGAR-FREE VARIANT: allulose is the community's most reliable 1:1-behaving sugar substitute that still lets the machine freeze properly (unlike stevia/aspartame/sucralose, which fail alone). Typical dosing is ~12-18 g granulated (or ~15-22 ml liquid) allulose per 355 ml of base needing sweetening. Every recipe you generate must also include a sugar-free variant that swaps sugar/syrup/condensed-milk-type ingredients for an allulose equivalent at that ratio, with a one-sentence note on why it still freezes.
+function detectSpirit(normalizedText) {
+  return SPIRITS.find((s) => normalizedText.includes(s)) || null;
+}
 
-PREP / INFUSIONS: if the requested flavor needs something not achievable by just pouring liquids together (e.g. a spicy margarita wanting jalapeño heat, an herb or spice infusion, a fruit purée, a flavored syrup), give CONCRETE prep steps with real quantities, ratios, and times (e.g. "Muddle 3 fresh jalapeño slices — seeds removed for less heat, left in for more — into 250 ml tequila. Steep sealed at room temperature 24-48h, tasting after 24h, then strain." or a faster quick-infusion alternative). Never hand-wave prep as "infuse to taste" without a real method.
+function detectPremadeAlcohol(normalizedText) {
+  return PREMADE_ALCOHOL.find((s) => normalizedText.includes(s)) || null;
+}
 
-PRESETS: SLUSH (non-dairy, non-alcoholic sugary drinks), SPIKED SLUSH (any alcoholic drink), FROZEN JUICE (100% juice or premade smoothie), MILKSHAKE (dairy-based, 720 ml+ minimum, dispense within 30 min), FRAPPE (coffee/blended, 720 ml+ minimum, dispense within 30 min).
+function detectTags(normalizedText) {
+  const tags = [];
+  Object.entries(TAG_KEYWORDS).forEach(([tag, words]) => {
+    if (words.some((w) => normalizedText.includes(w))) tags.push(tag);
+  });
+  return tags;
+}
 
-You'll be given a short list of existing recipes from this machine's recipe database as style/flavor-pairing reference — you may draw on them, remix them, or ignore them and invent something new, whichever best satisfies the request, as long as it respects every constraint above.
+// ---- Building a recipe from a matched drink family ----
 
-Respond with ONLY a raw JSON array (no markdown code fences, no commentary before or after) of 1 to 3 recipe objects — use more than one only when the request is open-ended (e.g. a pile of ingredients with no named drink), not for a specific named request. Each object must have exactly these fields:
-{
-  "name": "string",
-  "preset": "SLUSH" | "SPIKED SLUSH" | "FROZEN JUICE" | "MILKSHAKE" | "FRAPPE",
-  "tags": ["array of 1-4 from: creamy, milkshake, refreshing, fruity, spicy, tropical, citrus, coffee, chocolate, cocktail, mocktail"],
-  "difficulty": "easy" | "medium" | "advanced",
-  "batch_note": "string, e.g. '1.9 L, about 6-8 servings'",
-  "prep_steps": ["array of strings for any advance prep/infusion steps; empty array if none needed"],
-  "ingredients": ["array of qty + ingredient strings, the regular (full-sugar/full-alcohol) version"],
-  "directions": "string: how to combine everything and which preset + temperature bar to run",
-  "machine_fit_note": "string: 1-2 sentences on why this hits the machine's sugar/alcohol requirements (cite approx ABV%/Brix% or the relevant rule)",
-  "sugar_free_ingredients": ["array of qty + ingredient strings, the allulose-substituted version"],
-  "sugar_free_note": "string: what changed for the sugar-free version and why it still freezes",
-  "inspired_by": ["array of existing recipe names this drew from, or empty array"]
-}`;
+// If the request names a fruit flavor the matched template doesn't already
+// mention (e.g. "strawberry lemonade"), blend some of that fruit juice into
+// the largest existing component rather than ignoring the descriptor.
+function injectExtraFruit(lines, normalizedText) {
+  const fruit = normalizedIncludesAny(normalizedText, JUICE_FRUIT_WORDS);
+  if (!fruit || lines.length === 0) return;
+  if (normalize(lines.join(" ")).includes(fruit)) return;
+  const match = lines[0].match(/^(\d+(?:\.\d+)?)\s*ml\s+(.*)$/i);
+  if (!match) return;
+  const totalMl = parseFloat(match[1]);
+  const fruitMl = round5(totalMl * 0.35);
+  const remainMl = round5(totalMl - fruitMl);
+  if (fruitMl <= 0 || remainMl <= 0) return;
+  lines[0] = `${remainMl} ml ${match[2]}`;
+  lines.splice(1, 0, `${fruitMl} ml ${fruit} juice`);
+}
 
-// Cheap keyword-overlap scoring against the dataset, just to pick a handful
-// of relevant few-shot examples to ground the model — not the "NLP" itself
-// (that's Claude's job on the free text), just retrieval.
+function buildFromFamily(family, normalizedText, batchMl, freeText) {
+  const mocktail = MOCKTAIL_KEYWORDS.some((k) => normalizedText.includes(k));
+  const spicy = SPICY_KEYWORDS.some((k) => normalizedText.includes(k));
+  batchMl = Math.max(batchMl, family.minBatch || 0);
+
+  const isAlcoholicFamily = family.preset === "SPIKED SLUSH";
+  const preset = isAlcoholicFamily && mocktail ? "SLUSH" : family.preset;
+  const requestedSpirit = detectSpirit(normalizedText);
+  const spiritDisplay = family.spirit ? requestedSpirit || family.spirit : null;
+
+  let spiritMl = 0;
+  if (isAlcoholicFamily && !mocktail && !family.premade && spiritDisplay) {
+    spiritMl = recommendedSpiritMl(batchMl);
+  }
+
+  const lines = buildComponentIngredients(family.components, batchMl, spiritMl, isAlcoholicFamily && !mocktail && !family.premade ? spiritDisplay : null);
+  if (family.fixedExtras) lines.push(...family.fixedExtras);
+  if (isAlcoholicFamily && mocktail && spiritDisplay) {
+    lines.push(`zero-proof ${spiritDisplay}, to taste`);
+  }
+  if (family.premade && isAlcoholicFamily) {
+    // premade alcohol (wine/sparkling) is already one of the weighted components' names in most
+    // of these templates, so nothing extra to add here beyond what buildComponentIngredients did.
+  }
+  injectExtraFruit(lines, normalizedText);
+
+  const prepSteps = [];
+  if (family.mintPrep) applyMintPrep(lines, prepSteps);
+  if (spicy) applySpicyPrep(lines, prepSteps, isAlcoholicFamily && !mocktail ? spiritDisplay : null, spiritMl);
+
+  const addedSugar = ensureSugar(lines, batchMl, family.forceSugar);
+
+  const fitInfo = machineFitNote({
+    isSpiked: isAlcoholicFamily && !mocktail && !family.premade,
+    isPremade: Boolean(family.premade) && isAlcoholicFamily && !mocktail,
+    spiritMl,
+    batchMl,
+    addedSugar,
+    mocktail: isAlcoholicFamily && mocktail,
+  });
+
+  const tags = Array.from(new Set([...family.tags, ...detectTags(normalizedText)]));
+  let familyLabel = titleCase(family.aliases[0]);
+  const extraFruit = normalizedIncludesAny(normalizedText, JUICE_FRUIT_WORDS);
+  if (extraFruit && !normalize(familyLabel).includes(extraFruit)) familyLabel = `${titleCase(extraFruit)} ${familyLabel}`;
+  const sugarFreeAsked = SUGAR_FREE_KEYWORDS.some((k) => normalizedText.includes(k));
+  const name = `${sugarFreeAsked ? "Sugar-Free " : ""}${mocktail && isAlcoholicFamily ? "Mocktail " : ""}${spicy ? "Spicy " : ""}${familyLabel}`;
+
+  const directions = `Combine everything${prepSteps.length ? " (after the prep step above)" : ""}, run ${preset}${preset === "SPIKED SLUSH" ? ", starting near the middle of the temperature range and adjusting to taste" : ""}.`;
+
+  return finishRecipe({
+    name, preset, tags, batchMl, lines, prepSteps, directions, fitInfo, freeText,
+    servingTip: family.servingTip,
+  });
+}
+
+// ---- Generic fallback (no named family recognized) ----
+
+function buildGenericFromText(normalizedText, batchMl, freeText) {
+  const mocktail = MOCKTAIL_KEYWORDS.some((k) => normalizedText.includes(k));
+  const spicy = SPICY_KEYWORDS.some((k) => normalizedText.includes(k));
+  const requestedSpirit = !mocktail ? detectSpirit(normalizedText) : null;
+  const premadeAlcohol = !mocktail ? detectPremadeAlcohol(normalizedText) : null;
+  const dairy = normalizedIncludesAny(normalizedText, DAIRY_WORDS);
+  const coffee = normalizedIncludesAny(normalizedText, COFFEE_WORDS);
+  const soda = normalizedIncludesAny(normalizedText, SODA_WORDS);
+  const fruit = normalizedIncludesAny(normalizedText, JUICE_FRUIT_WORDS);
+
+  const lines = [];
+  const prepSteps = [];
+  let preset = "SLUSH";
+  let spiritMl = 0;
+  let spiritDisplay = null;
+  let isPremade = false;
+  let noFlavorDetected = false;
+
+  if (requestedSpirit) {
+    preset = "SPIKED SLUSH";
+    spiritDisplay = requestedSpirit;
+    spiritMl = recommendedSpiritMl(batchMl);
+    const mixerName = fruit ? `${fruit} juice` : soda ? soda : "juice or soda of choice";
+    const remaining = batchMl - spiritMl;
+    lines.push(`${round5(remaining * 0.8)} ml ${mixerName}`, `${round5(remaining * 0.2)} ml water`, `${spiritMl} ml ${spiritDisplay}`);
+  } else if (premadeAlcohol) {
+    preset = "SPIKED SLUSH";
+    isPremade = true;
+    lines.push(`${round5(batchMl * 0.85)} ml ${premadeAlcohol}`, `${round5(batchMl * 0.15)} ml water or soda (to keep it in the 2.8-16% ABV range)`);
+  } else if (dairy || normalizedText.includes("milkshake")) {
+    preset = "MILKSHAKE";
+    batchMl = Math.max(batchMl, 720);
+    const flavor = fruit || (normalizedText.includes("chocolate") ? "chocolate syrup" : null);
+    lines.push(`${round5(batchMl * 0.72)} ml whole milk`, `${round5(batchMl * 0.24)} ml heavy cream`, "10 ml vanilla extract");
+    if (flavor) lines.push(flavor === "chocolate syrup" ? "60 ml chocolate syrup" : `${flavor} purée or syrup, to taste`);
+  } else if (coffee) {
+    preset = "FRAPPE";
+    batchMl = Math.max(batchMl, 720);
+    lines.push(`${round5(batchMl * 0.65)} ml chilled black coffee`, `${round5(batchMl * 0.33)} ml half & half`);
+  } else if (normalizedText.includes("smoothie") || normalizedText.includes("100% juice") || normalizedText.includes("real juice")) {
+    preset = "FROZEN JUICE";
+    lines.push(`${round5(batchMl)} ml ${fruit ? `${fruit} juice` : "100% juice of choice"}`);
+  } else if (fruit || soda) {
+    lines.push(`${round5(batchMl * 0.85)} ml ${fruit ? `${fruit} juice` : soda}`, `${round5(batchMl * 0.15)} ml water`);
+  } else {
+    // No flavor detected at all — plain water needs sugar force-added below
+    // regardless of keyword matching (there's nothing sweet to detect yet).
+    lines.push(`${round5(batchMl)} ml water — pick a full-sugar flavor concentrate to add`);
+    noFlavorDetected = true;
+  }
+
+  if (spicy) applySpicyPrep(lines, prepSteps, spiritDisplay, spiritMl);
+  const addedSugar = ensureSugar(lines, batchMl, preset === "MILKSHAKE" || preset === "FRAPPE" || noFlavorDetected);
+
+  const tags = detectTags(normalizedText);
+  if (tags.length === 0) tags.push(preset === "SPIKED SLUSH" ? "cocktail" : "refreshing");
+
+  const fitInfo = machineFitNote({
+    isSpiked: preset === "SPIKED SLUSH" && !isPremade,
+    isPremade,
+    spiritMl,
+    batchMl,
+    addedSugar,
+    mocktail: mocktail && Boolean(requestedSpirit || premadeAlcohol),
+  });
+
+  const name = `${spicy ? "Spicy " : ""}Custom ${titleCase(preset === "SPIKED SLUSH" ? "Spiked Slush" : preset.toLowerCase())}`;
+  const directions = `Combine everything${prepSteps.length ? " (after the prep step above)" : ""}, run ${preset}, adjusting the temperature bar to taste.`;
+
+  return finishRecipe({ name, preset, tags, batchMl, lines, prepSteps, directions, fitInfo, freeText });
+}
+
+// ---- Ingredient-list mode ("mango, coconut milk, dark rum") ----
+
+function classifyIngredientToken(token) {
+  const t = normalize(token);
+  const spirit = detectSpirit(t);
+  if (spirit) return { type: "spirit", display: spirit, raw: token };
+  const premade = detectPremadeAlcohol(t);
+  if (premade) return { type: "premade", display: premade, raw: token };
+  const dairy = normalizedIncludesAny(t, DAIRY_WORDS);
+  if (dairy) return { type: "dairy", display: token, raw: token };
+  const coffee = normalizedIncludesAny(t, COFFEE_WORDS);
+  if (coffee) return { type: "coffee", display: token, raw: token };
+  const fruit = normalizedIncludesAny(t, JUICE_FRUIT_WORDS);
+  if (fruit) return { type: "fruit", display: token, raw: token };
+  const soda = normalizedIncludesAny(t, SODA_WORDS);
+  if (soda) return { type: "soda", display: token, raw: token };
+  if (/sugar|honey|agave|syrup|allulose/i.test(t)) return { type: "sweetener", display: token, raw: token };
+  return { type: "other", display: token, raw: token };
+}
+
+function buildFromTokens(tokens, normalizedText, batchMl, freeText, variantLabel, useCount) {
+  const mocktail = MOCKTAIL_KEYWORDS.some((k) => normalizedText.includes(k));
+  const spicy = SPICY_KEYWORDS.some((k) => normalizedText.includes(k));
+  const used = tokens.slice(0, useCount);
+
+  const spiritToken = !mocktail ? used.find((t) => t.type === "spirit") : null;
+  const premadeToken = !mocktail ? used.find((t) => t.type === "premade") : null;
+  const dairyTokens = used.filter((t) => t.type === "dairy");
+  const coffeeToken = used.find((t) => t.type === "coffee");
+  const baseTokens = used.filter((t) => ["fruit", "soda", "dairy"].includes(t.type) && t !== spiritToken);
+
+  let preset = "SLUSH";
+  if (dairyTokens.length && !coffeeToken) preset = "MILKSHAKE";
+  else if (coffeeToken) preset = "FRAPPE";
+  else if (spiritToken || premadeToken) preset = "SPIKED SLUSH";
+  if (preset === "MILKSHAKE" || preset === "FRAPPE") batchMl = Math.max(batchMl, 720);
+
+  let spiritMl = 0;
+  const lines = [];
+  const prepSteps = [];
+  let isPremade = false;
+  let noFlavorDetected = false;
+
+  if (spiritToken) spiritMl = recommendedSpiritMl(batchMl);
+  if (premadeToken) isPremade = true;
+
+  const flavorBases = baseTokens.length ? baseTokens : used.filter((t) => t.type === "other");
+  const reserved = spiritMl + (isPremade ? round5(batchMl * 0.85) : 0);
+  const remaining = batchMl - reserved;
+
+  if (isPremade) {
+    lines.push(`${round5(batchMl * 0.85)} ml ${premadeToken.display}`);
+    lines.push(`${round5(batchMl * 0.15)} ml water or soda (to keep it in the 2.8-16% ABV range)`);
+  } else if (flavorBases.length > 0) {
+    const weights = flavorBases.map((_, i) => (i === 0 ? 2 : 1));
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
+    flavorBases.forEach((tok, i) => {
+      const ml = round5((weights[i] / totalWeight) * remaining);
+      const label = tok.type === "fruit" ? `${tok.display} juice or purée` : tok.type === "dairy" ? tok.display : tok.type === "soda" ? tok.display : tok.display;
+      if (ml > 0) lines.push(`${ml} ml ${label}`);
+    });
+  } else {
+    lines.push(`${round5(remaining)} ml water — pick a full-sugar flavor concentrate to add`);
+    noFlavorDetected = true;
+  }
+
+  if (coffeeToken) lines.push(`${round5(batchMl * 0.3)} ml half & half`);
+  if (dairyTokens.length && preset === "MILKSHAKE") lines.push("10 ml vanilla extract");
+  if (spiritToken) lines.push(`${spiritMl} ml ${spiritToken.display}`);
+  else if (mocktail && (spiritToken || premadeToken)) lines.push(`zero-proof ${(spiritToken || premadeToken).display}, to taste`);
+
+  const explicitSweetener = used.find((t) => t.type === "sweetener");
+  if (explicitSweetener) lines.push(explicitSweetener.display);
+
+  if (spicy) applySpicyPrep(lines, prepSteps, spiritToken ? spiritToken.display : null, spiritMl);
+  const addedSugar = ensureSugar(lines, batchMl, preset === "MILKSHAKE" || preset === "FRAPPE" || noFlavorDetected);
+
+  const tags = detectTags(normalizedText);
+  if (tags.length === 0) tags.push(preset === "SPIKED SLUSH" ? "cocktail" : "refreshing");
+
+  const fitInfo = machineFitNote({
+    isSpiked: preset === "SPIKED SLUSH" && !isPremade,
+    isPremade,
+    spiritMl,
+    batchMl,
+    addedSugar,
+    mocktail: mocktail && Boolean(spiritToken || premadeToken),
+  });
+
+  const usedNames = used.map((t) => t.raw).join(", ");
+  const leftOutNames = tokens.slice(useCount).map((t) => t.raw);
+  const name = `${spicy ? "Spicy " : ""}${variantLabel} (${usedNames})`;
+  let directions = `Combine everything${prepSteps.length ? " (after the prep step above)" : ""}, run ${preset}, adjusting the temperature bar to taste.`;
+  if (leftOutNames.length) directions += ` (Left out ${leftOutNames.join(", ")} for this variant — see the other version if you want everything in one batch.)`;
+
+  return finishRecipe({ name, preset, tags, batchMl, lines, prepSteps, directions, fitInfo, freeText });
+}
+
+function buildFromIngredientList(freeText, normalizedText, batchMl) {
+  const rawTokens = freeText.split(",").map((t) => t.trim()).filter(Boolean);
+  const classified = rawTokens.map(classifyIngredientToken);
+  if (classified.length <= 2) {
+    return [buildFromTokens(classified, normalizedText, batchMl, freeText, "Custom Mix", classified.length)];
+  }
+  // Multiple candidate ingredients: offer a full-mix version and a simplified
+  // one using just the two most prominent (first-mentioned) usable tokens.
+  const results = [buildFromTokens(classified, normalizedText, batchMl, freeText, "Full Mix", classified.length)];
+  results.push(buildFromTokens(classified, normalizedText, batchMl, freeText, "Simplified Twist", Math.min(2, classified.length)));
+  return results;
+}
+
+// ---- Retrieval: closest dataset recipes, for the "Inspired by" credit ----
+
 function pickInspirationRecipes(freeText, limit) {
   const queryWords = normalize(freeText)
     .split(/[^a-z0-9]+/)
     .filter((w) => w.length > 2);
-  if (queryWords.length === 0) return RECIPES.slice(0, limit);
-
+  if (queryWords.length === 0) return [];
   const scored = RECIPES.map((r) => {
     const haystack = normalize(`${r.name} ${r.tags.join(" ")} ${r.ingredients.join(" ")}`);
     const score = queryWords.reduce((acc, w) => acc + (haystack.includes(w) ? 1 : 0), 0);
@@ -502,33 +1034,7 @@ function pickInspirationRecipes(freeText, limit) {
     .map((s) => s.r);
 }
 
-function buildInspirationBlock(freeText) {
-  const picks = pickInspirationRecipes(freeText, 6);
-  if (picks.length === 0) return "No closely related existing recipes found — invent freely within the constraints above.";
-  return picks
-    .map(
-      (r) =>
-        `- ${r.name} (${r.preset}, tags: ${r.tags.join(", ")}): ${r.ingredients.join("; ")}`
-    )
-    .join("\n");
-}
-
-function extractJsonArray(text) {
-  // Strip ```json ... ``` fences if the model added them despite instructions.
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-  const candidate = fenced ? fenced[1] : text;
-  try {
-    return JSON.parse(candidate);
-  } catch (e) {
-    // Fall back to the substring between the first [ and last ]
-    const start = candidate.indexOf("[");
-    const end = candidate.lastIndexOf("]");
-    if (start !== -1 && end !== -1 && end > start) {
-      return JSON.parse(candidate.slice(start, end + 1));
-    }
-    throw e;
-  }
-}
+// ---- Entry point ----
 
 function setCustomStatus(message, kind) {
   if (!message) {
@@ -541,79 +1047,35 @@ function setCustomStatus(message, kind) {
   els.customStatus.className = `custom-status ${kind || ""}`.trim();
 }
 
-async function generateCustomDrinks() {
+function generateCustomDrinks() {
   const freeText = els.customPrompt.value.trim();
   if (!freeText) {
     setCustomStatus("Type what you're craving, or list a few ingredients, first.", "error");
     return;
   }
-  const apiKey = getStoredApiKey();
-  if (!apiKey) {
-    setCustomStatus("Add your Anthropic API key first (🔑 API Key button above).", "error");
-    els.apiKeyPanel.hidden = false;
-    return;
+
+  const normalizedText = normalize(freeText);
+  const batchMl = parseBatchMl(freeText);
+  const looksLikeIngredientList = freeText.includes(",") && !/\b(i want|i'd like|need|craving|give me|make me|for a)\b/i.test(normalizedText) && !findDrinkFamily(normalizedText);
+
+  let recipes;
+  if (looksLikeIngredientList) {
+    recipes = buildFromIngredientList(freeText, normalizedText, batchMl);
+  } else {
+    const family = findDrinkFamily(normalizedText);
+    recipes = [family ? buildFromFamily(family, normalizedText, batchMl, freeText) : buildGenericFromText(normalizedText, batchMl, freeText)];
   }
 
-  els.generateCustomBtn.disabled = true;
-  setCustomStatus("✨ Mixing up your custom drink…", "loading");
-  els.customResults.innerHTML = "";
-
-  const userMessage = `Existing recipes for reference:\n${buildInspirationBlock(freeText)}\n\nRequest: ${freeText}`;
-
-  try {
-    const response = await fetch(ANTHROPIC_API_URL, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        // Required for any direct browser call to the Anthropic API — see
-        // the privacy note in the API key panel for what this means.
-        "anthropic-dangerous-direct-browser-access": "true",
-      },
-      body: JSON.stringify({
-        model: ANTHROPIC_MODEL,
-        max_tokens: 4096,
-        system: MACHINE_CONSTRAINTS_PROMPT,
-        output_config: { effort: "medium" },
-        messages: [{ role: "user", content: userMessage }],
-      }),
-    });
-
-    if (!response.ok) {
-      const body = await response.text();
-      let detail = body;
-      try {
-        detail = JSON.parse(body).error?.message || body;
-      } catch (e) {
-        /* keep raw body as detail */
-      }
-      if (response.status === 401) {
-        throw new Error("That API key was rejected (401). Double-check it and save again.");
-      }
-      if (response.status === 429) {
-        throw new Error("Rate limited (429) — wait a moment and try again.");
-      }
-      throw new Error(`Request failed (${response.status}): ${detail}`);
-    }
-
-    const data = await response.json();
-    const textBlock = (data.content || []).find((b) => b.type === "text");
-    if (!textBlock) throw new Error("No text in the response.");
-
-    const recipes = extractJsonArray(textBlock.text);
-    if (!Array.isArray(recipes) || recipes.length === 0) {
-      throw new Error("Got a response, but couldn't find any recipes in it.");
-    }
-
-    lastCustomRecipes = recipes;
-    renderCustomResults();
-    setCustomStatus(`✨ Created ${recipes.length} custom recipe${recipes.length === 1 ? "" : "s"}.`, "success");
-  } catch (err) {
-    setCustomStatus(`Couldn't create a drink: ${err.message}`, "error");
-  } finally {
-    els.generateCustomBtn.disabled = false;
+  if (SUGAR_FREE_KEYWORDS.some((k) => normalizedText.includes(k)) && !state.sugarFree) {
+    els.sugarFreeToggle.checked = true;
+    state.sugarFree = true;
+    document.body.classList.add("sugar-free-mode");
+    render();
   }
+
+  lastCustomRecipes = recipes;
+  renderCustomResults();
+  setCustomStatus(`✨ Created ${recipes.length} custom recipe${recipes.length === 1 ? "" : "s"} — built offline from the machine's real sugar/alcohol limits.`, "success");
 }
 
 function renderCustomRecipeCard(recipe) {
@@ -633,7 +1095,7 @@ function renderCustomRecipeCard(recipe) {
   const difficulty = recipe.difficulty || "medium";
   meta.innerHTML = `
     <span class="badge difficulty-${escapeHtml(difficulty)}">${escapeHtml(capitalize(difficulty))}</span>
-    <span class="badge ai-badge">✨ AI Custom</span>
+    <span class="badge ai-badge">✨ Custom Build</span>
     ${recipe.batch_note ? `<span class="badge source-badge">${escapeHtml(recipe.batch_note)}</span>` : ""}
   `;
   card.appendChild(meta);
@@ -708,24 +1170,6 @@ function renderCustomResults() {
 }
 
 function initCustomDrinkCreator() {
-  els.apiKeyInput.value = getStoredApiKey();
-
-  els.apiKeyBtn.addEventListener("click", () => {
-    els.apiKeyPanel.hidden = !els.apiKeyPanel.hidden;
-  });
-
-  els.saveApiKeyBtn.addEventListener("click", () => {
-    setStoredApiKey(els.apiKeyInput.value.trim());
-    setCustomStatus("API key saved to this browser.", "success");
-    els.apiKeyPanel.hidden = true;
-  });
-
-  els.clearApiKeyBtn.addEventListener("click", () => {
-    setStoredApiKey("");
-    els.apiKeyInput.value = "";
-    setCustomStatus("API key cleared.", "success");
-  });
-
   els.generateCustomBtn.addEventListener("click", generateCustomDrinks);
   els.customPrompt.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {

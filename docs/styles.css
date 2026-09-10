@@ -713,62 +713,10 @@ h1, h2, h3 {
   color: var(--accent-dark);
 }
 
-.api-key-btn {
-  border: 2px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 0.82rem;
-  font-weight: 800;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.api-key-btn:hover {
-  border-color: var(--accent2);
-}
-
 .custom-blurb {
   color: var(--text-muted);
   font-size: 0.88rem;
   margin: 0 0 14px;
-}
-
-.api-key-panel {
-  background: var(--bg);
-  border: 2px dashed var(--border);
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin-bottom: 14px;
-}
-
-.api-key-note {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  margin: 0 0 10px;
-}
-
-.api-key-note a {
-  color: var(--accent-dark);
-  font-weight: 800;
-}
-
-.api-key-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.api-key-row input {
-  flex: 1 1 220px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 2px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  font-size: 0.9rem;
-  font-family: inherit;
 }
 
 .custom-input-row {

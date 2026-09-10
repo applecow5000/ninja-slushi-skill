@@ -74,26 +74,41 @@ in isolation.
   automatically if your OS has "reduce motion" turned on.
 - **✨ Custom Drink Creator** — describe a drink in plain English ("I want a
   spicy margarita") or list what you have on hand ("mango, coconut milk, dark
-  rum") and it designs one to three custom recipes with a real Claude API
-  call, constrained by the machine's actual sugar/alcohol chemistry (see
-  below) so what comes back will actually freeze — including any advance prep
-  a flavor needs (e.g. a jalapeño-infused vodka with a real ratio and steep
-  time), a fitting preset/temperature, and its own pre-computed sugar-free
-  variant that the Sugar-Free toggle switches to automatically. A handful of
-  the closest-matching dataset recipes are sent along as style/flavor-pairing
-  reference, credited under "Inspired by" if the model draws on them.
-
-  **This calls the Anthropic API directly from your browser with your own
-  API key** — click **🔑 API Key** to paste one (get one at
-  [console.anthropic.com](https://console.anthropic.com/settings/keys)). The
-  key is stored only in your browser's `localStorage` and sent only to
-  `api.anthropic.com`, never anywhere else — but it *is* client-side
-  JavaScript, so anyone with access to that browser/profile (or its dev
-  tools) can read it back out. Don't paste in a key you wouldn't want exposed
-  that way, and use "Clear" to remove it when you're done. This is the one
-  feature in this app that needs network access and isn't free to use (it's
-  billed on your Anthropic account, standard API rates) — everything else
-  (search, filters, sugar-free rewriter, themes) works fully offline.
+  rum") and it designs one or two custom recipes on the spot. **Fully
+  offline, no API key, no network call** — it's a rule-based
+  keyword/template matcher (see `generateCustomDrinks()` and friends in
+  `app.js`), not a live model call:
+  - Recognizes ~16 named drink families (margarita, daiquiri, piña colada,
+    mule, mimosa, sangria, painkiller, paloma, mojito, cosmopolitan,
+    screwdriver, bloody mary, frappé, milkshake, (spiked) lemonade, iced tea)
+    and detects spirits, premade alcohol, dairy, coffee, fruit/juice, and
+    soda keywords for anything else, including a "list your ingredients"
+    mode (comma-separated, no recognized drink name) that builds one or two
+    variants — "Full Mix" and a "Simplified Twist" leaving an ingredient or
+    two out — since **multiple results are fine** when the request is
+    open-ended.
+  - Every recipe is sized against the machine's real chemistry from
+    `../references/sugar-alcohol-and-alerts.md`: batch 475 ml–1.9 L, straight
+    spirits capped per the official ml-per-batch-size table (recommended at
+    ~85% of the max, landing in the community's tighter ~8-14% ABV sweet
+    spot), premade alcohol flagged for the 2.8-16% ABV rule, and sugar
+    topped up (~9% of batch weight) whenever nothing in the mix already
+    looks sweet — so a savory request like a Bloody Mary still gets the
+    sugar it needs to freeze, correctly noted as such.
+  - "Spicy" triggers a real jalapeño infusion prep step (ratio + steep time)
+    on the spirit, or a chili-syrup method for mocktails; "mojito" gets a
+    mint-syrup prep step the same way.
+  - "Mocktail" / "virgin" / "kid friendly" swaps any alcoholic family to its
+    non-alcoholic form (SLUSH preset, zero-proof spirit noted), matching how
+    the official docs themselves describe mocktail conversions.
+  - Its sugar-free variant reuses the exact same `rewriteIngredientForSugarFree()`
+    used for the dataset, so it's consistent with the rest of the app, and
+    typing "sugar free" / "diet" in the box auto-enables the Sugar-Free
+    toggle for you.
+  - A handful of the closest-matching dataset recipes (simple keyword-overlap
+    scoring) are credited under "Inspired by."
+  - This is a heuristic, not a chemistry simulator — always taste and adjust,
+    and treat the generated ratios as a solid starting point, not gospel.
 
 ## Adding / editing recipes
 

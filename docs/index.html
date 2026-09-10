@@ -42,7 +42,7 @@
     <h1>🎂 Erica's Birthday Bash Slushi Station <span class="wiggle">🥳</span></h1>
     <p class="subtitle">
       Search the recipe box, filter by drink type and difficulty, or describe a
-      custom drink and let AI build it within the machine's real limits. 🍭
+      custom drink and build it within the machine's real limits. 🍭
     </p>
   </header>
 
@@ -88,30 +88,17 @@
     <section class="custom-section">
       <div class="custom-header">
         <h2>✨ Custom Drink Creator</h2>
-        <button id="apiKeyBtn" type="button" class="api-key-btn">🔑 API Key</button>
       </div>
       <p class="custom-blurb">
-        Describe what you're craving ("spicy margarita", "something creamy and
-        chocolatey") or just list what's in your fridge ("mango, coconut milk,
-        dark rum") — Claude will design one or more custom recipes that actually
-        work in the machine (right sugar/alcohol balance to freeze, batch size,
-        any advance prep like an infusion), inspired by recipes already in this
-        dataset where relevant.
+        Describe what you're craving ("I want a spicy margarita", "something
+        creamy and chocolatey") or just list what's in your fridge ("mango,
+        coconut milk, dark rum") — this builds one or more custom recipes that
+        actually work in the machine (right sugar/alcohol balance to freeze,
+        batch size, any advance prep like an infusion), inspired by recipes
+        already in this dataset where relevant. Runs fully offline — no API
+        key, no network call, just keyword matching against the machine's
+        real chemistry.
       </p>
-
-      <div id="apiKeyPanel" class="api-key-panel" hidden>
-        <p class="api-key-note">
-          Your key is stored only in this browser (<code>localStorage</code>) and
-          sent directly from your browser to Anthropic's API — never to any other
-          server. Get a key at
-          <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">console.anthropic.com</a>.
-        </p>
-        <div class="api-key-row">
-          <input id="apiKeyInput" type="password" placeholder="sk-ant-..." autocomplete="off" />
-          <button id="saveApiKeyBtn" type="button" class="clear-btn">Save</button>
-          <button id="clearApiKeyBtn" type="button" class="theme-btn">Clear</button>
-        </div>
-      </div>
 
       <div class="custom-input-row">
         <textarea id="customPrompt" rows="2" placeholder='e.g. "I want a spicy margarita" or "mango, coconut milk, dark rum"'></textarea>
