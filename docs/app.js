@@ -283,6 +283,31 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+/* ---------------------------------------------------------------------
+ * Confetti — purely decorative, birthday-themed background pieces.
+ * Skipped entirely if the visitor prefers reduced motion.
+ * ------------------------------------------------------------------- */
+
+const CONFETTI_EMOJI = ["🎉", "🎈", "🎊", "🍬", "🧁", "✨"];
+
+function spawnConfetti() {
+  const field = document.getElementById("confettiField");
+  if (!field) return;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const pieceCount = 22;
+  for (let i = 0; i < pieceCount; i++) {
+    const piece = document.createElement("span");
+    piece.className = "confetti-piece";
+    piece.textContent = CONFETTI_EMOJI[i % CONFETTI_EMOJI.length];
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.fontSize = `${0.8 + Math.random() * 0.9}rem`;
+    piece.style.animationDuration = `${8 + Math.random() * 10}s`;
+    piece.style.animationDelay = `${Math.random() * 12}s`;
+    field.appendChild(piece);
+  }
+}
+
 function render() {
   const filtered = getFilteredRecipes().filter((r) => matchesPreset(r, state.activePresets));
   els.results.innerHTML = "";
@@ -302,6 +327,7 @@ function render() {
  * ------------------------------------------------------------------- */
 
 function init() {
+  spawnConfetti();
   initFilterChips();
 
   els.query.addEventListener("input", (e) => {
