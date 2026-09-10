@@ -765,6 +765,16 @@ h1, h2, h3 {
   margin: 0;
 }
 
+.abv-note {
+  font-size: 0.8rem;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-left: 4px solid var(--accent);
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin: 0;
+  color: var(--text);
+}
+
 :root[data-theme="party"] body.sugar-free-mode .app-header h1::after {
   content: " 🌿";
 }

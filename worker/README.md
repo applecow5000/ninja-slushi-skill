@@ -62,7 +62,8 @@ own deploy via GitHub Pages is unaffected either way).
 ## How it fits together
 
 ```
-Browser (GitHub Pages)  --POST {query, inspiration, sugarFree}-->  Worker
+Browser (GitHub Pages)  --POST {query, inspiration, sugarFree,
+                                 targetBatchMl, servingBand}-->  Worker
                                                                        |
                                                                   reads GEMINI_API_KEY
                                                                        |
@@ -78,16 +79,28 @@ Browser renders the recipe(s) the same way it renders offline-built ones
 - **CORS** is locked to `https://applecow5000.github.io` (and `null`, for
   local `file://` testing) in `ALLOWED_ORIGINS` in `index.js` — update that
   list if you host the frontend somewhere else too.
-- **Timeouts**: the Worker gives Gemini 15s; the frontend gives the whole
-  round trip 9s before giving up and falling back to the offline generator.
+- **Timeouts**: the Worker gives Gemini 20s (`GEMINI_TIMEOUT_MS`); the
+  frontend gives the whole round trip 25s (`CUSTOM_API_TIMEOUT_MS`) before
+  giving up and falling back to the offline generator — always kept longer
+  than the Worker's own timeout, so the browser never gives up before the
+  Worker's own wait could resolve.
 - **Structured output**: the request uses Gemini's `responseSchema` to
   force schema-valid JSON matching the same recipe shape the offline
   generator produces (`RECIPE_ARRAY_SCHEMA` in `index.js`), so the same
   `renderCustomRecipeCard()` on the frontend renders either source
   identically.
-- **Debounce**: the frontend waits ~500ms after you stop typing before
-  calling this Worker, so it's one call per finished thought, not one per
-  keystroke (see `CUSTOM_DEBOUNCE_MS` in `app.js`).
+- **Serving size**: if the frontend's serving-size selector is set, it sends
+  `targetBatchMl` (the exact batch size in ml to size the recipe to) and
+  `servingBand` (`"2-4"` / `"5-8"` / `"9-12"`) in the POST body — the Worker
+  folds both into the prompt (see `SYSTEM_INSTRUCTION` and the `userText`
+  assembly in `index.js`), including the "9 to 12 exceeds the machine's
+  single-batch max, build at 1.9 L and note it needs two runs" instruction.
+  The frontend also applies that caveat itself client-side regardless of
+  what Gemini returns, so it's never missing even if a response omits it.
+- **Recipe count**: the system prompt asks for exactly 1 recipe for a named
+  drink and exactly 3 for an open-ended request, matching the offline
+  generator's behavior — the frontend doesn't second-guess this, it renders
+  however many recipes come back.
 
 ## Cost
 

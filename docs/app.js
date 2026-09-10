@@ -79,6 +79,283 @@ function hasAnySugarSignal(recipe) {
 }
 
 /* ---------------------------------------------------------------------
+ * Dual-unit display (metric + imperial)
+ *
+ * A pure, display-time transform: it never changes the underlying metric
+ * quantity (the number that actually drives sugar/alcohol dosing math
+ * elsewhere in this file) — it only appends a parenthetical conversion so
+ * nothing here can ever cause an over/under dose, only mis-label one.
+ *
+ * Volume (ml) uses the exact, universally-used US culinary equivalences
+ * (1 cup = 240 ml, 1 tbsp = 15 ml, 1 tsp = 5 ml) and is shown without a
+ * "≈" qualifier, matching how virtually every recipe converter presents it.
+ *
+ * Mass (g) needs an ingredient-specific density to convert to cups, so it's
+ * only converted when the ingredient matches a known density, and always
+ * shown with "≈" to flag it as an approximation — guessing a density for an
+ * unrecognized ingredient would risk exactly the mis-dosing this exists to
+ * avoid, so unmatched ingredients are left metric-only instead.
+ * ------------------------------------------------------------------- */
+
+const FRACTION_STEPS = [
+  [0, ""], [1 / 8, "⅛"], [1 / 4, "¼"], [1 / 3, "⅓"], [3 / 8, "⅜"],
+  [1 / 2, "½"], [5 / 8, "⅝"], [2 / 3, "⅔"], [3 / 4, "¾"], [7 / 8, "⅞"], [1, ""],
+];
+
+// Rounds a decimal quantity to the nearest 1/8 and renders it as a mixed
+// number using unicode fraction glyphs (e.g. 1.33 -> "1 ⅓"), the way a
+// printed recipe card would show it rather than a raw decimal.
+function formatFraction(value) {
+  if (!(value > 0)) return "0";
+  let whole = Math.floor(value);
+  const frac = value - whole;
+  let closest = FRACTION_STEPS[0];
+  let closestDiff = Infinity;
+  for (const step of FRACTION_STEPS) {
+    const diff = Math.abs(frac - step[0]);
+    if (diff < closestDiff) {
+      closestDiff = diff;
+      closest = step;
+    }
+  }
+  if (closest[0] === 1) {
+    whole += 1;
+    return `${whole}`;
+  }
+  if (whole === 0) return closest[1] || "0";
+  return closest[1] ? `${whole} ${closest[1]}` : `${whole}`;
+}
+
+function pluralUnit(qty, unit) {
+  return Math.abs(qty - 1) < 0.001 ? unit : `${unit}s`;
+}
+
+function imperialForVolumeMl(ml) {
+  if (!(ml > 0)) return null;
+  if (ml >= 60) {
+    const cups = ml / 240;
+    return `${formatFraction(cups)} ${pluralUnit(cups, "cup")}`;
+  }
+  if (ml >= 15) {
+    const tbsp = ml / 15;
+    return `${formatFraction(tbsp)} tbsp`;
+  }
+  const tsp = ml / 5;
+  return `${formatFraction(tsp)} tsp`;
+}
+
+// Grams-per-US-cup for ingredients this app actually generates/stores.
+// Deliberately small and specific rather than a single "average" density —
+// sugar and cocoa powder differ by more than 2x, so a generic number would
+// misdose exactly the ingredients (sugar, allulose) this feature most needs
+// to get right.
+const DENSITY_G_PER_CUP = {
+  "powdered sugar": 120,
+  "brown sugar": 220,
+  "light brown sugar": 220,
+  "granulated sugar": 200,
+  sugar: 200,
+  allulose: 190,
+  "cocoa powder": 90,
+  salt: 290,
+};
+
+function lookupDensity(ingredientName) {
+  const t = normalize(ingredientName);
+  const keys = Object.keys(DENSITY_G_PER_CUP).sort((a, b) => b.length - a.length);
+  for (const key of keys) {
+    if (t.includes(key)) return DENSITY_G_PER_CUP[key];
+  }
+  return null;
+}
+
+function imperialForMassGrams(grams, ingredientName) {
+  const density = lookupDensity(ingredientName);
+  if (!density) return null; // no known density — stay metric-only rather than guess
+  const cups = grams / density;
+  return `≈${formatFraction(cups)} ${pluralUnit(cups, "cup")}`;
+}
+
+const ML_PER_LITER = 1000;
+
+function unitToMlOrG(value, unit) {
+  const u = unit.toLowerCase();
+  if (u === "l") return value * ML_PER_LITER;
+  return value; // "ml" or "g" pass through as-is
+}
+
+// Parses the leading quantity of an ingredient line, including the
+// dataset's range formats (e.g. "300–800 ml", "420 ml–1.12 L", "36–65 g")
+// as well as a plain single value. Returns { loVal, hiVal, avgVal, unit,
+// isRange, rest } in the line's base unit (ml stays ml, L is converted to
+// ml, g stays g) — or null if the line doesn't start with a recognizable
+// quantity. Used by both addImperialUnits (per-line display) and the ABV/
+// batch-size estimators below, so a range recipe converts/estimates from
+// the same midpoint everywhere rather than two different guesses.
+function parseQuantityToken(line) {
+  // Each end of the range carries its own unit, e.g. "420 ml–1.12 L ...".
+  let m = line.match(/^(\d+(?:\.\d+)?)\s*(ml|g|l)\s*[–-]\s*(\d+(?:\.\d+)?)\s*(ml|g|l)\b(.*)$/i);
+  if (m) {
+    const lo = unitToMlOrG(parseFloat(m[1]), m[2]);
+    const hi = unitToMlOrG(parseFloat(m[3]), m[4]);
+    return { loVal: lo, hiVal: hi, avgVal: (lo + hi) / 2, unit: m[2].toLowerCase() === "l" ? "ml" : m[2].toLowerCase(), isRange: true, rest: m[5] };
+  }
+  // A single shared unit after the range, e.g. "300–800 ml ...", "36–65 g ...".
+  m = line.match(/^(\d+(?:\.\d+)?)\s*[–-]\s*(\d+(?:\.\d+)?)\s*(ml|g|l)\b(.*)$/i);
+  if (m) {
+    const unit = m[3].toLowerCase();
+    const lo = unitToMlOrG(parseFloat(m[1]), unit);
+    const hi = unitToMlOrG(parseFloat(m[2]), unit);
+    return { loVal: lo, hiVal: hi, avgVal: (lo + hi) / 2, unit: unit === "l" ? "ml" : unit, isRange: true, rest: m[4] };
+  }
+  // A plain single value, e.g. "600 ml ...", "50 g ...", "1.2 L ...".
+  m = line.match(/^(\d+(?:\.\d+)?)\s*(ml|g|l)\b(.*)$/i);
+  if (m) {
+    const unit = m[2].toLowerCase();
+    const val = unitToMlOrG(parseFloat(m[1]), unit);
+    return { loVal: val, hiVal: val, avgVal: val, unit: unit === "l" ? "ml" : unit, isRange: false, rest: m[3] };
+  }
+  return null;
+}
+
+// Appends an imperial conversion to a "<qty> <unit> <ingredient>" line, if
+// one can be computed accurately. Leaves the line untouched otherwise
+// (unrecognized units, or a mass ingredient with no known density). Ranges
+// are converted from their midpoint and always shown with "~" to flag that
+// it's a range being approximated by one number.
+function addImperialUnits(line) {
+  const parsed = parseQuantityToken(line);
+  if (!parsed) return line;
+  const approxPrefix = parsed.isRange ? "~" : "";
+  if (parsed.unit === "ml") {
+    const imperial = imperialForVolumeMl(parsed.avgVal);
+    return imperial ? `${line} (${approxPrefix}${imperial})` : line;
+  }
+  if (parsed.unit === "g") {
+    // imperialForMassGrams already prefixes "≈" for the density guess, so a
+    // range doesn't need its own extra "~" on top — one approximation
+    // marker is enough.
+    const imperial = imperialForMassGrams(parsed.avgVal, parsed.rest);
+    return imperial ? `${line} (${imperial})` : line;
+  }
+  return line;
+}
+
+/* ---------------------------------------------------------------------
+ * ABV estimation (SPIKED SLUSH only)
+ *
+ * Derived purely from the ml quantities already in an ingredient list and a
+ * vetted per-spirit/per-premade-alcohol ABV table below — never from asking
+ * the AI or the offline generator to state a number itself, so this stays
+ * consistent and trustworthy across both. Assumes a ~240 ml serving (this
+ * app's standard reference serving) to translate a batch-wide ABV% into a
+ * per-serving standard-drink count.
+ * ------------------------------------------------------------------- */
+
+const STANDARD_SERVING_ML = 240;
+// 1 US standard drink = 14 g pure ethanol; ethanol density ~0.789 g/ml, so
+// 14 / 0.789 ≈ 17.7 ml of pure ethanol per standard drink.
+const ML_ETHANOL_PER_STANDARD_DRINK = 17.7;
+
+// Straight-spirit ABV assumptions — most bottled spirits are ~40%, but a
+// few common liqueurs are meaningfully lower/higher, so they're called out
+// individually rather than assumed flat.
+const SPIRIT_ABV = {
+  "triple sec": 30,
+  cointreau: 40,
+  schnapps: 20,
+  "kahlúa": 20,
+  kahlua: 20,
+  "irish cream": 17,
+  baileys: 17,
+};
+const DEFAULT_SPIRIT_ABV = 40; // rum, tequila, vodka, gin, whiskey/whisky, bourbon, brandy, mezcal
+
+function spiritAbvPercent(spiritName) {
+  const t = normalize(spiritName);
+  const keys = Object.keys(SPIRIT_ABV).sort((a, b) => b.length - a.length);
+  for (const key of keys) {
+    if (t.includes(key)) return SPIRIT_ABV[key];
+  }
+  return DEFAULT_SPIRIT_ABV;
+}
+
+const PREMADE_ALCOHOL_ABV = {
+  champagne: 12,
+  prosecco: 11.5,
+  "sparkling wine": 11.5,
+  "rosé wine": 12.5,
+  "rose wine": 12.5,
+  "red wine": 13,
+  "white wine": 12.5,
+  wine: 12.5,
+  "hard seltzer": 5,
+  seltzer: 5,
+  "hard cider": 5,
+  cider: 5,
+  beer: 5,
+};
+const DEFAULT_PREMADE_ABV = 12.5;
+
+function premadeAbvPercent(name) {
+  const t = normalize(name);
+  const keys = Object.keys(PREMADE_ALCOHOL_ABV).sort((a, b) => b.length - a.length);
+  for (const key of keys) {
+    if (t.includes(key)) return PREMADE_ALCOHOL_ABV[key];
+  }
+  return DEFAULT_PREMADE_ABV;
+}
+
+// Sums ml-of-pure-alcohol across every recognized alcoholic ingredient line,
+// then expresses it as batch-wide ABV%. Returns null if nothing alcoholic
+// was found (so callers know not to show an ABV note at all).
+function estimateAbv(ingredientLines, batchMl) {
+  if (!(batchMl > 0)) return null;
+  let totalEthanolMl = 0;
+  let found = false;
+  ingredientLines.forEach((line) => {
+    const parsed = parseQuantityToken(line);
+    if (!parsed || parsed.unit !== "ml") return;
+    const qty = parsed.avgVal; // range recipes: estimate from the midpoint
+    const t = normalize(parsed.rest);
+    const spiritKey = SPIRITS.find((s) => t.includes(s));
+    if (spiritKey) {
+      found = true;
+      totalEthanolMl += qty * (spiritAbvPercent(spiritKey) / 100);
+      return;
+    }
+    const premadeKey = PREMADE_ALCOHOL.find((s) => t.includes(s));
+    if (premadeKey) {
+      found = true;
+      totalEthanolMl += qty * (premadeAbvPercent(premadeKey) / 100);
+    }
+  });
+  if (!found) return null;
+  return { abvPercent: (totalEthanolMl / batchMl) * 100, totalEthanolMl };
+}
+
+// Sums every ml-quantity ingredient line (midpoint, for range recipes) as a
+// rough total batch volume — used for dataset/AI recipes that don't carry
+// an explicit batch-size field.
+function estimateBatchMlFromLines(lines) {
+  let sum = 0;
+  lines.forEach((line) => {
+    const parsed = parseQuantityToken(line);
+    if (parsed && parsed.unit === "ml") sum += parsed.avgVal;
+  });
+  return sum;
+}
+
+function formatAbvNote(ingredientLines, batchMl, servingMl) {
+  const est = estimateAbv(ingredientLines, batchMl);
+  if (!est) return null;
+  const abv = Math.round(est.abvPercent * 10) / 10;
+  const ethanolPerServingMl = est.totalEthanolMl * ((servingMl || STANDARD_SERVING_ML) / batchMl);
+  const drinks = Math.round((ethanolPerServingMl / ML_ETHANOL_PER_STANDARD_DRINK) * 10) / 10;
+  return `Estimated ~${abv}% ABV — about ${drinks} standard drink${drinks === 1 ? "" : "s"} per ~${servingMl || STANDARD_SERVING_ML} ml serving.`;
+}
+
+/* ---------------------------------------------------------------------
  * Search & filter state
  * ------------------------------------------------------------------- */
 
@@ -87,6 +364,7 @@ const state = {
   activeTags: new Set(),
   activeDifficulties: new Set(),
   sugarFree: false,
+  servingBand: null, // "2-4" | "5-8" | "9-12" | null — overrides batch size for custom builds only
 };
 
 function normalize(s) {
@@ -141,6 +419,7 @@ const els = {
   resultCount: document.getElementById("resultCount"),
   clearFilters: document.getElementById("clearFilters"),
   presetFilters: document.getElementById("presetFilters"),
+  servingBandFilters: document.getElementById("servingBandFilters"),
 };
 
 const DIFFICULTIES = ["easy", "medium", "advanced"];
@@ -193,6 +472,45 @@ function matchesPreset(recipe, activePresets) {
   return activePresets.has(recipe.preset);
 }
 
+// Single-select (unlike the multi-select chips above): only one serving
+// band applies at a time, since it maps directly to one batch size. Only
+// affects custom-drink generation, never dataset filtering.
+const SERVING_BAND_OPTIONS = [
+  { value: "2-4", label: "2 to 4" },
+  { value: "5-8", label: "5 to 8" },
+  { value: "9-12", label: "9 to 12" },
+];
+
+function initServingBandChips() {
+  if (!els.servingBandFilters) return;
+  SERVING_BAND_OPTIONS.forEach(({ value, label }) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.textContent = label;
+    chip.dataset.kind = "servingBand";
+    chip.dataset.value = value;
+    chip.setAttribute("aria-pressed", "false");
+    chip.addEventListener("click", () => {
+      const wasActive = state.servingBand === value;
+      els.servingBandFilters.querySelectorAll(".chip").forEach((c) => {
+        c.classList.remove("active");
+        c.setAttribute("aria-pressed", "false");
+      });
+      state.servingBand = wasActive ? null : value;
+      if (!wasActive) {
+        chip.classList.add("active");
+        chip.setAttribute("aria-pressed", "true");
+      }
+      // Force the custom build to re-run at the new batch size even if the
+      // query text itself hasn't changed.
+      customState.query = null;
+      render();
+    });
+    els.servingBandFilters.appendChild(chip);
+  });
+}
+
 function renderRecipeCard(recipe) {
   const card = document.createElement("article");
   card.className = "card";
@@ -230,9 +548,9 @@ function renderRecipeCard(recipe) {
   ingList.className = "ingredient-list";
   recipe.ingredients.forEach((line) => {
     const li = document.createElement("li");
-    const displayLine = state.sugarFree ? rewriteIngredientForSugarFree(line) : line;
-    li.textContent = displayLine;
-    if (state.sugarFree && displayLine !== line) {
+    const sugarFreeLine = state.sugarFree ? rewriteIngredientForSugarFree(line) : line;
+    li.textContent = addImperialUnits(sugarFreeLine);
+    if (state.sugarFree && sugarFreeLine !== line) {
       li.classList.add("sugar-free-adjusted");
     }
     ingList.appendChild(li);
@@ -243,6 +561,16 @@ function renderRecipeCard(recipe) {
   directions.className = "directions";
   directions.textContent = recipe.directions;
   card.appendChild(directions);
+
+  if (recipe.preset === "SPIKED SLUSH") {
+    const abvNote = formatAbvNote(recipe.ingredients, estimateBatchMlFromLines(recipe.ingredients), STANDARD_SERVING_ML);
+    if (abvNote) {
+      const abvEl = document.createElement("p");
+      abvEl.className = "abv-note";
+      abvEl.textContent = `🍸 ${abvNote}`;
+      card.appendChild(abvEl);
+    }
+  }
 
   if (state.sugarFree) {
     const note = recipe.sugarFreeNote;
@@ -456,10 +784,14 @@ function interpolateSpiritMaxMl(batchMl) {
   return table[table.length - 1][1];
 }
 
-// Recommend ~85% of the hard cap — lands near the community's tighter
-// practical ABV window (~8-14%) rather than the bare legal ceiling.
-function recommendedSpiritMl(batchMl) {
-  return round5(interpolateSpiritMaxMl(batchMl) * 0.85);
+// Recommend ~85% of the hard cap by default — lands near the community's
+// tighter practical ABV window (~8-14%) rather than the bare legal ceiling.
+// `factor` lets callers dial a variant lighter (never used to go above the
+// default 0.85, only at or below it) without touching the underlying cap
+// table — used to vary the "3 custom recipes" flavor profile without ever
+// making a variant less safe than the standard recommendation.
+function recommendedSpiritMl(batchMl, factor = 0.85) {
+  return round5(interpolateSpiritMaxMl(batchMl) * factor);
 }
 
 // Heuristic added-sugar target (~9% of batch weight) for a base with no
@@ -503,6 +835,39 @@ function batchNote(batchMl) {
   const liters = (batchMl / 1000).toFixed(batchMl % 1000 === 0 ? 0 : 1);
   const servings = batchMl <= 720 ? "2-3" : batchMl <= 1440 ? "4-6" : "6-8";
   return `${liters} L, about ${servings} servings`;
+}
+
+// ---- Serving-size selector ----
+//
+// A single-select control (see initServingBandChips()) that, when set,
+// overrides the free-text batch-size parsing above for custom builds only
+// (it never affects dataset filtering). "9 to 12" is honest about the
+// machine's real 1.9 L single-batch ceiling (~7-8 servings at a 240 ml
+// reference serving) rather than silently pretending it can do more —
+// applyServingBandCaveat() appends a note explaining the batch needs to run
+// twice to reach that count.
+const SERVING_BANDS = {
+  "2-4": { batchMl: 720 },
+  "5-8": { batchMl: 1600 },
+  "9-12": { batchMl: 1900, exceedsSingleBatch: true },
+};
+
+function resolveBatchMl(freeText) {
+  const band = state.servingBand && SERVING_BANDS[state.servingBand];
+  if (band) return band.batchMl;
+  return parseBatchMl(freeText);
+}
+
+const SERVING_BAND_CAVEAT =
+  "This machine's max single batch is 1.9 L (about 7-8 servings at a ~240 ml serving) — for 9 to 12 servings, run this exact recipe twice back-to-back rather than trying to fit it all in one pass.";
+
+function applyServingBandCaveat(recipes) {
+  const band = state.servingBand && SERVING_BANDS[state.servingBand];
+  if (!band || !band.exceedsSingleBatch) return recipes;
+  return recipes.map((r) => ({
+    ...r,
+    machine_fit_note: r.machine_fit_note ? `${r.machine_fit_note} ${SERVING_BAND_CAVEAT}` : SERVING_BAND_CAVEAT,
+  }));
 }
 
 // ---- Keyword vocabularies ----
@@ -849,8 +1214,32 @@ function buildFromFamily(family, normalizedText, batchMl, freeText) {
 }
 
 // ---- Generic fallback (no named family recognized) ----
+//
+// A purely custom, open-ended request gets 3 varied recipes rather than 1
+// (see buildGenericVariants below). Variety comes only from flavor/dilution
+// ratios and a spirit amount within the already-safe range (never above the
+// standard 85%-of-cap recommendation) — the sugar dosing formula
+// (recommendedSugarGrams via ensureSugar) is identical across every variant,
+// so variety never comes at the cost of the machine's freezing chemistry.
 
-function buildGenericFromText(normalizedText, batchMl, freeText) {
+const GENERIC_VARIANT_STYLES = [
+  { label: "Classic", spiritFactor: 0.85, mixerRatio: 0.8, note: "" },
+  {
+    label: "Lighter Pour",
+    spiritFactor: 0.7,
+    mixerRatio: 0.75,
+    note: "Garnish with a citrus wheel for a crisper finish.",
+  },
+  {
+    label: "Extra Fruity",
+    spiritFactor: 0.85,
+    mixerRatio: 0.9,
+    note: "Stir in a handful of extra fresh fruit chunks or purée just before serving for more texture.",
+  },
+];
+
+function buildGenericFromText(normalizedText, batchMl, freeText, style) {
+  style = style || GENERIC_VARIANT_STYLES[0];
   const mocktail = MOCKTAIL_KEYWORDS.some((k) => normalizedText.includes(k));
   const spicy = SPICY_KEYWORDS.some((k) => normalizedText.includes(k));
   const requestedSpirit = !mocktail ? detectSpirit(normalizedText) : null;
@@ -871,29 +1260,35 @@ function buildGenericFromText(normalizedText, batchMl, freeText) {
   if (requestedSpirit) {
     preset = "SPIKED SLUSH";
     spiritDisplay = requestedSpirit;
-    spiritMl = recommendedSpiritMl(batchMl);
+    spiritMl = recommendedSpiritMl(batchMl, style.spiritFactor);
     const mixerName = fruit ? `${fruit} juice` : soda ? soda : "juice or soda of choice";
     const remaining = batchMl - spiritMl;
-    lines.push(`${round5(remaining * 0.8)} ml ${mixerName}`, `${round5(remaining * 0.2)} ml water`, `${spiritMl} ml ${spiritDisplay}`);
+    lines.push(`${round5(remaining * style.mixerRatio)} ml ${mixerName}`, `${round5(remaining * (1 - style.mixerRatio))} ml water`, `${spiritMl} ml ${spiritDisplay}`);
   } else if (premadeAlcohol) {
     preset = "SPIKED SLUSH";
     isPremade = true;
-    lines.push(`${round5(batchMl * 0.85)} ml ${premadeAlcohol}`, `${round5(batchMl * 0.15)} ml water or soda (to keep it in the 2.8-16% ABV range)`);
+    // Vary the dilution a little (still well inside the safe 2.8-16% ABV
+    // range machineFitNote describes — this only ever adjusts water/soda
+    // split, never the alcohol input itself).
+    const premadeRatio = clamp(style.mixerRatio, 0.75, 0.9);
+    lines.push(`${round5(batchMl * premadeRatio)} ml ${premadeAlcohol}`, `${round5(batchMl * (1 - premadeRatio))} ml water or soda (to keep it in the 2.8-16% ABV range)`);
   } else if (dairy || normalizedText.includes("milkshake")) {
     preset = "MILKSHAKE";
     batchMl = Math.max(batchMl, 720);
+    const creamRatio = clamp(0.24 + (style.mixerRatio - 0.8) * 0.3, 0.15, 0.32);
     const flavor = fruit || (normalizedText.includes("chocolate") ? "chocolate syrup" : null);
-    lines.push(`${round5(batchMl * 0.72)} ml whole milk`, `${round5(batchMl * 0.24)} ml heavy cream`, "10 ml vanilla extract");
+    lines.push(`${round5(batchMl * (0.96 - creamRatio))} ml whole milk`, `${round5(batchMl * creamRatio)} ml heavy cream`, "10 ml vanilla extract");
     if (flavor) lines.push(flavor === "chocolate syrup" ? "60 ml chocolate syrup" : `${flavor} purée or syrup, to taste`);
   } else if (coffee) {
     preset = "FRAPPE";
     batchMl = Math.max(batchMl, 720);
-    lines.push(`${round5(batchMl * 0.65)} ml chilled black coffee`, `${round5(batchMl * 0.33)} ml half & half`);
+    const coffeeRatio = clamp(0.65 + (style.mixerRatio - 0.8) * 0.3, 0.55, 0.75);
+    lines.push(`${round5(batchMl * coffeeRatio)} ml chilled black coffee`, `${round5(batchMl * (0.98 - coffeeRatio))} ml half & half`);
   } else if (normalizedText.includes("smoothie") || normalizedText.includes("100% juice") || normalizedText.includes("real juice")) {
     preset = "FROZEN JUICE";
     lines.push(`${round5(batchMl)} ml ${fruit ? `${fruit} juice` : "100% juice of choice"}`);
   } else if (fruit || soda) {
-    lines.push(`${round5(batchMl * 0.85)} ml ${fruit ? `${fruit} juice` : soda}`, `${round5(batchMl * 0.15)} ml water`);
+    lines.push(`${round5(batchMl * style.mixerRatio)} ml ${fruit ? `${fruit} juice` : soda}`, `${round5(batchMl * (1 - style.mixerRatio))} ml water`);
   } else {
     // No flavor detected at all — plain water needs sugar force-added below
     // regardless of keyword matching (there's nothing sweet to detect yet).
@@ -916,10 +1311,17 @@ function buildGenericFromText(normalizedText, batchMl, freeText) {
     mocktail: mocktail && Boolean(requestedSpirit || premadeAlcohol),
   });
 
-  const name = `${spicy ? "Spicy " : ""}Custom ${titleCase(preset === "SPIKED SLUSH" ? "Spiked Slush" : preset.toLowerCase())}`;
-  const directions = `Combine everything${prepSteps.length ? " (after the prep step above)" : ""}, run ${preset}, adjusting the temperature bar to taste.`;
+  const name = `${spicy ? "Spicy " : ""}${style.label} Custom ${titleCase(preset === "SPIKED SLUSH" ? "Spiked Slush" : preset.toLowerCase())}`;
+  let directions = `Combine everything${prepSteps.length ? " (after the prep step above)" : ""}, run ${preset}, adjusting the temperature bar to taste.`;
+  if (style.note) directions += ` ${style.note}`;
 
   return finishRecipe({ name, preset, tags, batchMl, lines, prepSteps, directions, fitInfo, freeText });
+}
+
+// Purely custom, open-ended requests (no named family) get 3 varied
+// recipes — see GENERIC_VARIANT_STYLES above for how they differ.
+function buildGenericVariants(normalizedText, batchMl, freeText) {
+  return GENERIC_VARIANT_STYLES.map((style) => buildGenericFromText(normalizedText, batchMl, freeText, style));
 }
 
 // ---- Ingredient-list mode ("mango, coconut milk, dark rum") ----
@@ -1026,10 +1428,16 @@ function buildFromIngredientList(freeText, normalizedText, batchMl) {
   if (classified.length <= 2) {
     return [buildFromTokens(classified, normalizedText, batchMl, freeText, "Custom Mix", classified.length)];
   }
-  // Multiple candidate ingredients: offer a full-mix version and a simplified
-  // one using just the two most prominent (first-mentioned) usable tokens.
+  // Multiple candidate ingredients, open-ended request: offer 3 variants —
+  // a full mix, a simplified two-ingredient twist, and a single-ingredient
+  // highlight — the same "3 recipes for purely custom requests" treatment
+  // as the generic fallback. Only which/how-many flavor tokens are used
+  // varies; recommendedSpiritMl/recommendedSugarGrams (called inside
+  // buildFromTokens) are unaffected by useCount, so safety math never
+  // changes across variants.
   const results = [buildFromTokens(classified, normalizedText, batchMl, freeText, "Full Mix", classified.length)];
   results.push(buildFromTokens(classified, normalizedText, batchMl, freeText, "Simplified Twist", Math.min(2, classified.length)));
+  results.push(buildFromTokens(classified, normalizedText, batchMl, freeText, "Solo Highlight", 1));
   return results;
 }
 
@@ -1058,7 +1466,7 @@ function pickInspirationRecipes(freeText, limit) {
 // No DOM side effects — the caller (render()) decides where these go.
 function buildCustomRecipesFromText(freeText) {
   const normalizedText = normalize(freeText);
-  const batchMl = parseBatchMl(freeText);
+  const batchMl = resolveBatchMl(freeText);
   const looksLikeIngredientList =
     freeText.includes(",") &&
     !/\b(i want|i'd like|need|craving|give me|make me|for a)\b/i.test(normalizedText) &&
@@ -1068,7 +1476,11 @@ function buildCustomRecipesFromText(freeText) {
     return buildFromIngredientList(freeText, normalizedText, batchMl);
   }
   const family = findDrinkFamily(normalizedText);
-  return [family ? buildFromFamily(family, normalizedText, batchMl, freeText) : buildGenericFromText(normalizedText, batchMl, freeText)];
+  // A named drink (e.g. "margarita") gets exactly one recipe — it's a
+  // specific request, not an open-ended one. Only a purely custom request
+  // (no recognized family) gets 3 varied recipes.
+  if (family) return [buildFromFamily(family, normalizedText, batchMl, freeText)];
+  return buildGenericVariants(normalizedText, batchMl, freeText);
 }
 
 // If the query mentions "sugar free"/"diet"/etc., flip the toggle on for
@@ -1102,7 +1514,7 @@ const CUSTOM_DRINK_API_URL = "https://ninja-slushi-api.johnny-y-w-wang.workers.d
 // offline before the Worker even finishes waiting on Gemini.
 const CUSTOM_API_TIMEOUT_MS = 25000;
 
-async function fetchCustomRecipesFromApi(freeText, inspirationRecipes) {
+async function fetchCustomRecipesFromApi(freeText, inspirationRecipes, targetBatchMl, servingBand) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), CUSTOM_API_TIMEOUT_MS);
   try {
@@ -1112,6 +1524,8 @@ async function fetchCustomRecipesFromApi(freeText, inspirationRecipes) {
       body: JSON.stringify({
         query: freeText,
         sugarFree: state.sugarFree,
+        targetBatchMl,
+        servingBand: servingBand || null,
         inspiration: inspirationRecipes.map((r) => ({
           name: r.name,
           preset: r.preset,
@@ -1157,11 +1571,12 @@ function renderCustomLoadingPlaceholder() {
 
 async function resolveCustomForQuery(freeText, mySeq) {
   const inspiration = pickInspirationRecipes(freeText, 6);
+  const targetBatchMl = resolveBatchMl(freeText);
   let recipes;
   let source;
   if (CUSTOM_DRINK_API_URL) {
     try {
-      recipes = await fetchCustomRecipesFromApi(freeText, inspiration);
+      recipes = await fetchCustomRecipesFromApi(freeText, inspiration, targetBatchMl, state.servingBand);
       source = "ai";
     } catch (err) {
       recipes = buildCustomRecipesFromText(freeText);
@@ -1174,7 +1589,9 @@ async function resolveCustomForQuery(freeText, mySeq) {
 
   if (mySeq !== customState.requestSeq) return; // superseded by a newer query since we started
 
-  customState.recipes = recipes;
+  // Applied uniformly regardless of source (AI or offline) — never relies
+  // on the AI having remembered the "9-12 needs 2 runs" instruction itself.
+  customState.recipes = applyServingBandCaveat(recipes);
   customState.pending = false;
   customState.source = source;
   render();
@@ -1232,7 +1649,7 @@ function renderCustomRecipeCard(recipe, source) {
   ingList.className = "ingredient-list";
   ingredients.forEach((line) => {
     const li = document.createElement("li");
-    li.textContent = line;
+    li.textContent = addImperialUnits(line);
     if (state.sugarFree) li.classList.add("sugar-free-adjusted");
     ingList.appendChild(li);
   });
@@ -1242,6 +1659,16 @@ function renderCustomRecipeCard(recipe, source) {
   directions.className = "directions";
   directions.textContent = recipe.directions || "";
   card.appendChild(directions);
+
+  if (recipe.preset === "SPIKED SLUSH" && Array.isArray(recipe.ingredients)) {
+    const abvNote = formatAbvNote(recipe.ingredients, estimateBatchMlFromLines(recipe.ingredients), STANDARD_SERVING_ML);
+    if (abvNote) {
+      const abvEl = document.createElement("p");
+      abvEl.className = "abv-note";
+      abvEl.textContent = `🍸 ${abvNote}`;
+      card.appendChild(abvEl);
+    }
+  }
 
   if (recipe.machine_fit_note) {
     const fitNote = document.createElement("p");
@@ -1352,6 +1779,7 @@ function render() {
 function init() {
   initThemeSwitcher();
   initFilterChips();
+  initServingBandChips();
 
   // Typing alone doesn't trigger a search — only an explicit action does
   // (the Search button, pressing Enter, or a filter chip), so the custom
@@ -1381,6 +1809,7 @@ function init() {
     state.activeTags.clear();
     state.activeDifficulties.clear();
     state.activePresets.clear();
+    state.servingBand = null;
     els.query.value = "";
     document.querySelectorAll(".chip.active").forEach((c) => {
       c.classList.remove("active");

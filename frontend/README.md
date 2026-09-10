@@ -60,9 +60,40 @@ that the footer with repo-relative links is gone).
   override for a few recipes whose prep is trickier than their ingredient
   count suggests (e.g. gelatin-stabilized frosé).
 - **Preset filters** (SLUSH / SPIKED SLUSH / FROZEN JUICE / MILKSHAKE / FRAPPÉ).
+- **Serving size** (2 to 4 / 5 to 8 / 9 to 12, single-select) — only affects
+  custom-drink generation (both the AI backend and the offline generator),
+  not dataset filtering, since dataset recipes already have a fixed batch.
+  Picking a band overrides whatever batch size the typed text implies.
+  "9 to 12" is honest about the machine's real 1.9 L single-batch ceiling
+  (about 7-8 servings at a ~240 ml reference serving): the recipe is built
+  at the 1.9 L max with an explicit note that it needs to run twice
+  back-to-back to reach 9-12 total servings, rather than silently pretending
+  the machine can exceed its own limit in one pass.
 - All filters and the search boxes **combine (AND across facets, OR within a
   facet)** rather than overwriting each other — narrow with as many as you
   like, and "Clear all filters" resets everything at once.
+- **Dual-unit measurements** — every ingredient quantity shows its metric
+  amount plus a parenthetical imperial conversion, on dataset cards and
+  custom-built cards alike: volume (ml/L) converts to cups/tbsp/tsp using
+  the exact standard US culinary equivalences (1 cup = 240 ml, 1 tbsp =
+  15 ml, 1 tsp = 5 ml — shown without a "≈", the way virtually every recipe
+  converter shows them), while mass (g) only converts to cups when the
+  ingredient matches a known density (sugar, brown sugar, powdered sugar,
+  allulose, cocoa powder, salt) and is always flagged "≈" since a
+  gram-to-cup conversion is inherently ingredient-specific — if there's no
+  known density, it's left metric-only rather than guessing, so this can
+  never quietly over/under-dose a conversion. A handful of dataset recipes
+  give a range (e.g. "300–800 ml") rather than one number; those convert
+  from the midpoint and get an extra "~" to flag it.
+- **Estimated ABV for alcoholic drinks** — any SPIKED SLUSH card (dataset,
+  AI, or offline-built) shows an estimated batch-wide ABV% and roughly how
+  many standard drinks (14 g pure alcohol each) that works out to per
+  ~240 ml serving. This is computed client-side from the ml quantities
+  already in the ingredient list against a small per-spirit/per-premade-
+  alcohol ABV table (standard spirits ~40%, triple sec/schnapps/Kahlúa/
+  Irish cream lower, wine ~12-13%, beer/cider/seltzer ~5%) — never asked of
+  the AI or the offline generator directly, so it can't drift from the
+  actual numbers in the recipe.
 - **Sugar-Free mode** — a toggle that rewrites sugar ingredients on the fly:
   - `sugar` → `allulose (granulated)`, scaled ×1.33 (allulose is ~70% as
     sweet as sugar by weight, so the common conversion is about 1⅓ cups
@@ -116,11 +147,18 @@ that the footer with repo-relative links is gone).
     mule, mimosa, sangria, painkiller, paloma, mojito, cosmopolitan,
     screwdriver, bloody mary, frappé, milkshake, (spiked) lemonade, iced tea)
     and detects spirits, premade alcohol, dairy, coffee, fruit/juice, and
-    soda keywords for anything else, including a "list your ingredients"
-    mode (comma-separated, no recognized drink name) that builds one or two
-    variants — "Full Mix" and a "Simplified Twist" leaving an ingredient or
-    two out — since **multiple results are fine** when the request is
-    open-ended.
+    soda keywords for anything else. A **named drink gets exactly 1 recipe**
+    (it's a specific request); a **purely custom/open-ended request gets 3**
+    — either "list your ingredients" mode (comma-separated, no recognized
+    drink name), which builds "Full Mix," "Simplified Twist," and "Solo
+    Highlight" variants using progressively fewer of the listed ingredients,
+    or the generic fallback (a described drink matching no named family),
+    which builds "Classic," "Lighter Pour," and "Extra Fruity" variants that
+    differ only in mixer ratio and, when alcoholic, how much of the *already
+    safe* recommended spirit amount they use — never in the sugar dosing
+    formula, which stays identical and safe across every variant. The live
+    backend follows the same rule (exactly 1 for a named drink, exactly 3
+    for an open-ended one).
   - Every recipe is sized against the machine's real chemistry from
     `../references/sugar-alcohol-and-alerts.md`: batch 475 ml–1.9 L, straight
     spirits capped per the official ml-per-batch-size table (recommended at
