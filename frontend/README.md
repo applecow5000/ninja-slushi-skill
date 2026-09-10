@@ -77,33 +77,34 @@ that the footer with repo-relative links is gone).
 - There's no preset filter — SLUSH / SPIKED SLUSH / FROZEN JUICE / MILKSHAKE
   / FRAPPÉ is decided by the ingredients, and every card (dataset or custom)
   shows which preset to run right in its badge.
-- **Servings** (3 / 4 / 6 / 8 / 10, single-select) — only affects
-  custom-drink generation (both the AI backend and the offline generator),
-  not dataset filtering, since dataset recipes already have a fixed batch.
-  This app's reference serving is 6.4 US fl oz, so the batch size is exactly
-  `servings × 6.4 oz` — "10" lands right at the machine's real 1.9 L / 64 oz
-  single-batch max, and every option is sized to genuinely fit in one pass
-  (no serving count here can exceed what the machine can actually hold).
-- **🍹 Buzz level** (5 stops, single-select "radial" buttons with a row of
-  1-5 🥴 emoji under each — left end says "🥂 I want to feel a lil buzz,"
-  right end says "🤪 I don't know what's going on anymore") — only affects
-  alcoholic custom builds. Each stop targets a real batch-wide ABV% (5/6/7/
-  8/9%, backend-only — never shown in the UI) rather than a fixed spirit
-  volume, which fixes a real bug: 120 ml of 40% tequila in a 1.2 L batch is
-  actually ~4% ABV (120 × 0.40 ÷ 1200), not ~10% (120 ÷ 1200) — every ABV
-  calculation in this app, generation-time or the ABV badge on a card, goes
-  through the same real-strength math (`applyAbvTargetToLines()`), so
-  they can never disagree with each other. The spirit amount needed is
-  still hard-capped at the machine's official per-batch-size max — a high
-  buzz-level target can't ever push past it, and the card says so honestly
-  if the target had to be capped down for that batch size.
-- **Buzz level and Servings adjust an already-shown custom recipe directly**
-  — move either one after a build is on screen and its ratios/volume
-  update immediately, no re-search and no new AI call (the same rescale
-  math runs client-side on whatever's already showing, offline- or
-  AI-built alike). Drink-type and difficulty selections never do this —
-  they only ever apply to the *next* fresh search. All custom builds start
-  at the leftmost buzz level (mildest) by default.
+- **Servings** (3 / 4 / 6 / 8 / 10, single-select) — this app's reference
+  serving is 6.4 US fl oz, so the batch size is exactly `servings × 6.4 oz`
+  — "10" lands right at the machine's real 1.9 L / 64 oz single-batch max,
+  and every option is sized to genuinely fit in one pass.
+- **🍹 Buzz level** (5 single-select "radial" stops — left end says "🥴 I
+  want to feel a lil buzz," right end says "🥴🥴🥴🥴🥴 I don't know what's
+  going on anymore") — only affects alcoholic builds. Each stop targets a
+  real batch-wide ABV% (5/6/7/8/9%, backend-only — never shown in the UI)
+  rather than a fixed spirit volume, which fixes a real bug: 120 ml of 40%
+  tequila in a 1.2 L batch is actually ~4% ABV (120 × 0.40 ÷ 1200), not
+  ~10% (120 ÷ 1200) — every ABV calculation in this app, generation-time or
+  the ABV badge on a card, goes through the same real-strength math
+  (`applyAbvTargetToLines()`), so they can never disagree with each other.
+  Every stop up to 9% is always actually reachable (spirit/premade alcohol
+  is solved for real ABV, not just capped at a flat volume ratio) — the
+  card notes when hitting a high buzz-level target for a straight-spirit
+  drink needed more than the manufacturer's official per-batch-size volume
+  guidance, since that guidance turns out to cap real achievable ABV at
+  only ~6-7% for a standard 40% spirit.
+- **Servings and Buzz level adjust both custom builds AND dataset recipes
+  directly** — move either one and any recipe currently on screen (custom
+  or straight from the dataset) has its ratios/volume rescaled immediately,
+  no re-search and no new AI call, using the same real-ABV math either way.
+  A rescaled dataset card gets a small note saying it's been adjusted from
+  the original. Drink-type and difficulty selections never do this — they
+  only ever apply to the *next* fresh custom-drink search, and never touch
+  the dataset at all. All custom builds start at the leftmost buzz level
+  (mildest) by default.
 - All filters and the search boxes **combine (AND across facets, OR within a
   facet)** for dataset search, rather than overwriting each other — narrow
   with as many as you like, and "Clear all filters" resets everything at
