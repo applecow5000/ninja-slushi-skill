@@ -455,6 +455,56 @@ h1, h2, h3 {
   transform: translateY(-1px) scale(1.03);
 }
 
+.buzz-slider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.buzz-caption {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  max-width: 130px;
+  line-height: 1.25;
+}
+
+.buzz-caption-left {
+  text-align: right;
+}
+
+.buzz-stops {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1;
+  justify-content: space-between;
+  min-width: 220px;
+}
+
+.buzz-stop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.buzz-radio {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.buzz-emojis {
+  font-size: 0.95rem;
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: -1px;
+}
+
 .bottom-row {
   display: flex;
   align-items: center;

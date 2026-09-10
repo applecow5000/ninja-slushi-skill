@@ -63,7 +63,8 @@ own deploy via GitHub Pages is unaffected either way).
 
 ```
 Browser (GitHub Pages)  --POST {query, inspiration, sugarFree,
-                                 targetBatchMl, servingBand}-->  Worker
+                                 targetBatchMl, targetAbvPercent,
+                                 driveTypeFilters, difficultyFilters}-->  Worker
                                                                        |
                                                                   reads GEMINI_API_KEY
                                                                        |
@@ -89,18 +90,26 @@ Browser renders the recipe(s) the same way it renders offline-built ones
   generator produces (`RECIPE_ARRAY_SCHEMA` in `index.js`), so the same
   `renderCustomRecipeCard()` on the frontend renders either source
   identically.
-- **Serving size**: if the frontend's serving-size selector is set, it sends
-  `targetBatchMl` (the exact batch size in ml to size the recipe to) and
-  `servingBand` (`"2-4"` / `"5-8"` / `"9-12"`) in the POST body — the Worker
-  folds both into the prompt (see `SYSTEM_INSTRUCTION` and the `userText`
-  assembly in `index.js`), including the "9 to 12 exceeds the machine's
-  single-batch max, build at 1.9 L and note it needs two runs" instruction.
-  The frontend also applies that caveat itself client-side regardless of
-  what Gemini returns, so it's never missing even if a response omits it.
-- **Recipe count**: the system prompt asks for exactly 1 recipe for a named
-  drink and exactly 3 for an open-ended request, matching the offline
-  generator's behavior — the frontend doesn't second-guess this, it renders
-  however many recipes come back.
+- **Serving size**: the frontend's servings selector (3/4/6/8/10, each
+  exactly `servings × 6.4 oz`) sends `targetBatchMl` (ml) in the POST body,
+  folded into the prompt as an exact sizing instruction.
+- **Buzz level**: the frontend's 5-stop buzz-level slider sends
+  `targetAbvPercent` (5-9%, backend-only — never shown in the UI) for
+  alcoholic requests. The system prompt is explicit that ABV must be
+  computed from the ingredient's REAL strength (spirit_ml × spirit_ABV% ÷
+  batch_ml), never a bare volume ratio — but this is a best-effort
+  instruction to Gemini, not the actual guarantee: the frontend
+  independently re-derives and, if needed, corrects every alcoholic
+  recipe's ABV client-side (`applyAbvTargetToLines()` in `app.js`) against
+  the machine's official spirit-volume cap regardless of what comes back,
+  so a miscalculated AI response can't reach the page.
+- **Drink-type/difficulty filters**: sent as `driveTypeFilters`/
+  `difficultyFilters` — best-effort hints for Gemini; the frontend's own
+  `applyFilterSelectionNotes()` is what actually guarantees a selection
+  either shows up or gets an honest note explaining why not, regardless of
+  the AI's compliance.
+- **Recipe count**: the system prompt always asks for exactly 3 recipes,
+  matching the offline generator's behavior.
 
 ## Cost
 

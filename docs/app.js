@@ -362,6 +362,127 @@ function formatAbvNote(ingredientLines, batchMl, servingMl) {
 }
 
 /* ---------------------------------------------------------------------
+ * "Buzz level" — targets a real batch-wide ABV%, not a spirit-volume ratio
+ *
+ * The bug this fixes: 120 ml of 40% tequila in a 1.2 L batch is really
+ * ~4% ABV (120 × 0.40 / 1200), not ~10% (120 / 1200) — any calculation
+ * that skips the spirit's actual strength and just divides volumes is
+ * wrong. Every spirit/premade-alcohol amount in a generated recipe is
+ * solved FOR a real target ABV using the ingredient's actual strength
+ * (spiritAbvPercent/premadeAbvPercent), via applyAbvTargetToLines() below,
+ * then hard-clamped to the machine's official safety ceiling. This is also
+ * exactly what the buzz-level slider and the ABV badge on a card both read
+ * from — one calculation, used everywhere, never re-derived differently in
+ * two places.
+ * ------------------------------------------------------------------- */
+
+// Percentages are backend-only — never shown in the UI, which only shows
+// the emoji/label pair (see initBuzzLevelSlider()).
+const BUZZ_LEVELS = [
+  { targetAbv: 5, drunkCount: 1 },
+  { targetAbv: 6, drunkCount: 2 },
+  { targetAbv: 7, drunkCount: 3 },
+  { targetAbv: 8, drunkCount: 4 },
+  { targetAbv: 9, drunkCount: 5 },
+];
+
+function currentTargetAbv() {
+  const level = BUZZ_LEVELS[state.buzzLevel] || BUZZ_LEVELS[0];
+  return level.targetAbv;
+}
+
+// Scales just the leading quantity of an "<N> ml ..." / "<N> g ..." line by
+// a factor. Leaves range-format lines and non-numeric lines untouched
+// (rare in generated recipes — this only ever operates on the app's own
+// generated "qty unit ingredient" lines, offline or AI).
+function rescaleMlOrGLine(line, factor) {
+  const m = line.match(/^(\d+(?:\.\d+)?)\s*(ml|g)\b(.*)$/i);
+  if (!m) return line;
+  const scaled = round5(parseFloat(m[1]) * factor);
+  if (scaled <= 0) return line;
+  return `${scaled} ${m[2]}${m[3]}`;
+}
+
+// The single place that sizes alcohol (and rebalances everything else
+// around it) for a target ABV. Used both when a recipe is first built and
+// when the buzz-level/serving-size selectors adjust an already-shown one —
+// same math either time, whether the recipe came from the offline
+// generator or the AI backend (both produce the same "qty ml/g ingredient"
+// line shape). No-ops (aside from a plain volume rescale) on a recipe with
+// no recognized alcohol line.
+function applyAbvTargetToLines(lines, batchMl, targetAbvPercent) {
+  const alcoholInfo = lines
+    .map((line, i) => {
+      const parsed = parseQuantityToken(line);
+      if (!parsed || parsed.unit !== "ml") return null;
+      const t = normalize(parsed.rest);
+      const spiritKey = SPIRITS.find((s) => t.includes(s));
+      if (spiritKey) return { i, kind: "spirit", ml: parsed.avgVal, abvPct: spiritAbvPercent(spiritKey) };
+      const premadeKey = PREMADE_ALCOHOL.find((s) => t.includes(s));
+      if (premadeKey) return { i, kind: "premade", ml: parsed.avgVal, abvPct: premadeAbvPercent(premadeKey) };
+      return null;
+    })
+    .filter(Boolean);
+
+  const currentTotalMl = estimateBatchMlFromLines(lines);
+
+  if (alcoholInfo.length === 0) {
+    // No alcohol recognized — just a plain volume rescale (for serving-size
+    // changes on a non-alcoholic recipe), nothing ABV-related to do.
+    if (!(currentTotalMl > 0) || Math.round(currentTotalMl) === Math.round(batchMl)) {
+      return { lines, capped: false, alcoholMl: 0, actualAbvPercent: null };
+    }
+    const factor = batchMl / currentTotalMl;
+    return { lines: lines.map((l) => rescaleMlOrGLine(l, factor)), capped: false, alcoholMl: 0, actualAbvPercent: null };
+  }
+
+  const oldEthanolMl = alcoholInfo.reduce((a, x) => a + x.ml * (x.abvPct / 100), 0);
+  const targetEthanolMl = (targetAbvPercent / 100) * batchMl;
+  let scale = oldEthanolMl > 0 ? targetEthanolMl / oldEthanolMl : 1;
+  let capped = false;
+
+  const hasSpirit = alcoholInfo.some((x) => x.kind === "spirit");
+  const oldAlcoholTotalMl = alcoholInfo.reduce((a, x) => a + x.ml, 0);
+  if (hasSpirit) {
+    // Straight spirits are hard-capped at the machine's official max ml for
+    // this batch size (MAX_SPIRIT_TABLE) — a buzz-level target can never
+    // push past it, whatever the slider asked for.
+    const maxSpiritMl = interpolateSpiritMaxMl(batchMl);
+    const currentSpiritMl = alcoholInfo.filter((x) => x.kind === "spirit").reduce((a, x) => a + x.ml, 0);
+    if (currentSpiritMl * scale > maxSpiritMl) {
+      scale = maxSpiritMl / currentSpiritMl;
+      capped = true;
+    }
+  } else {
+    // Premade alcohol has no ml cap of its own — just keep the dilution
+    // physically sane (can't be more than 95% of the batch or under 15%).
+    const minMl = batchMl * 0.15;
+    const maxMl = batchMl * 0.95;
+    const newPremadeMl = oldAlcoholTotalMl * scale;
+    if (newPremadeMl > maxMl) {
+      scale = maxMl / oldAlcoholTotalMl;
+      capped = true;
+    } else if (newPremadeMl < minMl) {
+      scale = minMl / oldAlcoholTotalMl;
+      capped = true;
+    }
+  }
+
+  const newAlcoholTotalMl = round5(oldAlcoholTotalMl * scale);
+  const oldNonAlcoholMl = currentTotalMl - oldAlcoholTotalMl;
+  const newNonAlcoholMl = batchMl - newAlcoholTotalMl;
+  const nonAlcoholFactor = oldNonAlcoholMl > 0 ? newNonAlcoholMl / oldNonAlcoholMl : 1;
+
+  const alcoholIndexes = new Set(alcoholInfo.map((x) => x.i));
+  const newLines = lines.map((line, i) => rescaleMlOrGLine(line, alcoholIndexes.has(i) ? scale : nonAlcoholFactor));
+
+  const newEthanolMl = alcoholInfo.reduce((a, x) => a + x.ml * scale * (x.abvPct / 100), 0);
+  const actualAbvPercent = Math.round((newEthanolMl / batchMl) * 1000) / 10;
+
+  return { lines: newLines, capped, alcoholMl: newAlcoholTotalMl, actualAbvPercent };
+}
+
+/* ---------------------------------------------------------------------
  * Search & filter state
  * ------------------------------------------------------------------- */
 
@@ -371,6 +492,7 @@ const state = {
   activeDifficulties: new Set(),
   sugarFree: false,
   servingCount: null, // 3 | 4 | 6 | 8 | 10 | null — overrides batch size for custom builds only
+  buzzLevel: 0, // index into BUZZ_LEVELS (0-4) — always has a default, leftmost/mildest
 };
 
 function normalize(s) {
@@ -425,6 +547,7 @@ const els = {
   resultCount: document.getElementById("resultCount"),
   clearFilters: document.getElementById("clearFilters"),
   servingSizeFilters: document.getElementById("servingSizeFilters"),
+  buzzStops: document.getElementById("buzzStops"),
   historyPanel: document.getElementById("historyPanel"),
   historyList: document.getElementById("historyList"),
 };
@@ -501,8 +624,48 @@ function initServingSizeChips() {
         chip.classList.add("active");
         chip.setAttribute("aria-pressed", "true");
       }
+      // Serving size is one of the two selectors (with buzz level) that DO
+      // adjust an already-shown recipe's numbers directly — drink-type and
+      // difficulty chips never do this.
+      liveAdjustCurrentRecipes();
     });
     els.servingSizeFilters.appendChild(chip);
+  });
+}
+
+// A tipsy-face emoji, repeated per stop's intensity (1-5) — the actual
+// target ABV% never appears in the UI, only this and the two end captions.
+const DRUNK_EMOJI = "🥴";
+
+// Single-select "radial" stops (native radio buttons, styled) rather than a
+// literal <input type=range> — 5 fixed, meaningful stops instead of a
+// continuous drag. Always has a value (defaults to leftmost/mildest); like
+// serving size, changing it live-adjusts whatever custom recipes are
+// already on screen (see liveAdjustCurrentRecipes()).
+function initBuzzLevelSlider() {
+  if (!els.buzzStops) return;
+  BUZZ_LEVELS.forEach((level, i) => {
+    const stop = document.createElement("label");
+    stop.className = "buzz-stop";
+
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = "buzzLevel";
+    radio.className = "buzz-radio";
+    radio.value = String(i);
+    radio.checked = i === state.buzzLevel;
+    radio.addEventListener("change", () => {
+      state.buzzLevel = i;
+      liveAdjustCurrentRecipes();
+    });
+
+    const emojiRow = document.createElement("span");
+    emojiRow.className = "buzz-emojis";
+    emojiRow.textContent = DRUNK_EMOJI.repeat(level.drunkCount);
+
+    stop.appendChild(radio);
+    stop.appendChild(emojiRow);
+    els.buzzStops.appendChild(stop);
   });
 }
 
@@ -1069,16 +1232,27 @@ function ensureSugar(lines, batchMl, forceSugar) {
   return false;
 }
 
-function machineFitNote({ isSpiked, isPremade, spiritMl, batchMl, addedSugar, mocktail }) {
+function machineFitNote({ isSpiked, isPremade, spiritMl, batchMl, addedSugar, mocktail, actualAbvPercent, abvCapped }) {
   if (mocktail) {
     return `Made non-alcoholic per your request — without alcohol as antifreeze, the sugar in this batch is what lets it freeze, so keep the full-sugar (or allulose, in Sugar-Free mode) version rather than a diet base alone.`;
   }
+  // Both alcoholic branches describe the REAL computed ABV (actual ethanol
+  // content ÷ batch volume, from applyAbvTargetToLines) — never a flat
+  // claim derived from spirit/premade volume alone, which would be wrong
+  // (120 ml of 40% tequila in a 1.2 L batch is ~4% ABV, not the ~10% a
+  // volume-only calculation would suggest).
   if (isPremade) {
-    return `Premade alcoholic inputs (wine/beer/cider/sparkling wine) need to land between 2.8%-16% ABV to freeze — check the label and dilute with a splash of water/soda if it runs hot, and make sure it still has real sugar (the machine's low-sugar alert will fire otherwise).`;
+    const abvText = actualAbvPercent != null ? `sized to land at about ${actualAbvPercent}% ABV` : `needs to land between 2.8%-16% ABV to freeze`;
+    const capNote = abvCapped ? " Your buzz-level target couldn't be hit at this dilution without going unrealistically strong/weak, so it landed here instead — check the label and adjust to taste." : "";
+    return `Premade alcoholic input ${abvText} — check the label since bottled strength varies, and make sure it still has real sugar (the machine's low-sugar alert will fire otherwise).${capNote}`;
   }
   if (isSpiked) {
     const maxMl = Math.round(interpolateSpiritMaxMl(batchMl));
-    return `Spirit capped at ${spiritMl} ml (official max for this batch size is ~${maxMl} ml) to land in the community's practical ~8-14% ABV sweet spot rather than the legal 16% ceiling — too much and it won't freeze at all.${addedSugar ? " Sugar topped up since the base alone was too tart/low-sugar to hit the machine's freezing threshold." : ""}`;
+    const abvText = actualAbvPercent != null ? `sized to land at about ${actualAbvPercent}% ABV` : `capped at ${spiritMl} ml`;
+    const capNote = abvCapped
+      ? ` Your buzz-level target would have needed more spirit than this batch size safely allows (official max here is ~${maxMl} ml), so it's capped at the safe limit instead.`
+      : "";
+    return `Spirit ${abvText} (official max for this batch size is ~${maxMl} ml) — too much and it won't freeze at all.${capNote}${addedSugar ? " Sugar topped up since the base alone was too tart/low-sugar to hit the machine's freezing threshold." : ""}`;
   }
   return addedSugar
     ? `Sugar topped up to roughly the community's ~10-15% Brix target — this base alone was under the machine's low-sugar threshold and would freeze into hard ice instead of slush.`
@@ -1106,6 +1280,7 @@ function finishRecipe({ name, preset, tags, batchMl, lines, prepSteps, direction
     preset,
     tags: Array.from(new Set(tags)),
     difficulty: difficultyFor(lines, prepSteps),
+    batch_ml: batchMl, // exact batch size used to build this — lets the buzz-level/serving-size sliders rescale it later without re-parsing
     batch_note: batchNote(batchMl),
     prep_steps: prepSteps,
     ingredients: lines,
@@ -1197,12 +1372,16 @@ function buildFromFamily(family, normalizedText, batchMl, freeText, style, injec
   const requestedSpirit = detectSpirit(normalizedText);
   const spiritDisplay = family.spirit ? requestedSpirit || family.spirit : null;
 
+  // Seed with a reasonable starting spirit amount — applyAbvTargetToLines
+  // below resizes it (and rebalances everything else) to the buzz-level's
+  // real target ABV, so this seed only matters for splitting the other
+  // components sensibly, not for the final numbers.
   let spiritMl = 0;
   if (isAlcoholicFamily && !mocktail && !family.premade && spiritDisplay) {
-    spiritMl = recommendedSpiritMl(batchMl, style.spiritFactor);
+    spiritMl = recommendedSpiritMl(batchMl);
   }
 
-  const lines = buildComponentIngredients(
+  let lines = buildComponentIngredients(
     family.components,
     batchMl,
     spiritMl,
@@ -1213,16 +1392,22 @@ function buildFromFamily(family, normalizedText, batchMl, freeText, style, injec
   if (isAlcoholicFamily && mocktail && spiritDisplay) {
     lines.push(`zero-proof ${spiritDisplay}, to taste`);
   }
-  if (family.premade && isAlcoholicFamily) {
-    // premade alcohol (wine/sparkling) is already one of the weighted components' names in most
-    // of these templates, so nothing extra to add here beyond what buildComponentIngredients did.
-  }
   injectExtraFruit(lines, normalizedText);
   injectFilterHintIngredients(lines, injectableHints);
 
+  let actualAbvPercent = null;
+  let abvCapped = false;
+  if (isAlcoholicFamily && !mocktail) {
+    const abvResult = applyAbvTargetToLines(lines, batchMl, currentTargetAbv());
+    lines = abvResult.lines;
+    actualAbvPercent = abvResult.actualAbvPercent;
+    abvCapped = abvResult.capped;
+    spiritMl = abvResult.alcoholMl; // for the spicy-prep infusion text below
+  }
+
   const prepSteps = [];
   if (family.mintPrep) applyMintPrep(lines, prepSteps);
-  if (spicy) applySpicyPrep(lines, prepSteps, isAlcoholicFamily && !mocktail ? spiritDisplay : null, spiritMl);
+  if (spicy) applySpicyPrep(lines, prepSteps, isAlcoholicFamily && !mocktail && !family.premade ? spiritDisplay : null, spiritMl);
 
   const addedSugar = ensureSugar(lines, batchMl, family.forceSugar);
 
@@ -1230,6 +1415,8 @@ function buildFromFamily(family, normalizedText, batchMl, freeText, style, injec
     isSpiked: isAlcoholicFamily && !mocktail && !family.premade,
     isPremade: Boolean(family.premade) && isAlcoholicFamily && !mocktail,
     spiritMl,
+    actualAbvPercent,
+    abvCapped,
     batchMl,
     addedSugar,
     mocktail: isAlcoholicFamily && mocktail,
@@ -1254,23 +1441,24 @@ function buildFromFamily(family, normalizedText, batchMl, freeText, style, injec
 // ---- Generic fallback (no named family recognized) ----
 //
 // A purely custom, open-ended request gets 3 varied recipes rather than 1
-// (see buildGenericVariants below). Variety comes only from flavor/dilution
-// ratios and a spirit amount within the already-safe range (never above the
-// standard 85%-of-cap recommendation) — the sugar dosing formula
-// (recommendedSugarGrams via ensureSugar) is identical across every variant,
-// so variety never comes at the cost of the machine's freezing chemistry.
+// (see buildGenericVariants below). Variety comes only from mixer/flavor
+// ratios (mixerRatio, via styleWeight()) — ABV is no longer part of this
+// variety at all, since the buzz-level slider is now the sole, explicit
+// control over how strong an alcoholic build is (see applyAbvTargetToLines
+// above); all 3 style variants of the same request land at the same target
+// ABV. The sugar dosing formula (recommendedSugarGrams via ensureSugar) is
+// also identical across every variant, so variety never comes at the cost
+// of the machine's freezing chemistry.
 
 const GENERIC_VARIANT_STYLES = [
-  { label: "Classic", spiritFactor: 0.85, mixerRatio: 0.8, note: "" },
+  { label: "Classic", mixerRatio: 0.8, note: "" },
   {
     label: "Lighter Pour",
-    spiritFactor: 0.7,
     mixerRatio: 0.75,
     note: "Garnish with a citrus wheel for a crisper finish.",
   },
   {
     label: "Extra Fruity",
-    spiritFactor: 0.85,
     mixerRatio: 0.9,
     note: "Stir in a handful of extra fresh fruit chunks or purée just before serving for more texture.",
   },
@@ -1287,7 +1475,7 @@ function buildGenericFromText(normalizedText, batchMl, freeText, style, injectab
   const soda = normalizedIncludesAny(normalizedText, SODA_WORDS);
   const fruit = normalizedIncludesAny(normalizedText, JUICE_FRUIT_WORDS);
 
-  const lines = [];
+  let lines = [];
   const prepSteps = [];
   let preset = "SLUSH";
   let spiritMl = 0;
@@ -1298,16 +1486,17 @@ function buildGenericFromText(normalizedText, batchMl, freeText, style, injectab
   if (requestedSpirit) {
     preset = "SPIKED SLUSH";
     spiritDisplay = requestedSpirit;
-    spiritMl = recommendedSpiritMl(batchMl, style.spiritFactor);
+    // Seed amount only — applyAbvTargetToLines below resizes this (and
+    // rebalances the mixer/water split) to the buzz-level's real target ABV.
+    spiritMl = recommendedSpiritMl(batchMl);
     const mixerName = fruit ? `${fruit} juice` : soda ? soda : "juice or soda of choice";
     const remaining = batchMl - spiritMl;
     lines.push(`${round5(remaining * style.mixerRatio)} ml ${mixerName}`, `${round5(remaining * (1 - style.mixerRatio))} ml water`, `${spiritMl} ml ${spiritDisplay}`);
   } else if (premadeAlcohol) {
     preset = "SPIKED SLUSH";
     isPremade = true;
-    // Vary the dilution a little (still well inside the safe 2.8-16% ABV
-    // range machineFitNote describes — this only ever adjusts water/soda
-    // split, never the alcohol input itself).
+    // Seed dilution only — applyAbvTargetToLines below resizes it to the
+    // buzz-level's real target ABV using this bottle's actual strength.
     const premadeRatio = clamp(style.mixerRatio, 0.75, 0.9);
     lines.push(`${round5(batchMl * premadeRatio)} ml ${premadeAlcohol}`, `${round5(batchMl * (1 - premadeRatio))} ml water or soda (to keep it in the 2.8-16% ABV range)`);
   } else if (dairy || normalizedText.includes("milkshake")) {
@@ -1335,6 +1524,17 @@ function buildGenericFromText(normalizedText, batchMl, freeText, style, injectab
   }
 
   injectFilterHintIngredients(lines, injectableHints);
+
+  let actualAbvPercent = null;
+  let abvCapped = false;
+  if (preset === "SPIKED SLUSH" && !mocktail) {
+    const abvResult = applyAbvTargetToLines(lines, batchMl, currentTargetAbv());
+    lines = abvResult.lines;
+    actualAbvPercent = abvResult.actualAbvPercent;
+    abvCapped = abvResult.capped;
+    spiritMl = abvResult.alcoholMl; // for the spicy-prep infusion text below
+  }
+
   if (spicy) applySpicyPrep(lines, prepSteps, spiritDisplay, spiritMl);
   const addedSugar = ensureSugar(lines, batchMl, preset === "MILKSHAKE" || preset === "FRAPPE" || noFlavorDetected);
 
@@ -1345,6 +1545,8 @@ function buildGenericFromText(normalizedText, batchMl, freeText, style, injectab
     isSpiked: preset === "SPIKED SLUSH" && !isPremade,
     isPremade,
     spiritMl,
+    actualAbvPercent,
+    abvCapped,
     batchMl,
     addedSugar,
     mocktail: mocktail && Boolean(requestedSpirit || premadeAlcohol),
@@ -1402,12 +1604,14 @@ function buildFromTokens(tokens, normalizedText, batchMl, freeText, variantLabel
   if (preset === "MILKSHAKE" || preset === "FRAPPE") batchMl = Math.max(batchMl, 720);
 
   let spiritMl = 0;
-  const lines = [];
+  let lines = [];
   const prepSteps = [];
   let isPremade = false;
   let noFlavorDetected = false;
 
-  if (spiritToken) spiritMl = recommendedSpiritMl(batchMl, style.spiritFactor);
+  // Seed amounts only — applyAbvTargetToLines below resizes whatever
+  // alcohol ends up in `lines` to the buzz-level's real target ABV.
+  if (spiritToken) spiritMl = recommendedSpiritMl(batchMl);
   if (premadeToken) isPremade = true;
 
   const flavorBases = baseTokens.length ? baseTokens : used.filter((t) => t.type === "other");
@@ -1440,6 +1644,16 @@ function buildFromTokens(tokens, normalizedText, batchMl, freeText, variantLabel
   const explicitSweetener = used.find((t) => t.type === "sweetener");
   if (explicitSweetener) lines.push(explicitSweetener.display);
 
+  let actualAbvPercent = null;
+  let abvCapped = false;
+  if (preset === "SPIKED SLUSH" && !mocktail) {
+    const abvResult = applyAbvTargetToLines(lines, batchMl, currentTargetAbv());
+    lines = abvResult.lines;
+    actualAbvPercent = abvResult.actualAbvPercent;
+    abvCapped = abvResult.capped;
+    spiritMl = abvResult.alcoholMl; // for the spicy-prep infusion text below
+  }
+
   if (spicy) applySpicyPrep(lines, prepSteps, spiritToken ? spiritToken.display : null, spiritMl);
   const addedSugar = ensureSugar(lines, batchMl, preset === "MILKSHAKE" || preset === "FRAPPE" || noFlavorDetected);
 
@@ -1450,6 +1664,8 @@ function buildFromTokens(tokens, normalizedText, batchMl, freeText, variantLabel
     isSpiked: preset === "SPIKED SLUSH" && !isPremade,
     isPremade,
     spiritMl,
+    actualAbvPercent,
+    abvCapped,
     batchMl,
     addedSugar,
     mocktail: mocktail && Boolean(spiritToken || premadeToken),
@@ -1660,6 +1876,11 @@ async function fetchCustomRecipesFromApi(freeText, inspirationRecipes, targetBat
         query: freeText,
         sugarFree: state.sugarFree,
         targetBatchMl,
+        // Best-effort hint only — the real guarantee is enforced client-side
+        // in resolveCustomForQuery() regardless of what comes back, via the
+        // same applyAbvTargetToLines() used for the offline generator and
+        // the buzz-level/serving-size live adjustment.
+        targetAbvPercent: currentTargetAbv(),
         // Best-effort hints for the AI — the client-side guarantee (real
         // ingredient injection for offline, tag-union + honest note either
         // way) lives in applyFilterSelectionNotes(), so this never needs to
@@ -1710,6 +1931,73 @@ function renderCustomLoadingPlaceholder() {
   return el;
 }
 
+// Rescales an already-built recipe (offline OR AI-sourced — both produce
+// the same "qty ml/g ingredient" line shape) to a new batch size and/or
+// buzz-level target ABV, via the same applyAbvTargetToLines() used at
+// build time. This is what lets the buzz-level/serving-size selectors
+// adjust a recipe already on screen without a full regeneration (or a new
+// AI call) — drink-type/difficulty chips never do this, by design.
+function rescaleRecipeForSelections(recipe, newBatchMl, targetAbvPercent) {
+  if (!Array.isArray(recipe.ingredients) || recipe.ingredients.length === 0) return recipe;
+  const oldBatchMl = recipe.batch_ml || estimateBatchMlFromLines(recipe.ingredients);
+  if (!(oldBatchMl > 0)) return recipe;
+  if (Math.round(oldBatchMl) === Math.round(newBatchMl) && recipe.preset !== "SPIKED SLUSH") {
+    return recipe; // nothing would change
+  }
+
+  const abvResult = applyAbvTargetToLines(recipe.ingredients, newBatchMl, targetAbvPercent);
+  const newLines = abvResult.lines;
+  const sugarFreeLines = newLines.map(rewriteIngredientForSugarFree);
+  const anyLineChanged = sugarFreeLines.some((l, i) => l !== newLines[i]);
+  const sugarFreeNote = anyLineChanged
+    ? "Sugar swapped for allulose (~1.33x, since it's about 70% as sweet as sugar by weight) so this still clears the machine's freezing threshold — taste and adjust."
+    : "This base likely needs sugar to freeze — if using a diet/zero-sugar version of any soda or juice here, add ~15-20 g granulated allulose per 355 ml to restore the sugar the machine needs.";
+
+  let machineFit = recipe.machine_fit_note;
+  if (recipe.preset === "SPIKED SLUSH" && abvResult.actualAbvPercent != null) {
+    const isPremadeLine = newLines.some((l) => {
+      const p = parseQuantityToken(l);
+      return p && p.unit === "ml" && PREMADE_ALCOHOL.some((s) => normalize(p.rest).includes(s));
+    });
+    machineFit = machineFitNote({
+      isSpiked: !isPremadeLine,
+      isPremade: isPremadeLine,
+      spiritMl: abvResult.alcoholMl,
+      actualAbvPercent: abvResult.actualAbvPercent,
+      abvCapped: abvResult.capped,
+      batchMl: newBatchMl,
+      addedSugar: /sugar topped up/i.test(recipe.machine_fit_note || ""),
+      mocktail: false,
+    });
+  }
+
+  return {
+    ...recipe,
+    batch_ml: newBatchMl,
+    batch_note: batchNote(newBatchMl),
+    ingredients: newLines,
+    sugar_free_ingredients: sugarFreeLines,
+    sugar_free_note: sugarFreeNote,
+    machine_fit_note: machineFit,
+    difficulty: difficultyFor(newLines, recipe.prep_steps || []),
+  };
+}
+
+// Fires from the buzz-level and serving-size controls only. No-ops if
+// nothing is on screen yet — the current values just apply to whatever
+// gets built next time a fresh Search runs.
+function liveAdjustCurrentRecipes() {
+  if (!customState.recipes.length) return;
+  const newBatchMl = resolveBatchMl(customState.query || "");
+  const targetAbv = currentTargetAbv();
+  customState.recipes = customState.recipes.map((r) => rescaleRecipeForSelections(r, newBatchMl, targetAbv));
+  // Keep the fingerprint in sync so a later Search (with nothing else
+  // changed) sees these are already accounted for, instead of redundantly
+  // re-querying the AI for the same adjustment we just made client-side.
+  customState.key = computeCustomRequestKey((customState.query || "").trim());
+  render();
+}
+
 async function resolveCustomForQuery(freeText, mySeq) {
   const inspiration = pickInspirationRecipes(freeText, 6);
   const targetBatchMl = resolveBatchMl(freeText);
@@ -1731,6 +2019,15 @@ async function resolveCustomForQuery(freeText, mySeq) {
 
   if (mySeq !== customState.requestSeq) return; // superseded by a newer request since we started
 
+  // AI-returned recipes get the buzz-level's real target ABV enforced the
+  // same way an offline build or a live slider adjustment does — never
+  // trust the AI's own arithmetic for something this safety-relevant, only
+  // its ingredient/flavor choices.
+  if (source === "ai") {
+    const targetAbv = currentTargetAbv();
+    recipes = recipes.map((r) => rescaleRecipeForSelections(r, targetBatchMl, targetAbv));
+  }
+
   // Applied uniformly regardless of source (AI or offline) — never relies on
   // the AI having honored the filter-selection hints itself.
   const finalRecipes = applyFilterSelectionNotes(recipes, hintInfo);
@@ -1744,6 +2041,7 @@ async function resolveCustomForQuery(freeText, mySeq) {
     source,
     sugarFree: state.sugarFree,
     servingCount: state.servingCount,
+    buzzLevel: state.buzzLevel,
     activeTags: Array.from(state.activeTags),
     activeDifficulties: Array.from(state.activeDifficulties),
     recipes: finalRecipes,
@@ -1923,6 +2221,7 @@ function restoreHistoryEntry(entry) {
   state.query = entry.query;
   state.sugarFree = Boolean(entry.sugarFree);
   state.servingCount = entry.servingCount || null;
+  state.buzzLevel = typeof entry.buzzLevel === "number" ? entry.buzzLevel : 0;
   state.activeTags = new Set(entry.activeTags || []);
   state.activeDifficulties = new Set(entry.activeDifficulties || []);
 
@@ -1944,6 +2243,11 @@ function restoreHistoryEntry(entry) {
       const active = Number(c.dataset.value) === state.servingCount;
       c.classList.toggle("active", active);
       c.setAttribute("aria-pressed", String(active));
+    });
+  }
+  if (els.buzzStops) {
+    els.buzzStops.querySelectorAll('input[name="buzzLevel"]').forEach((radio) => {
+      radio.checked = Number(radio.value) === state.buzzLevel;
     });
   }
 
@@ -2018,6 +2322,7 @@ function computeCustomRequestKey(trimmedQuery) {
     tags: Array.from(state.activeTags).sort(),
     diff: Array.from(state.activeDifficulties).sort(),
     serving: state.servingCount,
+    buzz: state.buzzLevel,
   });
 }
 
@@ -2112,6 +2417,7 @@ function init() {
   initThemeSwitcher();
   initFilterChips();
   initServingSizeChips();
+  initBuzzLevelSlider();
   renderHistoryPanel();
 
   // Typing alone doesn't trigger a search, and neither does clicking a
@@ -2143,11 +2449,16 @@ function init() {
     state.activeTags.clear();
     state.activeDifficulties.clear();
     state.servingCount = null;
+    state.buzzLevel = 0;
     els.query.value = "";
     document.querySelectorAll(".chip.active").forEach((c) => {
       c.classList.remove("active");
       c.setAttribute("aria-pressed", "false");
     });
+    if (els.buzzStops) {
+      const leftmost = els.buzzStops.querySelector('input[value="0"]');
+      if (leftmost) leftmost.checked = true;
+    }
     render();
   });
 

@@ -1,8 +1,9 @@
 /**
  * Ninja Slushi custom-drink backend — Cloudflare Worker.
  *
- * Receives { query, sugarFree, targetBatchMl, driveTypeFilters,
- * difficultyFilters, inspiration } from the frontend, calls the
+ * Receives { query, sugarFree, targetBatchMl, targetAbvPercent,
+ * driveTypeFilters, difficultyFilters, inspiration } from the frontend,
+ * calls the
  * Gemini API server-side (key never touches the browser), and returns
  * { recipes: [...] } in the same shape the frontend's offline generator
  * already produces, so the same rendering code handles either source.
@@ -95,9 +96,10 @@ Diet soda / sugar-free soda ALONE will not freeze. Exception: in a SPIKED SLUSH 
 
 ALCOHOL (SPIKED SLUSH only):
 - A premade alcoholic input (wine, beer, hard seltzer, a premade cocktail mix) must be 2.8%-16% ABV, AND still meet the sugar minimum above.
-- If adding straight spirits (vodka/tequila/rum/whiskey/gin, ~35-40%+), cap the spirit volume: max 120 ml per 720 ml batch, 180 ml per 1.08 L, 240 ml per 1.44 L, 300 ml per 1.9 L total recipe.
-- The community's practical sweet spot for cocktails is ABV ~8-14% total (not the bare legal ceiling of 16%) alongside the ~10-15% Brix sugar target above.
-- Too concentrated (over the max) won't freeze at all; too little sugar/alcohol freezes into hard ice instead of slush. If unsure, err toward the middle of these windows, not the edges.
+- If adding straight spirits (vodka/tequila/rum/whiskey/gin, ~35-40%+), cap the spirit volume: max 120 ml per 720 ml batch, 180 ml per 1.08 L, 240 ml per 1.44 L, 300 ml per 1.9 L total recipe. This volume cap is a hard ceiling, never to be exceeded regardless of any ABV target below.
+- CRITICAL — COMPUTE REAL ABV, NEVER JUST A VOLUME RATIO: the batch's overall ABV% is (spirit_ml × spirit's_own_ABV% ÷ 100) ÷ total_batch_ml × 100 — NOT spirit_ml ÷ total_batch_ml. For example, 120 ml of 40% tequila in a 1.2 L (1200 ml) batch is (120 × 0.40) ÷ 1200 × 100 = 4% ABV, not 10%. Use each spirit's/premade input's real strength (~40% for standard spirits, less for liqueurs like triple sec/schnapps/Kahlúa/Irish cream, ~11-13% for wine, ~5% for beer/cider/seltzer) when sizing the pour and when stating the ABV in machine_fit_note.
+- If a target ABV% is given below, solve for the spirit/premade-alcohol volume that actually achieves that real ABV (using the math above), then still apply the hard volume cap — if the target can't be reached without exceeding the cap, size to the cap instead and say so plainly in machine_fit_note (never silently exceed the machine's real safety ceiling to hit a requested ABV).
+- Too concentrated (over the max) won't freeze at all; too little sugar/alcohol freezes into hard ice instead of slush.
 
 NEVER include hot ingredients, ice, or solids (fresh fruit chunks, ice cream, frozen fruit) — everything poured in must be a pourable liquid or a fully dissolved/puréed-and-strained mixture.
 
@@ -232,6 +234,10 @@ export default {
       typeof body.targetBatchMl === "number" && body.targetBatchMl >= 475 && body.targetBatchMl <= 1900
         ? Math.round(body.targetBatchMl)
         : null;
+    const targetAbvPercent =
+      typeof body.targetAbvPercent === "number" && body.targetAbvPercent >= 3 && body.targetAbvPercent <= 20
+        ? body.targetAbvPercent
+        : null;
     const KNOWN_DRINK_TYPE_FILTERS = [
       "creamy", "milkshake", "refreshing", "fruity", "spicy",
       "tropical", "citrus", "coffee", "chocolate", "cocktail", "mocktail",
@@ -250,6 +256,9 @@ export default {
 
     if (targetBatchMl) {
       userText += `\n\nTarget batch size: ${targetBatchMl} ml — size every ingredient quantity (and the sugar/spirit dosing) to this exact total.`;
+    }
+    if (targetAbvPercent && targetBatchMl) {
+      userText += `\n\nTarget ABV (alcoholic recipes only): ${targetAbvPercent}% of the total batch — solve for the spirit/premade-alcohol volume that achieves this REAL ABV (using each ingredient's actual strength, not just a volume ratio — see the ALCOHOL section above), then still respect the hard spirit-volume cap for this batch size; if the cap forces a lower actual ABV, that's fine, just say so in machine_fit_note. Not applicable to non-alcoholic recipes.`;
     }
     if (driveTypeFilters.length) {
       userText += `\n\nThe visitor also selected these drink-type filters: ${driveTypeFilters.join(", ")}. These are hints, not hard requirements — if 3+ are selected, incorporate at least 2 of them coherently rather than forcing all of them into one recipe; note in machine_fit_note which ones you used if you had to leave any out.`;
