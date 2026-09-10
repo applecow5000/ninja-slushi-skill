@@ -26,6 +26,7 @@
   <div class="confetti-field" id="confettiField" aria-hidden="true"></div>
   <div class="cake-field" id="cakeField" aria-hidden="true"></div>
   <div class="unicorn-field" id="unicornField" aria-hidden="true"></div>
+  <div class="cake-field" id="canadaField" aria-hidden="true"></div>
 
   <div class="theme-switcher" role="group" aria-label="Theme">
     <button type="button" class="theme-btn" data-theme-choice="light" title="Light mode">☀️ Light</button>
@@ -51,7 +52,11 @@
     <section class="controls">
       <div class="field">
         <label for="query">Search recipes, or describe a custom drink</label>
-        <input id="query" type="search" placeholder='e.g. "margarita", "mango, coconut milk, rum", "spicy daiquiri"' autocomplete="off" />
+        <div class="search-row">
+          <input id="query" type="search" placeholder='e.g. "margarita", "mango, coconut milk, rum", "spicy daiquiri"' autocomplete="off" />
+          <button id="searchBtn" type="button" class="clear-btn search-btn">🔍 Search</button>
+        </div>
+        <p class="search-hint">Press Enter or click Search when you're done typing.</p>
       </div>
 
       <div class="filter-group">
@@ -86,15 +91,6 @@
       <div id="results" class="results-grid"></div>
     </section>
   </main>
-
-  <footer class="app-footer">
-    <p>
-      🎉 Recipes curated from this repo's
-      <a href="../references/official-recipes.md">official-recipes.md</a> and
-      <a href="../references/community-recipes.md">community-recipes.md</a>.
-      Edit <code>recipes-data.js</code> to add more. 🎉
-    </p>
-  </footer>
 
   <script src="recipes-data.js"></script>
   <script src="app.js"></script>

@@ -133,6 +133,7 @@ function getFilteredRecipes() {
 
 const els = {
   query: document.getElementById("query"),
+  searchBtn: document.getElementById("searchBtn"),
   tagFilters: document.getElementById("tagFilters"),
   difficultyFilters: document.getElementById("difficultyFilters"),
   sugarFreeToggle: document.getElementById("sugarFreeToggle"),
@@ -284,6 +285,7 @@ function escapeHtml(str) {
 const CONFETTI_EMOJI = ["🎉", "🎈", "🎊", "🍬", "🧁", "✨"];
 const CAKE_EMOJI = ["🎂", "🍰", "🧁"];
 const UNICORN_EMOJI = "🦄";
+const CANADA_EMOJI = ["🍁", "🇨🇦", "🦫", "🫎", "🍟"];
 
 function prefersReducedMotion() {
   return Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -338,8 +340,25 @@ function spawnUnicorns() {
   }
 }
 
+function spawnCanada() {
+  const field = document.getElementById("canadaField");
+  if (!field || prefersReducedMotion()) return;
+  const pieceCount = 5;
+  for (let i = 0; i < pieceCount; i++) {
+    const piece = document.createElement("span");
+    piece.className = "cake-piece";
+    piece.textContent = CANADA_EMOJI[i % CANADA_EMOJI.length];
+    piece.style.left = `${Math.random() * 92}%`;
+    piece.style.top = `${Math.random() * 90}%`;
+    piece.style.fontSize = `${2.5 + Math.random() * 3}rem`;
+    piece.style.animationDuration = `${6 + Math.random() * 6}s`;
+    piece.style.animationDelay = `${Math.random() * 4}s`;
+    field.appendChild(piece);
+  }
+}
+
 function clearPartyDecorations() {
-  ["confettiField", "cakeField", "unicornField"].forEach((id) => {
+  ["confettiField", "cakeField", "unicornField", "canadaField"].forEach((id) => {
     const field = document.getElementById(id);
     if (field) field.innerHTML = "";
   });
@@ -349,6 +368,7 @@ function spawnPartyDecorations() {
   spawnConfetti();
   spawnCakes();
   spawnUnicorns();
+  spawnCanada();
 }
 
 /* ---------------------------------------------------------------------
@@ -1081,7 +1101,6 @@ const CUSTOM_DRINK_API_URL = "https://ninja-slushi-api.johnny-y-w-wang.workers.d
 // (worker/index.js) — otherwise the browser gives up and falls back to
 // offline before the Worker even finishes waiting on Gemini.
 const CUSTOM_API_TIMEOUT_MS = 25000;
-const CUSTOM_DEBOUNCE_MS = 500;
 
 async function fetchCustomRecipesFromApi(freeText, inspirationRecipes) {
   const controller = new AbortController();
@@ -1124,10 +1143,9 @@ async function fetchCustomRecipesFromApi(freeText, inspirationRecipes) {
 const customState = {
   query: null, // the query text the current result/pending-state corresponds to
   recipes: [], // last resolved recipes (AI or offline) for `query`
-  pending: false, // true while a fetch (or its debounce wait) is in flight
+  pending: false, // true while a fetch is in flight
   source: null, // "ai" | "offline", for the small provenance note on the card
   requestSeq: 0, // bumped on every new query — lets a stale resolve bail out
-  debounceTimer: null,
 };
 
 function renderCustomLoadingPlaceholder() {
@@ -1258,7 +1276,6 @@ function render() {
   els.results.innerHTML = "";
 
   if (!hasSearched) {
-    clearTimeout(customState.debounceTimer);
     customState.requestSeq++; // invalidate any in-flight fetch
     customState.query = null;
     customState.recipes = [];
@@ -1274,19 +1291,20 @@ function render() {
   if (wantsCustom) {
     maybeAutoEnableSugarFree(normalize(trimmedQuery));
     if (trimmedQuery !== customState.query) {
-      // New query text — reset and (re)schedule a debounced fetch/build.
+      // New query text — reset and kick off the fetch/build right away.
+      // render() only runs on an explicit action (Search button, Enter, a
+      // filter click), never on every keystroke, so there's no need to
+      // additionally debounce here — the button *is* the debounce.
       customState.query = trimmedQuery;
       customState.recipes = [];
       customState.pending = true;
       customState.requestSeq++;
       const mySeq = customState.requestSeq;
-      clearTimeout(customState.debounceTimer);
-      customState.debounceTimer = setTimeout(() => resolveCustomForQuery(trimmedQuery, mySeq), CUSTOM_DEBOUNCE_MS);
+      resolveCustomForQuery(trimmedQuery, mySeq);
     }
     // else: same query as last render (e.g. only a filter/toggle changed) —
     // customState already holds the right pending/resolved data, reuse it.
   } else {
-    clearTimeout(customState.debounceTimer);
     customState.requestSeq++;
     customState.query = null;
     customState.recipes = [];
@@ -1335,8 +1353,20 @@ function init() {
   initThemeSwitcher();
   initFilterChips();
 
+  // Typing alone doesn't trigger a search — only an explicit action does
+  // (the Search button, pressing Enter, or a filter chip), so the custom
+  // drink builder only ever fires once per finished query, not per keystroke.
   els.query.addEventListener("input", (e) => {
     state.query = e.target.value;
+  });
+  els.query.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      render();
+    }
+  });
+  els.searchBtn.addEventListener("click", () => {
+    state.query = els.query.value;
     render();
   });
 

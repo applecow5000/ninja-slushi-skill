@@ -27,16 +27,20 @@ A copy of this app also lives in [`/docs`](../docs/) at the repo root, since
 **GitHub Pages** can only serve from a repo's root or its `/docs` folder (not
 an arbitrary path like `frontend/`). Settings → Pages → Deploy from branch →
 `master` / `/docs` gives you a hosted link with no local setup at all. If you
-edit the app, keep `frontend/` (for local dev) and `docs/` (for the live
-Pages site) in sync — `docs/index.html` points its footer links at GitHub
-instead of relative repo paths, since Pages only serves the `docs/` folder
-in isolation.
+edit the app, keep `frontend/` and `docs/` in sync (they're identical now
+that the footer with repo-relative links is gone).
 
 ## What it does
 
 - **Nothing loads until you search or filter** — the page opens empty with a
   prompt, not all 105 recipes at once; type something, or pick a filter, to
   see results.
+- **Typing alone doesn't search** — press **Enter** or click **🔍 Search**
+  once you're done typing. This matters more than it sounds: it's also what
+  triggers the custom-drink builder below, so it's one deliberate request
+  per finished thought, not one per keystroke. Filter chips and the
+  Sugar-Free toggle still act immediately on click, since those aren't typed
+  text.
 - **One search box, two jobs** — it matches recipe names and ingredient lines
   in the dataset (comma-separate multiple terms, e.g. `rum, pineapple juice`,
   to require all of them) **and**, once you've typed at least 3 characters,
@@ -80,8 +84,9 @@ in isolation.
   (`localStorage`) and applied before the page paints, so there's no flash of
   the wrong theme on reload. Light and Dark stay clean and colorful but calm;
   Party adds a bobbing-balloon header, an animated rainbow title, drifting
-  confetti, floating cake/cupcake shapes, and dancing unicorns — all skipped
-  automatically if your OS has "reduce motion" turned on.
+  confetti, floating cake/cupcake shapes, dancing unicorns, and a dash of
+  Canadian flair (maple leaves, the flag, a beaver, a moose, poutine) — all
+  skipped automatically if your OS has "reduce motion" turned on.
 - **✨ Custom Drink Creator (built into the search box)** — type a drink idea
   in plain English ("spicy margarita") or list what you have on hand
   ("mango, coconut milk, dark rum") into the same search box above, and it
