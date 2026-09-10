@@ -1,68 +1,99 @@
+/* ===========================================================================
+ * Three themes, switched via [data-theme] on <html>: "light", "dark", "party".
+ * Colorful accent hues (pink/purple/teal/gold) stay consistent across all
+ * three — only the background/surface/text values and the extra birthday
+ * decorations (confetti, cake shapes, dancing unicorns, balloons) change.
+ * Decorations are party-mode only; light/dark stay clean and calm.
+ * ========================================================================= */
+
 :root {
-  /* Birthday party palette 🎉 */
-  --bg: #fff3f8;
-  --bg-grad-1: #ffe1ec;
-  --bg-grad-2: #e6f4ff;
-  --bg-grad-3: #fff9d6;
+  /* Fallback (identical to light) in case JS/data-theme hasn't applied yet */
+  --bg: #ffffff;
+  --bg-grad-1: #ffe9f2;
+  --bg-grad-2: #eaf5ff;
+  --bg-grad-3: #fffaea;
   --surface: #ffffff;
-  --border: #f3c9de;
-  --text: #33223a;
-  --text-muted: #7a5a78;
+  --border: #f0d3e4;
+  --text: #2c2233;
+  --text-muted: #6e5c73;
   --accent: #ff5da2;
-  --accent-dark: #e0388a;
+  --accent-dark: #d81b7f;
   --accent2: #6a5ef5;
-  --accent3: #16c8b0;
-  --gold: #ffb703;
-  --easy: #2fbf71;
-  --medium: #ff9f1c;
-  --advanced: #ff4d6d;
-  --sugar-free: #8a4fff;
-  --shadow: 0 6px 18px rgba(224, 56, 138, 0.12);
+  --accent3: #0fae98;
+  --gold: #e69500;
+  --easy: #1f9d5c;
+  --medium: #d97f00;
+  --advanced: #e0345a;
+  --sugar-free: #7a3fe0;
+  --shadow: 0 4px 14px rgba(180, 60, 130, 0.1);
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #201229;
-    --bg-grad-1: #2c1533;
-    --bg-grad-2: #14202f;
-    --bg-grad-3: #2a2313;
-    --surface: #2a1a33;
-    --border: #4a2b52;
-    --text: #f6ecfa;
-    --text-muted: #cba9d4;
-    --accent: #ff77b3;
-    --accent-dark: #ffa6cf;
-    --accent2: #9c8dff;
-    --accent3: #4de3cd;
-    --gold: #ffd166;
-    --easy: #56e090;
-    --medium: #ffb84d;
-    --advanced: #ff7a90;
-    --sugar-free: #b58bff;
-    --shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-  }
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-grad-1: #ffe9f2;
+  --bg-grad-2: #eaf5ff;
+  --bg-grad-3: #fffaea;
+  --surface: #ffffff;
+  --border: #f0d3e4;
+  --text: #2c2233;
+  --text-muted: #6e5c73;
+  --accent: #ff5da2;
+  --accent-dark: #d81b7f;
+  --accent2: #6a5ef5;
+  --accent3: #0fae98;
+  --gold: #e69500;
+  --easy: #1f9d5c;
+  --medium: #d97f00;
+  --advanced: #e0345a;
+  --sugar-free: #7a3fe0;
+  --shadow: 0 4px 14px rgba(180, 60, 130, 0.1);
+  color-scheme: light;
 }
 
 :root[data-theme="dark"] {
-  --bg: #201229;
-  --bg-grad-1: #2c1533;
-  --bg-grad-2: #14202f;
-  --bg-grad-3: #2a2313;
-  --surface: #2a1a33;
-  --border: #4a2b52;
+  --bg: #1a1220;
+  --bg-grad-1: #2a1730;
+  --bg-grad-2: #101d2c;
+  --bg-grad-3: #241d0f;
+  --surface: #251a2c;
+  --border: #422b49;
   --text: #f6ecfa;
-  --text-muted: #cba9d4;
+  --text-muted: #c3aac9;
   --accent: #ff77b3;
   --accent-dark: #ffa6cf;
-  --accent2: #9c8dff;
+  --accent2: #a698ff;
   --accent3: #4de3cd;
   --gold: #ffd166;
   --easy: #56e090;
   --medium: #ffb84d;
   --advanced: #ff7a90;
   --sugar-free: #b58bff;
-  --shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+}
+
+:root[data-theme="party"] {
+  /* Lighter & brighter than a normal light mode, with extra decorations */
+  --bg: #fffdf7;
+  --bg-grad-1: #ffd9ec;
+  --bg-grad-2: #d8f0ff;
+  --bg-grad-3: #fff3b0;
+  --surface: #ffffff;
+  --border: #ffc2e0;
+  --text: #33223a;
+  --text-muted: #7a5a78;
+  --accent: #ff4fa3;
+  --accent-dark: #e0388a;
+  --accent2: #7c6bff;
+  --accent3: #1fd6bc;
+  --gold: #ffb703;
+  --easy: #2fbf71;
+  --medium: #ff9f1c;
+  --advanced: #ff4d6d;
+  --sugar-free: #9a5cff;
+  --shadow: 0 6px 18px rgba(224, 56, 138, 0.15);
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -71,9 +102,9 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 10% 15%, var(--bg-grad-1) 0%, transparent 40%),
-    radial-gradient(circle at 90% 10%, var(--bg-grad-2) 0%, transparent 45%),
-    radial-gradient(circle at 50% 90%, var(--bg-grad-3) 0%, transparent 50%),
+    radial-gradient(circle at 10% 15%, var(--bg-grad-1) 0%, transparent 42%),
+    radial-gradient(circle at 90% 10%, var(--bg-grad-2) 0%, transparent 46%),
+    radial-gradient(circle at 50% 95%, var(--bg-grad-3) 0%, transparent 52%),
     var(--bg);
   color: var(--text);
   font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -83,20 +114,102 @@ body {
   overflow-x: hidden;
 }
 
+/* Party mode gets bigger, more saturated gradient blobs */
+:root[data-theme="party"] body {
+  background:
+    radial-gradient(circle at 8% 12%, var(--bg-grad-1) 0%, transparent 48%),
+    radial-gradient(circle at 92% 8%, var(--bg-grad-2) 0%, transparent 50%),
+    radial-gradient(circle at 50% 100%, var(--bg-grad-3) 0%, transparent 58%),
+    radial-gradient(circle at 30% 60%, color-mix(in srgb, var(--accent3) 10%, transparent) 0%, transparent 45%),
+    var(--bg);
+}
+
 h1, h2, h3 {
   font-family: "Baloo 2", "Nunito", sans-serif;
 }
 
 /* ---------------------------------------------------------------------
- * Confetti field — a handful of drifting emoji/dots, purely decorative
+ * Theme switcher
  * ------------------------------------------------------------------- */
 
-.confetti-field {
+.theme-switcher {
+  position: sticky;
+  top: 12px;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto 16px;
+  max-width: 1100px;
+  flex-wrap: wrap;
+}
+
+.theme-btn {
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.82rem;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.12s ease, color 0.15s, border-color 0.15s;
+}
+
+.theme-btn:hover {
+  transform: translateY(-1px);
+  color: var(--text);
+}
+
+.theme-btn.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-color: transparent;
+  color: #fff;
+}
+
+/* ---------------------------------------------------------------------
+ * Party-mode-only decorative fields (confetti, cake shapes, unicorns,
+ * balloons, the wiggling emoji, and the animated rainbow title).
+ * Hidden entirely in light/dark; also respects prefers-reduced-motion.
+ * ------------------------------------------------------------------- */
+
+.confetti-field,
+.cake-field,
+.unicorn-field,
+.balloon-row,
+.wiggle {
+  display: none;
+}
+
+:root[data-theme="party"] .confetti-field,
+:root[data-theme="party"] .cake-field,
+:root[data-theme="party"] .unicorn-field,
+:root[data-theme="party"] .balloon-row,
+:root[data-theme="party"] .wiggle {
+  display: block;
+}
+
+:root[data-theme="party"] .balloon-row {
+  display: flex;
+}
+
+:root[data-theme="party"] .wiggle {
+  display: inline-block;
+}
+
+.confetti-field,
+.cake-field,
+.unicorn-field {
   position: fixed;
   inset: 0;
   pointer-events: none;
   overflow: hidden;
-  z-index: 0;
+  /* Above the card grid (z-index 1) so pieces stay visible while scrolling,
+     not hidden behind opaque card backgrounds; low opacity + pointer-events:
+     none keep them from interfering with reading or clicking. */
+  z-index: 2;
 }
 
 .confetti-piece {
@@ -114,29 +227,33 @@ h1, h2, h3 {
   100% { transform: translateY(105vh) rotate(360deg); opacity: 0.6; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .confetti-piece { animation: none; display: none; }
-  .balloon { animation: none !important; }
-  .wiggle { animation: none !important; }
+.cake-piece {
+  position: absolute;
+  opacity: 0.16;
+  animation: cake-drift ease-in-out infinite;
+  will-change: transform;
 }
 
-/* ---------------------------------------------------------------------
- * Header
- * ------------------------------------------------------------------- */
-
-.app-header {
-  max-width: 1100px;
-  margin: 0 auto 24px;
-  text-align: center;
-  position: relative;
-  z-index: 1;
+@keyframes cake-drift {
+  0%, 100% { transform: translate(0, 0) rotate(-6deg); }
+  50% { transform: translate(18px, -22px) rotate(6deg); }
 }
 
-.balloon-row {
-  display: flex;
-  justify-content: center;
-  gap: 28px;
-  margin-bottom: -6px;
+.unicorn-piece {
+  position: absolute;
+  bottom: 4%;
+  font-size: 2.4rem;
+  opacity: 0.88;
+  animation: unicorn-dance 2.6s ease-in-out infinite;
+  will-change: transform;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
+}
+
+@keyframes unicorn-dance {
+  0%, 100% { transform: translateX(0) translateY(0) rotate(-8deg); }
+  25% { transform: translateX(14px) translateY(-14px) rotate(8deg); }
+  50% { transform: translateX(0) translateY(-4px) rotate(-4deg); }
+  75% { transform: translateX(-14px) translateY(-14px) rotate(8deg); }
 }
 
 .balloon {
@@ -154,10 +271,49 @@ h1, h2, h3 {
   50% { transform: translateY(-10px) rotate(3deg); }
 }
 
+.wiggle {
+  animation: wiggle 1.8s ease-in-out infinite;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-12deg); }
+  75% { transform: rotate(12deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti-piece, .cake-piece, .unicorn-piece, .balloon, .wiggle, .app-header h1 {
+    animation: none !important;
+  }
+  .confetti-field, .cake-field, .unicorn-field { display: none !important; }
+}
+
+/* ---------------------------------------------------------------------
+ * Header
+ * ------------------------------------------------------------------- */
+
+.app-header {
+  max-width: 1100px;
+  margin: 0 auto 24px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.balloon-row {
+  justify-content: center;
+  gap: 28px;
+  margin-bottom: -6px;
+}
+
 .app-header h1 {
   margin: 4px 0 10px;
   font-size: clamp(1.6rem, 4vw, 2.3rem);
   font-weight: 800;
+  color: var(--accent-dark);
+}
+
+:root[data-theme="party"] .app-header h1 {
   background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3), var(--gold), var(--accent));
   background-size: 300% auto;
   -webkit-background-clip: text;
@@ -168,17 +324,6 @@ h1, h2, h3 {
 
 @keyframes rainbow-shift {
   to { background-position: 300% center; }
-}
-
-.wiggle {
-  display: inline-block;
-  animation: wiggle 1.8s ease-in-out infinite;
-}
-
-@keyframes wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-12deg); }
-  75% { transform: rotate(12deg); }
 }
 
 .subtitle {
@@ -202,6 +347,12 @@ h1, h2, h3 {
   padding: 20px;
   margin-bottom: 24px;
   box-shadow: var(--shadow);
+}
+
+:root[data-theme="light"] .controls,
+:root[data-theme="dark"] .controls {
+  border-style: solid;
+  border-width: 2px;
 }
 
 .search-row {
@@ -279,6 +430,10 @@ h1, h2, h3 {
 
 .chip:hover {
   border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+:root[data-theme="party"] .chip:hover {
   transform: translateY(-2px) rotate(-1deg);
 }
 
@@ -396,8 +551,12 @@ h1, h2, h3 {
 }
 
 .card:hover {
-  transform: translateY(-4px) rotate(-0.3deg);
+  transform: translateY(-4px);
   box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+:root[data-theme="party"] .card:hover {
+  transform: translateY(-4px) rotate(-0.3deg);
 }
 
 .card:nth-child(3n+1) { border-top-color: var(--accent); }
@@ -477,7 +636,7 @@ h1, h2, h3 {
   gap: 3px;
 }
 
-.ingredient-list li::marker {
+:root[data-theme="party"] .ingredient-list li::marker {
   content: "🎉  ";
 }
 
@@ -538,6 +697,6 @@ h1, h2, h3 {
   font-weight: 800;
 }
 
-body.sugar-free-mode .app-header h1::after {
+:root[data-theme="party"] body.sugar-free-mode .app-header h1::after {
   content: " 🌿";
 }

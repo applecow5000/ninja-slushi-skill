@@ -66,6 +66,13 @@ in isolation.
   - This is a **display-time transform**, not a scientific guarantee — always
     taste and adjust; allulose behaves slightly differently from sugar in
     freezing point and mouthfeel.
+- **Three themes** — ☀️ Light, 🌙 Dark, and 🎉 Party (the default) — switchable
+  any time from the buttons at the top of the page. Your choice is remembered
+  (`localStorage`) and applied before the page paints, so there's no flash of
+  the wrong theme on reload. Light and Dark stay clean and colorful but calm;
+  Party adds a bobbing-balloon header, an animated rainbow title, drifting
+  confetti, floating cake/cupcake shapes, and dancing unicorns — all skipped
+  automatically if your OS has "reduce motion" turned on.
 
 ## Adding / editing recipes
 

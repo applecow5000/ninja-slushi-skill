@@ -284,17 +284,22 @@ function escapeHtml(str) {
 }
 
 /* ---------------------------------------------------------------------
- * Confetti — purely decorative, birthday-themed background pieces.
- * Skipped entirely if the visitor prefers reduced motion.
+ * Birthday-mode decorations — confetti, drifting cake shapes, and dancing
+ * unicorns. Party-mode only (CSS also hides the fields in light/dark, this
+ * just avoids doing pointless work), and skipped for reduced motion.
  * ------------------------------------------------------------------- */
 
 const CONFETTI_EMOJI = ["🎉", "🎈", "🎊", "🍬", "🧁", "✨"];
+const CAKE_EMOJI = ["🎂", "🍰", "🧁"];
+const UNICORN_EMOJI = "🦄";
+
+function prefersReducedMotion() {
+  return Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+}
 
 function spawnConfetti() {
   const field = document.getElementById("confettiField");
-  if (!field) return;
-  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
+  if (!field || prefersReducedMotion()) return;
   const pieceCount = 22;
   for (let i = 0; i < pieceCount; i++) {
     const piece = document.createElement("span");
@@ -306,6 +311,91 @@ function spawnConfetti() {
     piece.style.animationDelay = `${Math.random() * 12}s`;
     field.appendChild(piece);
   }
+}
+
+function spawnCakes() {
+  const field = document.getElementById("cakeField");
+  if (!field || prefersReducedMotion()) return;
+  const pieceCount = 7;
+  for (let i = 0; i < pieceCount; i++) {
+    const piece = document.createElement("span");
+    piece.className = "cake-piece";
+    piece.textContent = CAKE_EMOJI[i % CAKE_EMOJI.length];
+    piece.style.left = `${Math.random() * 92}%`;
+    piece.style.top = `${Math.random() * 90}%`;
+    piece.style.fontSize = `${3 + Math.random() * 4}rem`;
+    piece.style.animationDuration = `${6 + Math.random() * 6}s`;
+    piece.style.animationDelay = `${Math.random() * 4}s`;
+    field.appendChild(piece);
+  }
+}
+
+function spawnUnicorns() {
+  const field = document.getElementById("unicornField");
+  if (!field || prefersReducedMotion()) return;
+  const pieceCount = 5;
+  for (let i = 0; i < pieceCount; i++) {
+    const piece = document.createElement("span");
+    piece.className = "unicorn-piece";
+    piece.textContent = UNICORN_EMOJI;
+    piece.style.left = `${4 + i * 20 + Math.random() * 8}%`;
+    piece.style.bottom = `${2 + Math.random() * 6}%`;
+    piece.style.animationDuration = `${2 + Math.random() * 1.5}s`;
+    piece.style.animationDelay = `${Math.random() * 2}s`;
+    field.appendChild(piece);
+  }
+}
+
+function clearPartyDecorations() {
+  ["confettiField", "cakeField", "unicornField"].forEach((id) => {
+    const field = document.getElementById(id);
+    if (field) field.innerHTML = "";
+  });
+}
+
+function spawnPartyDecorations() {
+  spawnConfetti();
+  spawnCakes();
+  spawnUnicorns();
+}
+
+/* ---------------------------------------------------------------------
+ * Theme switcher — light / dark / party, persisted in localStorage.
+ * The <head> also runs a tiny inline copy of this default logic before
+ * first paint (see index.html) so there's no flash of the wrong theme.
+ * ------------------------------------------------------------------- */
+
+const THEME_STORAGE_KEY = "ninja-slushi-theme";
+const THEMES = ["light", "dark", "party"];
+
+function getStoredTheme() {
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    return THEMES.includes(stored) ? stored : "party";
+  } catch (e) {
+    return "party";
+  }
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch (e) {
+    /* localStorage unavailable (private mode, etc.) — theme just won't persist */
+  }
+  document.querySelectorAll(".theme-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.themeChoice === theme);
+  });
+  clearPartyDecorations();
+  if (theme === "party") spawnPartyDecorations();
+}
+
+function initThemeSwitcher() {
+  document.querySelectorAll(".theme-btn").forEach((btn) => {
+    btn.addEventListener("click", () => applyTheme(btn.dataset.themeChoice));
+  });
+  applyTheme(getStoredTheme());
 }
 
 function render() {
@@ -327,7 +417,7 @@ function render() {
  * ------------------------------------------------------------------- */
 
 function init() {
-  spawnConfetti();
+  initThemeSwitcher();
   initFilterChips();
 
   els.query.addEventListener("input", (e) => {

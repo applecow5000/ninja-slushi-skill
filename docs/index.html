@@ -2,6 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<script>
+  // Apply the saved theme before first paint, to avoid a flash of the
+  // wrong theme. Falls back to "party" (this app's default personality)
+  // if nothing is stored yet or storage is unavailable.
+  (function () {
+    try {
+      var t = localStorage.getItem("ninja-slushi-theme") || "party";
+      document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {
+      document.documentElement.setAttribute("data-theme", "party");
+    }
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Ninja Slushi Recipe Finder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -11,6 +24,14 @@
 </head>
 <body>
   <div class="confetti-field" id="confettiField" aria-hidden="true"></div>
+  <div class="cake-field" id="cakeField" aria-hidden="true"></div>
+  <div class="unicorn-field" id="unicornField" aria-hidden="true"></div>
+
+  <div class="theme-switcher" role="group" aria-label="Theme">
+    <button type="button" class="theme-btn" data-theme-choice="light" title="Light mode">☀️ Light</button>
+    <button type="button" class="theme-btn" data-theme-choice="dark" title="Dark mode">🌙 Dark</button>
+    <button type="button" class="theme-btn" data-theme-choice="party" title="Birthday party mode">🎉 Party</button>
+  </div>
 
   <header class="app-header">
     <div class="balloon-row" aria-hidden="true">
