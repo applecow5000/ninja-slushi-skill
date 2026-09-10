@@ -26,16 +26,6 @@ function computeDifficulty(recipe) {
 
 const ALLULOSE_RATIO = 1.33;
 
-// NOT the same thing as ALLULOSE_RATIO above. That ratio is about taste
-// (how much allulose it takes to taste as sweet as sugar). This one is
-// about physics: allulose is a monosaccharide with a freezing-point
-// depression (FPD) effect of roughly 1.9x sucrose gram-for-gram, i.e. a
-// gram of allulose suppresses the freezing point (and therefore fights
-// the machine's ability to freeze a batch into slush) about like 1.9g of
-// real sugar would. Used only for solute-load / effective-Brix math
-// (see computeSugarLoad below) — never for the sweetness swap above.
-const ALLULOSE_FPD_FACTOR = 1.9;
-
 function scaleQuantity(qtyStr, ratio) {
   return qtyStr.replace(/(\d+(?:\.\d+)?)/, (m) => {
     const scaled = parseFloat(m) * ratio;
@@ -1020,44 +1010,72 @@ function recommendedSpiritMl(batchMl, factor = 0.85) {
 
 
 /* ---------------------------------------------------------------------
- * Brix estimation — the community's real target for texture (~12.5-15
- * effective Brix) is tighter than the machine's bare ~4-5g/100ml freezing
- * floor. This is a heuristic, not a lab refractometer reading: it
- * estimates sugar content from the SAME ingredient lines everything else
- * in this app already works from — explicit sugar/syrup amounts count at
- * (approximately) their real weight, and juice/soda/dairy bases get a
- * reasonable assumed natural-sugar content, since this app doesn't have
- * real nutrition data per ingredient. Allulose is the one exception: it
- * counts extra (~1.9x) toward the EFFECTIVE Brix used for freezing math,
- * since it depresses the freezing point harder per gram than real sugar
- * (see ALLULOSE_FPD_FACTOR / computeSugarLoad).
+ * Brix estimation — the community's real target for texture is tighter
+ * than the machine's bare freezing floor. This is a heuristic, not a lab
+ * refractometer reading: it estimates sugar content from the SAME
+ * ingredient lines everything else in this app already works from —
+ * explicit sugar/syrup amounts count at (approximately) their real
+ * weight, and juice/soda/dairy bases get a reasonable assumed
+ * natural-sugar content, since this app doesn't have real nutrition data
+ * per ingredient.
+ *
+ * Sugar and allulose are graded against TWO DIFFERENT windows, not one
+ * shared number. Allulose depresses the freezing point roughly ~1.9x as
+ * hard per gram as real sugar, so a recipe relying on allulose needs
+ * proportionally less of it to hit the same freezing effect — its ideal
+ * window is roughly the sugar window scaled down by that ~1.9x factor
+ * (13-15 / ~1.9 ≈ 6.8-7.9, widened a bit for margin to ~5-8). Each
+ * recipe is graded against whichever window matches its actual dominant
+ * sweetener (by real mass), rather than trying to force both onto one
+ * "effective" number.
  * ------------------------------------------------------------------- */
 
-// "Ideal" window narrowed slightly to 12.5-15 (from a flat 13-15) to match
-// the community's refined guidance; BRIX_TARGET_MID stays the solver's
-// aim-for point when topping up sugar.
-const BRIX_TARGET_MIN = 12.5;
-const BRIX_TARGET_MAX = 15;
-const BRIX_TARGET_MID = 14;
+const SUGAR_IDEAL_MIN = 13;
+const SUGAR_IDEAL_MAX = 15;
+const SUGAR_IDEAL_MID = 14;
+const SUGAR_FLOOR = 4.5; // ~4-5 g/100ml
+const SUGAR_CAUTION_MAX = 18;
+const SUGAR_FAILURE_MIN = 25; // "approaching/exceeding ~25-30"
 
-// Full four-tier map for the effective-Brix (solute-load) display, per the
-// community's refined freezing-chemistry guidance:
-//   < BRIX_FLOOR                          → low-sugar alert, likely won't slush
-//   BRIX_FLOOR - BRIX_TARGET_MIN          → under the sweet spot, freezes harder/icier
-//   BRIX_TARGET_MIN - BRIX_TARGET_MAX     → ideal
-//   BRIX_TARGET_MAX - BRIX_CAUTION_MAX    → caution: texture goes soft/syrupy
-//   BRIX_CAUTION_MAX - BRIX_FAILURE_MIN   → elevated risk, approaching failure
-//   >= BRIX_FAILURE_MIN                   → likely failure: may never fully freeze
-const BRIX_FLOOR = 4.5; // ~4-5 g/100ml
-const BRIX_CAUTION_MAX = 18;
-const BRIX_FAILURE_MIN = 25; // "approaching/exceeding ~25-30"
+const ALLULOSE_IDEAL_MIN = 5;
+const ALLULOSE_IDEAL_MAX = 8;
+const ALLULOSE_IDEAL_MID = 6.5;
+const ALLULOSE_FLOOR = 2;
+const ALLULOSE_CAUTION_MAX = 10;
+const ALLULOSE_FAILURE_MIN = 14;
 
-function classifyEffectiveBrix(brix) {
-  if (brix < BRIX_FLOOR) return "floor";
-  if (brix < BRIX_TARGET_MIN) return "below";
-  if (brix <= BRIX_TARGET_MAX) return "ideal";
-  if (brix <= BRIX_CAUTION_MAX) return "caution";
-  if (brix < BRIX_FAILURE_MIN) return "elevated";
+const SUGAR_BRIX_WINDOW = {
+  sweetener: "sugar",
+  floor: SUGAR_FLOOR,
+  min: SUGAR_IDEAL_MIN,
+  max: SUGAR_IDEAL_MAX,
+  mid: SUGAR_IDEAL_MID,
+  cautionMax: SUGAR_CAUTION_MAX,
+  failureMin: SUGAR_FAILURE_MIN,
+};
+const ALLULOSE_BRIX_WINDOW = {
+  sweetener: "allulose",
+  floor: ALLULOSE_FLOOR,
+  min: ALLULOSE_IDEAL_MIN,
+  max: ALLULOSE_IDEAL_MAX,
+  mid: ALLULOSE_IDEAL_MID,
+  cautionMax: ALLULOSE_CAUTION_MAX,
+  failureMin: ALLULOSE_FAILURE_MIN,
+};
+
+// Full four-tier classification against whichever window applies:
+//   < floor            → low-sugar alert, likely won't slush
+//   floor - min         → under the sweet spot, freezes harder/icier
+//   min - max           → ideal
+//   max - cautionMax     → caution: texture goes soft/syrupy
+//   cautionMax - failureMin → elevated risk, approaching failure
+//   >= failureMin        → likely failure: may never fully freeze
+function classifyBrix(brix, win) {
+  if (brix < win.floor) return "floor";
+  if (brix < win.min) return "below";
+  if (brix <= win.max) return "ideal";
+  if (brix <= win.cautionMax) return "caution";
+  if (brix < win.failureMin) return "elevated";
   return "failure";
 }
 
@@ -1074,28 +1092,24 @@ const NATURAL_SUGAR_G_PER_ML = {
   premadeMix: 0.12, // margarita/daiquiri mix, lemonade, sweetened iced tea
 };
 
-// Single pass over every ingredient line that returns BOTH the real
-// dissolved-sugar mass (actual grams, for solution-mass/weight purposes)
-// AND the "effective" sucrose-equivalent mass used for freezing-suppression
-// math — where every allulose gram counts ALLULOSE_FPD_FACTOR (~1.9x) as
-// much as a gram of real sugar, since it depresses the freezing point
-// harder per gram. Every other sugar source (table sugar, juice/soda/dairy
-// natural sugar, simple syrup, condensed milk) counts at 1.0x in both.
+// Single pass over every ingredient line that returns BOTH the total real
+// dissolved-sugar mass AND, separately, how much of that mass came from
+// allulose specifically — the latter is what decides which Brix window
+// (sugar's ~13-15 vs allulose's ~5-8) a recipe should be graded against.
 function computeSugarLoad(ingredientLines) {
   let realGrams = 0;
-  let effectiveGrams = 0;
+  let alluloseGrams = 0;
   ingredientLines.forEach((line) => {
     const parsed = parseQuantityToken(line);
     if (!parsed) return;
     const t = normalize(parsed.rest);
     if (parsed.unit === "g" && /\ballulose\b/.test(t)) {
       realGrams += parsed.avgVal;
-      effectiveGrams += parsed.avgVal * ALLULOSE_FPD_FACTOR;
+      alluloseGrams += parsed.avgVal;
       return;
     }
     if (parsed.unit === "g" && /\bsugar\b/.test(t)) {
       realGrams += parsed.avgVal;
-      effectiveGrams += parsed.avgVal;
       return;
     }
     if (parsed.unit !== "ml") return;
@@ -1115,62 +1129,67 @@ function computeSugarLoad(ingredientLines) {
       grams = parsed.avgVal * NATURAL_SUGAR_G_PER_ML.dairy;
     }
     realGrams += grams;
-    effectiveGrams += isAlluloseSyrup ? grams * ALLULOSE_FPD_FACTOR : grams;
+    if (isAlluloseSyrup) alluloseGrams += grams;
   });
-  return { realGrams, effectiveGrams };
+  return { realGrams, alluloseGrams };
 }
 
-// Real (unweighted) dissolved-sugar mass — kept for callers that need
-// actual physical mass (e.g. the SUGAR_LINE_MAX_FRACTION safety cap), not
-// the FPD-weighted solute load.
 function estimateSugarGrams(ingredientLines) {
   return computeSugarLoad(ingredientLines).realGrams;
 }
 
-// Approximates total solution mass as batch volume + real sugar mass
-// (water density ~1 g/ml) — close enough for a heuristic, not lab-grade
-// precision. The NUMERATOR uses the FPD-weighted effective grams (so
-// allulose counts harder against the machine's freezing ability), while
-// the mass in the denominator stays real physical mass.
-function estimateBrix(ingredientLines, batchMl) {
-  if (!(batchMl > 0)) return null;
-  const { realGrams, effectiveGrams } = computeSugarLoad(ingredientLines);
-  if (realGrams <= 0 && effectiveGrams <= 0) return null;
-  return (effectiveGrams / (batchMl + realGrams)) * 100;
+// Which Brix window a recipe should be graded against — allulose's ~5-8
+// ideal if allulose makes up the majority of its (real) sugar mass,
+// sugar's ~13-15 ideal otherwise (including recipes with no sugar at all,
+// so a missing-sugar recipe correctly reads as "below the sugar window"
+// rather than being compared to the tighter allulose one).
+function brixWindowFor(realGrams, alluloseGrams) {
+  return alluloseGrams > realGrams - alluloseGrams ? ALLULOSE_BRIX_WINDOW : SUGAR_BRIX_WINDOW;
 }
 
-// abvPercent is optional — when given (and this recipe actually contains
-// allulose), an elevated effective Brix driven by allulose is cross-checked
-// against ABV, since alcohol independently suppresses freezing point too.
-// Both pushing in the same direction is flagged as a compounded risk, with
-// a concrete suggestion, rather than just reporting the Brix number alone.
+// Approximates total solution mass as batch volume + real sugar mass
+// (water density ~1 g/ml) — close enough for a heuristic, not lab-grade
+// precision.
+function estimateBrix(ingredientLines, batchMl) {
+  if (!(batchMl > 0)) return null;
+  const { realGrams } = computeSugarLoad(ingredientLines);
+  if (realGrams <= 0) return null;
+  return (realGrams / (batchMl + realGrams)) * 100;
+}
+
+// abvPercent is optional — when given (and this recipe is allulose-based),
+// an elevated Brix is cross-checked against ABV, since alcohol
+// independently suppresses freezing point too. Both pushing in the same
+// direction is flagged as a compounded risk, with a concrete suggestion,
+// rather than just reporting the Brix number alone.
 function formatBrixNote(ingredientLines, batchMl, abvPercent) {
   if (!(batchMl > 0)) return null;
-  const { realGrams, effectiveGrams } = computeSugarLoad(ingredientLines);
-  if (realGrams <= 0 && effectiveGrams <= 0) return null;
-  const brix = (effectiveGrams / (batchMl + realGrams)) * 100;
+  const { realGrams, alluloseGrams } = computeSugarLoad(ingredientLines);
+  if (realGrams <= 0) return null;
+  const brix = (realGrams / (batchMl + realGrams)) * 100;
   const rounded = Math.round(brix * 10) / 10;
-  const hasAllulose = effectiveGrams > realGrams + 0.01;
-  const tier = classifyEffectiveBrix(rounded);
+  const win = brixWindowFor(realGrams, alluloseGrams);
+  const isAlluloseRecipe = win.sweetener === "allulose";
+  const tier = classifyBrix(rounded, win);
   const inRange = tier === "ideal";
 
   const status =
     tier === "floor"
-      ? `well below the ~${BRIX_FLOOR}g/100ml floor — low-sugar alert, this likely won't slush at all`
+      ? `well below the ~${win.floor}g/100ml floor — low-sugar alert, this likely won't slush at all`
       : tier === "below"
-      ? `below the ~${BRIX_TARGET_MIN}-${BRIX_TARGET_MAX} Brix sweet spot — may freeze harder/icier than ideal`
+      ? `below the ~${win.min}-${win.max} Brix sweet spot — may freeze harder/icier than ideal`
       : tier === "ideal"
-      ? `right in the community's ~${BRIX_TARGET_MIN}-${BRIX_TARGET_MAX} Brix sweet spot`
+      ? `right in the community's ~${win.min}-${win.max} Brix sweet spot`
       : tier === "caution"
-      ? `in the ~${BRIX_TARGET_MAX}-${BRIX_CAUTION_MAX} Brix caution zone — texture may turn out soft/syrupy`
+      ? `in the ~${win.max}-${win.cautionMax} Brix caution zone — texture may turn out soft/syrupy`
       : tier === "elevated"
-      ? `well above the ~${BRIX_CAUTION_MAX} Brix caution zone, approaching the ~${BRIX_FAILURE_MIN}-30 range where the freezing point may drop below what the machine can reach`
-      : `at/above ~${BRIX_FAILURE_MIN}-30 Brix — freezing point is likely suppressed below what the machine can reach; this batch may never fully freeze`;
+      ? `well above the ~${win.cautionMax} Brix caution zone, approaching the ~${win.failureMin}+ range where the freezing point may drop below what the machine can reach`
+      : `at/above ~${win.failureMin} Brix — freezing point is likely suppressed below what the machine can reach; this batch may never fully freeze`;
 
-  const label = hasAllulose ? "effective Brix (allulose-weighted)" : "Brix";
+  const label = isAlluloseRecipe ? "Brix (allulose target: ~5-8)" : "Brix";
   let text = `Estimated ~${rounded} ${label} — ${status}.`;
 
-  if (hasAllulose && abvPercent != null && abvPercent >= 8 && (tier === "caution" || tier === "elevated" || tier === "failure")) {
+  if (isAlluloseRecipe && abvPercent != null && abvPercent >= 8 && (tier === "caution" || tier === "elevated" || tier === "failure")) {
     text += ` ⚠️ High risk: allulose's freezing-point-depression effect is compounding with ~${Math.round(abvPercent * 10) / 10}% ABV — both independently fight the freeze. Try reducing the alcohol %, reducing the allulose amount, or swapping some allulose back for real sugar.`;
   }
 
@@ -1225,7 +1244,7 @@ function clampExcessiveSugarLines(lines, batchMl) {
 // EXPLICIT sugar-source lines (sugar/allulose/simple syrup/condensed milk)
 // that a recipe already added, never natural sugar from juice/soda/dairy,
 // so it stays a small correction rather than re-deriving the whole recipe.
-function applyBrixTargetToLines(lines, batchMl, targetBrix) {
+function applyBrixTargetToLines(lines, batchMl) {
   const sugarLineInfo = lines
     .map((line, i) => {
       const parsed = parseQuantityToken(line);
@@ -1234,19 +1253,25 @@ function applyBrixTargetToLines(lines, batchMl, targetBrix) {
       if (!isExplicitSugarLine(parsed, t)) return null;
       const isAllulose = /\ballulose\b/.test(t);
       const gramsPerUnit = parsed.unit === "g" ? 1 : /condensed milk/.test(t) ? CONDENSED_MILK_SUGAR_G_PER_ML : SIMPLE_SYRUP_SUGAR_G_PER_ML;
-      const realGrams = parsed.avgVal * gramsPerUnit;
-      // FPD-weighted: an allulose line pulls its weight in the target
-      // calc at ~1.9x its real mass, same as computeSugarLoad.
-      const effectiveGrams = isAllulose ? realGrams * ALLULOSE_FPD_FACTOR : realGrams;
-      return { i, val: parsed.avgVal, effectiveGrams };
+      const grams = parsed.avgVal * gramsPerUnit;
+      return { i, isAllulose, grams };
     })
     .filter(Boolean);
 
-  const { effectiveGrams: totalEffectiveGrams } = computeSugarLoad(lines);
-  const explicitEffectiveGrams = sugarLineInfo.reduce((a, x) => a + x.effectiveGrams, 0);
-  const naturalEffectiveGrams = totalEffectiveGrams - explicitEffectiveGrams;
-  const targetTotalEffectiveGrams = totalSugarGramsForBrix(batchMl, targetBrix);
-  const neededExplicitEffectiveGrams = Math.max(0, targetTotalEffectiveGrams - naturalEffectiveGrams);
+  const { realGrams: totalGrams } = computeSugarLoad(lines);
+  const explicitGrams = sugarLineInfo.reduce((a, x) => a + x.grams, 0);
+  const naturalGrams = totalGrams - explicitGrams;
+
+  // Which window is this recipe actually on? An existing allulose line
+  // means it's already on the allulose track, so target ITS ideal (~5-8),
+  // not sugar's (~13-15) — the two aren't interchangeable 1:1 (allulose
+  // depresses freezing point ~1.9x as hard per gram as real sugar). No
+  // explicit line yet defaults to the sugar window, matching what gets
+  // added below (plain granulated sugar).
+  const explicitAlluloseGrams = sugarLineInfo.filter((x) => x.isAllulose).reduce((a, x) => a + x.grams, 0);
+  const win = brixWindowFor(explicitGrams, explicitAlluloseGrams);
+  const targetTotalGrams = totalSugarGramsForBrix(batchMl, win.mid);
+  const neededExplicitGrams = Math.max(0, targetTotalGrams - naturalGrams);
 
   if (sugarLineInfo.length === 0) {
     // No explicit sugar/syrup line at all — if natural sugar (juice/soda/
@@ -1254,18 +1279,15 @@ function applyBrixTargetToLines(lines, batchMl, targetBrix) {
     // silently leaving the recipe under-sugared. This is exactly what
     // catches an AI response (or an offline build) that forgot sugar
     // entirely — e.g. "ginger beer + whiskey + lime" with nothing else has
-    // only ~8 Brix from the ginger beer alone, well short of the 12.5-15
+    // only ~8 Brix from the ginger beer alone, well short of the 13-15
     // target, and needs real sugar added to actually freeze into slush.
-    // Adds plain (1.0x-factor) sugar by default, not allulose — Sugar-Free
-    // mode's rewriter swaps it afterward, and re-running this same pass on
-    // the swapped line then correctly re-weights it at the 1.9x FPD factor.
-    if (neededExplicitEffectiveGrams > 0) {
-      return [...lines, `${round5(neededExplicitEffectiveGrams)} g granulated sugar`];
+    if (neededExplicitGrams > 0) {
+      return [...lines, `${round5(neededExplicitGrams)} g granulated sugar`];
     }
     return lines;
   }
 
-  const scale = explicitEffectiveGrams > 0 ? neededExplicitEffectiveGrams / explicitEffectiveGrams : 1;
+  const scale = explicitGrams > 0 ? neededExplicitGrams / explicitGrams : 1;
   const sugarIndexes = new Set(sugarLineInfo.map((x) => x.i));
   return lines.map((line, i) => (sugarIndexes.has(i) ? rescaleMlOrGLine(line, scale) : line));
 }
@@ -1588,10 +1610,10 @@ function applyHerbPrep(lines, prepSteps, herbName) {
 // base (a Bloody Mary, a bare spirit-and-water combo) gets however much it
 // actually needs, not a fixed guess.
 function ensureSugar(lines, batchMl, forceSugar) {
-  const { effectiveGrams: existingEffectiveGrams } = computeSugarLoad(lines);
-  const currentEffectiveBrix = batchMl > 0 ? (existingEffectiveGrams / batchMl) * 100 : 0;
-  if (!forceSugar && currentEffectiveBrix >= BRIX_TARGET_MIN) return false;
-  const neededGrams = sugarGramsNeededForBrix(existingEffectiveGrams, batchMl, BRIX_TARGET_MID);
+  const { realGrams: existingSugarGrams } = computeSugarLoad(lines);
+  const currentBrix = batchMl > 0 ? (existingSugarGrams / batchMl) * 100 : 0;
+  if (!forceSugar && currentBrix >= SUGAR_IDEAL_MIN) return false;
+  const neededGrams = sugarGramsNeededForBrix(existingSugarGrams, batchMl, SUGAR_IDEAL_MID);
   if (neededGrams <= 0) return false;
   lines.push(`${neededGrams} g granulated sugar`);
   return true;
@@ -2335,7 +2357,7 @@ function rescaleRecipeForSelections(recipe, newBatchMl, targetAbvPercent) {
   // Re-target Brix after the ABV/volume rescale — a bigger buzz-level
   // target claims more of a fixed batch for alcohol, which otherwise drags
   // the remaining sugar (and therefore Brix) down along with it.
-  const newLines = applyBrixTargetToLines(abvResult.lines, newBatchMl, BRIX_TARGET_MID);
+  const newLines = applyBrixTargetToLines(abvResult.lines, newBatchMl);
   const sugarFreeLines = newLines.map(rewriteIngredientForSugarFree);
   const anyLineChanged = sugarFreeLines.some((l, i) => l !== newLines[i]);
   const sugarFreeNote = anyLineChanged

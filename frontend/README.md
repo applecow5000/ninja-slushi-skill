@@ -288,29 +288,35 @@ that the footer with repo-relative links is gone).
     scoring) are credited under "Inspired by."
   - This is a heuristic, not a chemistry simulator — always taste and adjust,
     and treat the generated ratios as a solid starting point, not gospel.
-  - **Allulose freezing-point-depression (FPD) weighting**: allulose isn't
-    treated as equal to real sugar for Brix purposes. It's ~70% as sweet by
-    weight as sugar (the existing ~1.33x swap ratio, for taste), but it
-    depresses the freezing point roughly ~1.9x as hard per gram — a
-    completely different, unrelated property. Every Brix calculation
-    (`computeSugarLoad`, used by the on-card note, the offline generator's
-    sugar top-up, and every custom recipe's Brix correction pass) now
-    weights allulose grams at that ~1.9x factor before summing, and reports
-    the result as "effective Brix" whenever allulose is present. The Brix
-    note itself is now four-tier instead of a flat in/out-of-range check:
-    a floor (~4-5 g/100ml — below it, a low-sugar alert that the batch
-    likely won't slush at all), the ~12.5-15 ideal sweet spot, a ~15-18
-    caution zone (soft/syrupy texture), and ~25-30+ where the freezing
-    point may be suppressed below what the machine can reach at all. Since
-    alcohol independently suppresses freezing point too, a recipe with
-    allulose pushing effective Brix into caution/elevated/failure AND a
-    meaningful ABV (≥8%) gets an extra ⚠️ high-risk sentence suggesting a
-    fix: reduce the alcohol %, reduce the allulose amount, or swap some
-    allulose back for real sugar. This applies uniformly everywhere Brix is
-    shown, including toggling Sugar-Free mode on a dataset recipe — the
-    card's Brix note recomputes against whatever's actually displayed
-    (allulose-swapped or not), so it correctly reflects the swap's real
-    effect on freezability rather than treating it as sugar-equivalent.
+  - **Allulose gets its own, lower Brix target — not the same 13-15 as
+    sugar**: allulose is ~70% as sweet as sugar by weight (the existing
+    ~1.33x swap ratio, for taste), but it depresses the freezing point
+    roughly ~1.9x as hard per gram — a completely different, unrelated
+    property. Rather than converting allulose into a single blended
+    "effective Brix" number, every Brix calculation now grades a recipe
+    against one of TWO windows depending on which sweetener actually
+    dominates its (real) sugar mass: sugar's usual ~13-15 ideal, or
+    allulose's own, much lower ~5-8 ideal (roughly the sugar window scaled
+    down by that ~1.9x factor, widened a bit for margin). Both windows
+    share the same four-tier shape — a floor (below it, a low-sugar alert
+    that the batch likely won't slush at all), the ideal sweet spot, a
+    caution zone (soft/syrupy texture), and a likely-failure zone (freezing
+    point may be suppressed below what the machine can reach) — just
+    scaled to whichever sweetener is present. `computeSugarLoad()` (used by
+    the on-card note, the offline generator's sugar top-up, and every
+    custom recipe's Brix correction pass) tracks real sugar mass and how
+    much of it is allulose specifically, and `brixWindowFor()` picks the
+    matching window off that. Since alcohol independently suppresses
+    freezing point too, an allulose-based recipe pushed into caution/
+    elevated/failure on ITS window AND carrying a meaningful ABV (≥8%)
+    gets an extra ⚠️ high-risk sentence suggesting a fix: reduce the
+    alcohol %, reduce the allulose amount, or swap some allulose back for
+    real sugar. This applies uniformly everywhere Brix is shown, including
+    toggling Sugar-Free mode on a dataset recipe — the card's Brix note
+    recomputes (and re-picks its window) against whatever's actually
+    displayed, so switching to allulose correctly re-grades the recipe
+    against allulose's tighter, lower target instead of judging it by
+    sugar's.
 
 ## Adding / editing recipes
 
