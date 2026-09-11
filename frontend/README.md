@@ -198,9 +198,13 @@ that the footer with repo-relative links is gone).
   and ✕ to remove one you don't want. This never leaves your browser — it
   doesn't sync across devices and isn't visible to anyone else.
 - **Sugar-Free mode** — a toggle that rewrites sugar ingredients on the fly:
-  - `sugar` → `allulose (granulated)`, scaled ×1.33 (allulose is ~70% as
-    sweet as sugar by weight, so the common conversion is about 1⅓ cups
-    allulose per 1 cup sugar).
+  - `sugar` → `allulose (granulated)`, scaled ÷1.9 (not the ~1.33x taste-
+    equivalence ratio you'd use to match sweetness — allulose depresses
+    freezing point ~1.9x as hard per gram as real sugar, so dividing by
+    that factor is what actually lands the swap in allulose's own ~5-8
+    Brix ideal instead of overshooting it; see the allulose section
+    below). Handles a shared-unit range quantity (`36–65 g sugar`) by
+    scaling both ends, not just one.
   - `simple syrup` → an allulose syrup note.
   - `sweetened condensed milk` → a sugar-free condensed milk substitute note.
   - `chocolate syrup` / `caramel sauce` / `agave` / `honey` → flagged as
@@ -288,6 +292,75 @@ that the footer with repo-relative links is gone).
     scoring) are credited under "Inspired by."
   - This is a heuristic, not a chemistry simulator — always taste and adjust,
     and treat the generated ratios as a solid starting point, not gospel.
+  - **Allulose gets its own, lower Brix target — not the same 13-15 as
+    sugar**: allulose is ~70% as sweet as sugar by weight (the ~1.33x
+    ratio you'd use for a taste-only conversion), but for THIS app's
+    purposes — freezing chemistry — what matters is that it depresses the
+    freezing point roughly ~1.9x as hard per gram, a completely different,
+    unrelated property. The sugar→allulose swap (`rewriteIngredientForSugarFree`)
+    now converts by dividing by that ~1.9x factor, not multiplying by the
+    1.33x taste ratio — multiplying by 1.33x was a real bug: it landed at
+    ~1.33×1.9 ≈ 2.5x sugar's actual freezing effect, well past allulose's
+    ideal and, combined with any alcohol, could prevent the batch from
+    slushing at all. Rather than converting allulose into a single blended
+    "effective Brix" number, every Brix calculation now grades a recipe
+    against one of TWO windows depending on which sweetener actually
+    dominates its (real) sugar mass: sugar's usual ~13-15 ideal, or
+    allulose's own, much lower ~5-8 ideal (roughly the sugar window scaled
+    down by that ~1.9x factor, widened a bit for margin). Both windows
+    share the same four-tier shape — a floor (below it, a low-sugar alert
+    that the batch likely won't slush at all), the ideal sweet spot, a
+    caution zone (soft/syrupy texture), and a likely-failure zone (freezing
+    point may be suppressed below what the machine can reach) — just
+    scaled to whichever sweetener is present. `computeSugarLoad()` (used by
+    the on-card note, the offline generator's sugar top-up, and every
+    custom recipe's Brix correction pass) tracks real sugar mass and how
+    much of it is allulose specifically, and `brixWindowFor()` picks the
+    matching window off that. Since alcohol independently suppresses
+    freezing point too, an allulose-based recipe pushed into caution/
+    elevated/failure on ITS window AND carrying a meaningful ABV (≥8%)
+    gets an extra ⚠️ high-risk sentence suggesting a fix: reduce the
+    alcohol %, reduce the allulose amount, or swap some allulose back for
+    real sugar. This applies uniformly everywhere Brix is shown, including
+    toggling Sugar-Free mode on a dataset recipe — the card's Brix note
+    recomputes (and re-picks its window) against whatever's actually
+    displayed, so switching to allulose correctly re-grades the recipe
+    against allulose's tighter, lower target instead of judging it by
+    sugar's.
+  - **Hard limits for allulose-based custom drinks**: the buzz-level radial
+    doesn't apply once Sugar-Free mode is on — `currentTargetAbv()` ignores
+    the slider entirely and always targets a fixed 3.5% ABV midpoint
+    instead (3-4% is the allowed band), and the radial's radios are
+    disabled in the UI with a note explaining why. `applyAbvTargetToLines()`
+    also enforces a hard ceiling of 175 ml of total poured alcohol for the
+    whole pitcher regardless of batch size — for most batch sizes this
+    naturally falls out of the 3-4% target anyway, but it still kicks in
+    for a large batch paired with a weak-ABV premade (wine, cider, etc.)
+    that would otherwise need more volume than that to reach even 3%; the
+    cap wins in that conflict, which can mean landing under the 3% floor
+    for that edge case rather than exceeding 175 ml. A dedicated
+    `buildAlluloseVariant()` builds the Sugar-Free/allulose variant of a
+    custom recipe from scratch rather than just relabeling the regular
+    variant's numbers: it re-targets ABV under the allulose cap, re-targets
+    Brix (still against sugar's window, since the line still says "sugar"
+    at that point) so the pre-swap amount is sized for whatever room the
+    now much-smaller alcohol pour left, swaps sugar/syrup/sweetened-base
+    wording to allulose/diet/unsweetened (dividing by the ~1.9x FPD factor,
+    landing directly in allulose's ~5-8 ideal rather than the old, buggy
+    ~1.33x taste-ratio multiply), then re-targets Brix once more as a final
+    safety pass against whatever window the result actually falls under.
+    Also, any typically-sweetened base
+    (soda, margarita/daiquiri mix, lemonade, iced tea) gets swapped to its
+    diet/unsweetened/sugar-free counterpart (`rewriteIngredientToUnsweetenedBase()`,
+    folded into `rewriteIngredientForSugarFree()`) — both so the recipe is
+    actually consistent with going sugar-free, and so `computeSugarLoad()`
+    stops assuming full-sugar natural-sugar content for a line that no
+    longer carries it (any line reading diet/unsweetened/zero sugar/
+    sugar-free/no sugar added is counted as 0 natural sugar). Dataset
+    recipes still always show their as-authored numbers (per the earlier
+    decision that the serving-size/buzz-level selectors never touch them)
+    — only their ingredient wording benefits from the diet-base swap when
+    Sugar-Free mode is on, not their ABV/volume.
 
 ## Adding / editing recipes
 

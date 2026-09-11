@@ -490,6 +490,24 @@ h1, h2, h3 {
   cursor: pointer;
 }
 
+.buzz-radio:disabled {
+  cursor: not-allowed;
+}
+
+/* Sugar-Free mode hard-caps ABV/alcohol for allulose-based drinks — the
+ * buzz-level radial doesn't apply, so it's visually greyed out (radios
+ * themselves are also disabled in JS) and a note explains the fixed cap. */
+body.sugar-free-mode .buzz-slider {
+  opacity: 0.45;
+}
+
+.buzz-sugarfree-note {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 4px 0 0;
+  line-height: 1.4;
+}
+
 /* On a narrow/portrait phone, the row (caption - radios - caption) has no
  * room to sit side by side without squishing or wrapping mid-word — stack
  * it instead: caption above, a full-width row of radios, caption below. */
