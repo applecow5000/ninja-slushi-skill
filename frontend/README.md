@@ -317,6 +317,39 @@ that the footer with repo-relative links is gone).
     displayed, so switching to allulose correctly re-grades the recipe
     against allulose's tighter, lower target instead of judging it by
     sugar's.
+  - **Hard limits for allulose-based custom drinks**: the buzz-level radial
+    doesn't apply once Sugar-Free mode is on — `currentTargetAbv()` ignores
+    the slider entirely and always targets a fixed 3.5% ABV midpoint
+    instead (3-4% is the allowed band), and the radial's radios are
+    disabled in the UI with a note explaining why. `applyAbvTargetToLines()`
+    also enforces a hard ceiling of 175 ml of total poured alcohol for the
+    whole pitcher regardless of batch size — for most batch sizes this
+    naturally falls out of the 3-4% target anyway, but it still kicks in
+    for a large batch paired with a weak-ABV premade (wine, cider, etc.)
+    that would otherwise need more volume than that to reach even 3%; the
+    cap wins in that conflict, which can mean landing under the 3% floor
+    for that edge case rather than exceeding 175 ml. A dedicated
+    `buildAlluloseVariant()` builds the Sugar-Free/allulose variant of a
+    custom recipe from scratch rather than just relabeling the regular
+    variant's numbers: it re-targets ABV under the allulose cap, re-targets
+    Brix (still against sugar's window, since the line still says "sugar"
+    at that point) so the pre-swap amount is sized for whatever room the
+    now much-smaller alcohol pour left, swaps sugar/syrup/sweetened-base
+    wording to allulose/diet/unsweetened, then re-targets Brix once more —
+    this second pass is what corrects for the ~1.33x sweetness-swap ratio
+    overshooting allulose's actual ~5-8 Brix ideal, since that ratio is
+    about taste, not freezing chemistry. Also, any typically-sweetened base
+    (soda, margarita/daiquiri mix, lemonade, iced tea) gets swapped to its
+    diet/unsweetened/sugar-free counterpart (`rewriteIngredientToUnsweetenedBase()`,
+    folded into `rewriteIngredientForSugarFree()`) — both so the recipe is
+    actually consistent with going sugar-free, and so `computeSugarLoad()`
+    stops assuming full-sugar natural-sugar content for a line that no
+    longer carries it (any line reading diet/unsweetened/zero sugar/
+    sugar-free/no sugar added is counted as 0 natural sugar). Dataset
+    recipes still always show their as-authored numbers (per the earlier
+    decision that the serving-size/buzz-level selectors never touch them)
+    — only their ingredient wording benefits from the diet-base swap when
+    Sugar-Free mode is on, not their ABV/volume.
 
 ## Adding / editing recipes
 
