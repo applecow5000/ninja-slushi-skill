@@ -17,30 +17,50 @@ function computeDifficulty(recipe) {
  *
  * Pattern-matches common sugar ingredients in a recipe's free-text
  * ingredient strings and rewrites them to an allulose equivalent.
- * Allulose is roughly 70% as sweet as table sugar by weight, so the
- * conventional swap is ~1.33x allulose for the same sweetness
- * (e.g. allulose brands recommend ~1 1/3 cup allulose per 1 cup sugar).
+ *
+ * This used to convert by SWEETNESS (allulose is ~70% as sweet as table
+ * sugar by weight, so the conventional taste-equivalence swap is ~1.33x
+ * allulose per gram of sugar) — but sweetness is the wrong property for
+ * this app's purposes. What actually matters here is freezing-point
+ * depression (FPD): allulose suppresses the freezing point roughly ~1.9x
+ * as hard per gram as real sugar, so using the 1.33x taste ratio for a
+ * freezing-chemistry decision was a real overshoot — a 1.33x-scaled
+ * allulose amount lands at ~1.33x1.9 ≈ 2.5x sugar's actual freezing
+ * effect, well past allulose's own ~5-8 Brix ideal (sugar's is ~13-15)
+ * and, combined with any alcohol (which independently suppresses
+ * freezing point too), can prevent the batch from slushing at all.
+ * Converting by dividing by the ~1.9x FPD factor instead lands directly
+ * in allulose's own ideal window: an amount that hit sugar's ~14 Brix
+ * midpoint becomes 14/1.9 ≈ 7.4, right in the ~5-8 range.
  * This is a display-time transform only — it never mutates the
  * underlying recipe data.
  * ------------------------------------------------------------------- */
 
-const ALLULOSE_RATIO = 1.33;
+const ALLULOSE_FPD_FACTOR = 1.9;
 
-function scaleQuantity(qtyStr, ratio) {
-  return qtyStr.replace(/(\d+(?:\.\d+)?)/, (m) => {
-    const scaled = parseFloat(m) * ratio;
-    // Keep it readable: 1 decimal place, trim trailing .0
-    const rounded = Math.round(scaled * 10) / 10;
-    return rounded % 1 === 0 ? rounded.toFixed(0) : rounded.toString();
-  });
+function scaleNumberString(numStr, ratio) {
+  const scaled = parseFloat(numStr) * ratio;
+  // Keep it readable: 1 decimal place, trim trailing .0
+  const rounded = Math.round(scaled * 10) / 10;
+  return rounded % 1 === 0 ? rounded.toFixed(0) : rounded.toString();
 }
 
 // Ordered list of [regex, rewrite(match, originalLine) => newLine].
 // First rule that matches a given ingredient line wins.
 const SUGAR_FREE_RULES = [
   [
-    /^(.*?)(\d+(?:\.\d+)?\s*(?:g|ml|oz|cups?|tbsp|tsp))\s+(granulated |brown |white |light brown |caster )?sugar\b(.*)$/i,
-    (mm) => `${mm[1]}${scaleQuantity(mm[2], ALLULOSE_RATIO)} allulose (granulated)${mm[4]}`,
+    // Handles both a plain quantity ("162 g sugar") and a shared-unit
+    // en-dash range ("36–65 g sugar", common in dataset recipes sized for
+    // a range of servings) — scaling only the first number and leaving
+    // the second untouched would produce a backwards/decreasing range
+    // once the factor is a division (e.g. "36–34.2 g"), so both ends of
+    // a range get scaled by the same factor.
+    /^(.*?)(\d+(?:\.\d+)?)(?:\s*[–-]\s*(\d+(?:\.\d+)?))?(\s*(?:g|ml|oz|cups?|tbsp|tsp))\s+(?:granulated |brown |white |light brown |caster )?sugar\b(.*)$/i,
+    (mm) => {
+      const n1 = scaleNumberString(mm[2], 1 / ALLULOSE_FPD_FACTOR);
+      const rangeSuffix = mm[3] ? `–${scaleNumberString(mm[3], 1 / ALLULOSE_FPD_FACTOR)}` : "";
+      return `${mm[1]}${n1}${rangeSuffix}${mm[4]} allulose (granulated)${mm[5]}`;
+    },
   ],
   [
     /simple syrup/i,
@@ -1384,14 +1404,16 @@ function applyBrixTargetToLines(lines, batchMl) {
 //      correctly sized for whatever room the now much-smaller alcohol
 //      pour left in the batch.
 //   3. Swap sugar/syrup/sweetened-base wording to allulose/diet/
-//      unsweetened (rewriteIngredientForSugarFree) — this multiplies the
-//      sugar amount by the ~1.33x sweetness ratio, which overshoots
-//      allulose's actual ~5-8 ideal (that ratio is about taste, not
-//      freezing chemistry).
-//   4. Re-target Brix AGAIN — now that the line explicitly says
-//      "allulose", this pass detects it and rescales it down to
-//      allulose's own window instead of sugar's, correcting that
-//      overshoot.
+//      unsweetened (rewriteIngredientForSugarFree) — this divides the
+//      sugar amount by the ~1.9x FPD factor, landing directly in
+//      allulose's own ~5-8 ideal (an amount sized for sugar's ~14
+//      midpoint becomes ~14/1.9 ≈ 7.4).
+//   4. Re-target Brix AGAIN — a final safety pass against whatever window
+//      the result actually falls under (allulose's, now that the line
+//      says "allulose"), to correct for anything step 3's simple division
+//      didn't perfectly land (natural sugar already in the mix, Brix's
+//      nonlinear mass-in-denominator term, etc.) — normally a small
+//      no-op adjustment now that the conversion itself is correct.
 function buildAlluloseVariant(lines, batchMl) {
   const abvResult = applyAbvTargetToLines(lines, batchMl, ALLULOSE_ABV_TARGET, { alluloseCap: true });
   const sugarTargeted = applyBrixTargetToLines(abvResult.lines, batchMl);

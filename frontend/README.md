@@ -198,9 +198,13 @@ that the footer with repo-relative links is gone).
   and ✕ to remove one you don't want. This never leaves your browser — it
   doesn't sync across devices and isn't visible to anyone else.
 - **Sugar-Free mode** — a toggle that rewrites sugar ingredients on the fly:
-  - `sugar` → `allulose (granulated)`, scaled ×1.33 (allulose is ~70% as
-    sweet as sugar by weight, so the common conversion is about 1⅓ cups
-    allulose per 1 cup sugar).
+  - `sugar` → `allulose (granulated)`, scaled ÷1.9 (not the ~1.33x taste-
+    equivalence ratio you'd use to match sweetness — allulose depresses
+    freezing point ~1.9x as hard per gram as real sugar, so dividing by
+    that factor is what actually lands the swap in allulose's own ~5-8
+    Brix ideal instead of overshooting it; see the allulose section
+    below). Handles a shared-unit range quantity (`36–65 g sugar`) by
+    scaling both ends, not just one.
   - `simple syrup` → an allulose syrup note.
   - `sweetened condensed milk` → a sugar-free condensed milk substitute note.
   - `chocolate syrup` / `caramel sauce` / `agave` / `honey` → flagged as
@@ -289,10 +293,16 @@ that the footer with repo-relative links is gone).
   - This is a heuristic, not a chemistry simulator — always taste and adjust,
     and treat the generated ratios as a solid starting point, not gospel.
   - **Allulose gets its own, lower Brix target — not the same 13-15 as
-    sugar**: allulose is ~70% as sweet as sugar by weight (the existing
-    ~1.33x swap ratio, for taste), but it depresses the freezing point
-    roughly ~1.9x as hard per gram — a completely different, unrelated
-    property. Rather than converting allulose into a single blended
+    sugar**: allulose is ~70% as sweet as sugar by weight (the ~1.33x
+    ratio you'd use for a taste-only conversion), but for THIS app's
+    purposes — freezing chemistry — what matters is that it depresses the
+    freezing point roughly ~1.9x as hard per gram, a completely different,
+    unrelated property. The sugar→allulose swap (`rewriteIngredientForSugarFree`)
+    now converts by dividing by that ~1.9x factor, not multiplying by the
+    1.33x taste ratio — multiplying by 1.33x was a real bug: it landed at
+    ~1.33×1.9 ≈ 2.5x sugar's actual freezing effect, well past allulose's
+    ideal and, combined with any alcohol, could prevent the batch from
+    slushing at all. Rather than converting allulose into a single blended
     "effective Brix" number, every Brix calculation now grades a recipe
     against one of TWO windows depending on which sweetener actually
     dominates its (real) sugar mass: sugar's usual ~13-15 ideal, or
@@ -335,10 +345,11 @@ that the footer with repo-relative links is gone).
     Brix (still against sugar's window, since the line still says "sugar"
     at that point) so the pre-swap amount is sized for whatever room the
     now much-smaller alcohol pour left, swaps sugar/syrup/sweetened-base
-    wording to allulose/diet/unsweetened, then re-targets Brix once more —
-    this second pass is what corrects for the ~1.33x sweetness-swap ratio
-    overshooting allulose's actual ~5-8 Brix ideal, since that ratio is
-    about taste, not freezing chemistry. Also, any typically-sweetened base
+    wording to allulose/diet/unsweetened (dividing by the ~1.9x FPD factor,
+    landing directly in allulose's ~5-8 ideal rather than the old, buggy
+    ~1.33x taste-ratio multiply), then re-targets Brix once more as a final
+    safety pass against whatever window the result actually falls under.
+    Also, any typically-sweetened base
     (soda, margarita/daiquiri mix, lemonade, iced tea) gets swapped to its
     diet/unsweetened/sugar-free counterpart (`rewriteIngredientToUnsweetenedBase()`,
     folded into `rewriteIngredientForSugarFree()`) — both so the recipe is
